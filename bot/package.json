@@ -1,0 +1,17 @@
+{
+  "name": "ugcstation-bot",
+  "version": "1.0.0",
+  "description": "UGC Marketplace Telegram Bot",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
