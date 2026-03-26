@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, ChevronRight, ChevronDown, Check, X, Clock, CheckCircle2, XCircle, Send, Phone, Link, User, Video, ThumbsUp, ThumbsDown, Play } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight, ChevronDown, Check, X, Clock, CheckCircle2, XCircle, Send, Phone, Link, User, Video, ThumbsUp, ThumbsDown } from 'lucide-react';
 import api from '../lib/api';
 import { ApplicationShimmer } from '../components/Shimmer';
 import { hapticFeedback } from '../lib/telegram';
@@ -230,32 +230,13 @@ export default function Applications() {
                           borderRadius: 12, overflow: 'hidden',
                           background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                         }}>
-                          {/* Video thumbnail + play button */}
-                          <div
-                            onClick={() => navigate(`/video?url=${encodeURIComponent(sub.videoUrl)}`)}
-                            style={{ position: 'relative', cursor: 'pointer', background: '#000' }}
-                          >
-                            <video
-                              src={sub.videoUrl}
-                              preload="metadata"
-                              playsInline
-                              muted
-                              style={{ width: '100%', maxHeight: 200, display: 'block', opacity: 0.7 }}
-                            />
-                            <div style={{
-                              position: 'absolute', inset: 0,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                              <div style={{
-                                width: 52, height: 52, borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.9)', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center',
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-                              }}>
-                                <Play size={24} fill="var(--primary)" stroke="var(--primary)" style={{ marginLeft: 3 }} />
-                              </div>
-                            </div>
-                          </div>
+                          <video
+                            src={sub.videoUrl}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            style={{ width: '100%', maxHeight: 300, display: 'block', background: '#000' }}
+                          />
                           <div style={{ padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                               {new Date(sub.createdAt).toLocaleDateString('uz')}
