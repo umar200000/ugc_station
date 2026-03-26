@@ -43,12 +43,11 @@ export default function Profile() {
   const isCompany = user?.role === 'COMPANY';
 
   useEffect(() => {
-    // Statistikani olish
     const fetchStats = async () => {
       try {
         if (isCompany) {
-          const res = await api.get('/ads/my');
-          const ads = res.data.ads || [];
+          const res = await api.get('/ads/my/list');
+          const ads = res.data || [];
           const totalApps = ads.reduce((sum: number, ad: any) => sum + (ad._count?.applications || 0), 0);
           setStats(prev => ({ ...prev, ads: ads.length, applications: totalApps }));
         } else {
