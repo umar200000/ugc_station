@@ -30,6 +30,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  contactRequired: boolean;
   login: () => Promise<void>;
   selectRole: (role: 'COMPANY' | 'INFLUENCER') => Promise<void>;
   onboardCompany: (data: { name: string; industry: string }) => Promise<void>;
@@ -43,6 +44,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: localStorage.getItem(getTokenKey()),
   isLoading: true,
+  contactRequired: false,
 
   login: async () => {
     try {
@@ -87,7 +89,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       localStorage.setItem(tokenKey, res.data.token);
       set({ user: res.data.user, token: res.data.token, isLoading: false });
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response?.data?.error === 'contact_required') {
+        set({ isLoading: false, contactRequired: true });
+        return;
+      }
       console.error('Login error:', err);
       set({ isLoading: false });
     }

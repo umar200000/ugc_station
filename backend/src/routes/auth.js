@@ -61,6 +61,11 @@ router.post('/telegram', async (req, res) => {
       });
     }
 
+    // Telefon raqam tekshirish — bot orqali contact bermagan bo'lsa
+    if (!user.phone && !isAdmin && !req.body.devUser) {
+      return res.status(403).json({ error: 'contact_required', message: 'Avval bot orqali telefon raqamingizni yuboring' });
+    }
+
     // JWT token yaratish
     const token = jwt.sign(
       {

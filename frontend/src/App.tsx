@@ -41,7 +41,7 @@ function TabPage({ path, children }: { path: string; children: React.ReactNode }
 }
 
 function App() {
-  const { user, isLoading, login } = useAuthStore();
+  const { user, isLoading, contactRequired, login } = useAuthStore();
 
   useEffect(() => {
     login();
@@ -52,6 +52,34 @@ function App() {
       <div className="loading-screen">
         <div className="spinner" />
         <p>Yuklanmoqda...</p>
+      </div>
+    );
+  }
+
+  // Telefon raqam bermagan — bot orqali contact so'rash
+  if (contactRequired) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', padding: '40px 20px',
+        textAlign: 'center', maxWidth: 420, margin: '0 auto',
+      }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: 20,
+          background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 20px', fontSize: 32,
+        }}>
+          📞
+        </div>
+        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Telefon raqam kerak</h1>
+        <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 24 }}>
+          Davom etish uchun bot ga qaytib, telefon raqamingizni yuboring.
+          Pastdagi tugmani bosing 👇
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          Bot da "📞 Telefon raqamni yuborish" tugmasini bosing
+        </p>
       </div>
     );
   }
