@@ -5,11 +5,17 @@ const { authMiddleware, influencerOnly, companyOnly } = require('../middleware/a
 
 const router = express.Router();
 
-// Telegram notification
+// Telegram notification (to'g'ridan-to'g'ri HTTP API)
 async function sendTelegramNotification(telegramId, message) {
   try {
-    const { bot } = require('../bot');
-    await bot.telegram.sendMessage(telegramId, message, { parse_mode: 'HTML' });
+    const botToken = process.env.BOT_TOKEN;
+    if (!botToken) return;
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: telegramId, text: message, parse_mode: 'HTML' }),
+    });
   } catch (err) {
     console.error('Telegram notification error:', err.message);
   }
