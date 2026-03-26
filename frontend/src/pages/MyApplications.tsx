@@ -24,6 +24,7 @@ export default function MyApplications() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
   const [uploading, setUploading] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadAppId, setUploadAppId] = useState<string | null>(null);
 
@@ -83,12 +84,16 @@ export default function MyApplications() {
     e.target.value = '';
 
     setUploading(uploadAppId);
+    setUploadProgress(0);
     try {
       const formData = new FormData();
       formData.append('video', file);
       formData.append('applicationId', uploadAppId);
       const res = await api.post('/submissions', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (e.total) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        },
       });
       setSubmissions(prev => ({
         ...prev,
@@ -185,9 +190,20 @@ export default function MyApplications() {
                       disabled={isUploading}
                       onClick={() => handleVideoSelect(app.id)}
                     >
-                      {isUploading ? <><Loader2 size={15} className="spin" /> Yuklanmoqda...</> : <><Video size={15} /> Video joylash</>}
+                      {isUploading ? <><Loader2 size={15} className="spin" /> {uploadProgress}%</> : <><Video size={15} /> Video joylash</>}
                     </button>
                   </div>
+
+                  {/* Upload progress bar */}
+                  {isUploading && (
+                    <div style={{ height: 4, borderRadius: 100, background: 'var(--border)', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%', borderRadius: 100, transition: 'width 0.3s',
+                        background: 'linear-gradient(90deg, var(--primary), var(--primary-light))',
+                        width: `${uploadProgress}%`,
+                      }} />
+                    </div>
+                  )}
 
                   {/* Videos toggle */}
                   {(appSubs.length > 0 || isExpanded) && (

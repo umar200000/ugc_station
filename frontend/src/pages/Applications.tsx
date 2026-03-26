@@ -214,51 +214,52 @@ export default function Applications() {
                 </div>
               )}
 
-              {/* Videolar — qabul qilingan arizalarda */}
-              {app.status === 'ACCEPTED' && (() => {
+              {/* Videolar */}
+              {(() => {
                 const appSubs = submissions[app.id];
                 const loaded = appSubs !== undefined;
-                if (!loaded) { loadSubmissions(app.id); }
+                if (!loaded && app.status === 'ACCEPTED') { loadSubmissions(app.id); }
                 return appSubs && appSubs.length > 0 ? (
                   <div style={{ marginTop: 10 }}>
                     <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Video size={14} /> Yuborilgan videolar ({appSubs.length})
                     </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {appSubs.map((sub) => (
                         <div key={sub.id} style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
-                          padding: '10px 12px', borderRadius: 10,
+                          borderRadius: 12, overflow: 'hidden',
                           background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                         }}>
                           <video
                             src={sub.videoUrl}
                             controls
-                            style={{ width: 80, height: 80, borderRadius: 8, objectFit: 'cover', background: '#000' }}
+                            playsInline
+                            preload="metadata"
+                            style={{ width: '100%', maxHeight: 300, background: '#000', display: 'block' }}
                           />
-                          <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                               {new Date(sub.createdAt).toLocaleDateString('uz')}
                             </p>
                             {sub.status === 'PENDING' ? (
-                              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                                <button className="btn btn-success btn-sm" style={{ padding: '4px 12px', fontSize: 12 }}
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button className="btn btn-success btn-sm" style={{ padding: '6px 14px', fontSize: 12 }}
                                   onClick={() => handleSubStatus(sub.id, app.id, 'APPROVED')}>
                                   <ThumbsUp size={13} /> Yoqdi
                                 </button>
-                                <button className="btn btn-danger btn-sm" style={{ padding: '4px 12px', fontSize: 12 }}
+                                <button className="btn btn-danger btn-sm" style={{ padding: '6px 14px', fontSize: 12 }}
                                   onClick={() => handleSubStatus(sub.id, app.id, 'REJECTED')}>
                                   <ThumbsDown size={13} /> Yoqmadi
                                 </button>
                               </div>
                             ) : (
-                              <p style={{
-                                fontSize: 13, fontWeight: 600, marginTop: 6,
+                              <span style={{
+                                fontSize: 13, fontWeight: 600,
                                 color: sub.status === 'APPROVED' ? 'var(--secondary)' : 'var(--danger)',
                                 display: 'flex', alignItems: 'center', gap: 4,
                               }}>
                                 {sub.status === 'APPROVED' ? <><CheckCircle2 size={13} /> Tasdiqlangan</> : <><XCircle size={13} /> Rad etilgan</>}
-                              </p>
+                              </span>
                             )}
                           </div>
                         </div>
