@@ -16,6 +16,7 @@ import InfluencerProfile from './pages/InfluencerProfile';
 import Profile from './pages/Profile';
 import Applications from './pages/Applications';
 import EditAd from './pages/EditAd';
+import VideoPlayer from './pages/VideoPlayer';
 // Admin panel is now a separate website in /admin folder
 
 // Tab sahifalarini mount qilib, display bilan boshqarish
@@ -108,6 +109,7 @@ function MainApp() {
           <Route path="/create-ad" element={<CreateAd />} />
           <Route path="/ad/:id/edit" element={<EditAd />} />
           <Route path="/ad/:id/applications" element={<Applications />} />
+          <Route path="/video" element={<VideoPlayer />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       )}
