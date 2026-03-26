@@ -214,7 +214,37 @@ certbot renew --dry-run     # Test renewal
 | 3002 | ugc-backend |
 | 5432 | PostgreSQL |
 
-## Deploy Scripts
+## CI/CD (GitHub Actions)
+
+Auto-deploy on push to `main` branch. Only changed components are deployed (path-based filtering).
+
+**Workflow:** `.github/workflows/deploy.yml`
+
+### Required GitHub Secret
+
+Add `SSH_PRIVATE_KEY` in repo Settings → Secrets → Actions:
+
+```bash
+# Generate a key pair (if not already done)
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/gh_deploy
+
+# Copy public key to server
+ssh-copy-id -i ~/.ssh/gh_deploy.pub root@173.212.239.43
+
+# Copy the PRIVATE key content — paste this as the GitHub secret value
+cat ~/.ssh/gh_deploy
+```
+
+### What gets deployed
+
+| Path changed | Action |
+|---|---|
+| `frontend/**` | Build + rsync dist to server |
+| `admin/**` | Rsync to server |
+| `backend/**` | Rsync + npm install + prisma db push + pm2 restart |
+| `bot/**` | Rsync + npm install + pm2 restart |
+
+## Deploy Scripts (Manual)
 
 See `scripts/` directory:
 - `scripts/deploy-backend.sh` — Deploy backend only

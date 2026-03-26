@@ -1,0 +1,146 @@
+name: Deploy UGC Station
+
+on:
+  push:
+    branches: [main]
+
+env:
+  SERVER: root@173.212.239.43
+  REMOTE_BASE: /var/www/ugc-station
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      admin: ${{ steps.filter.outputs.admin }}
+      backend: ${{ steps.filter.outputs.backend }}
+      bot: ${{ steps.filter.outputs.bot }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            admin:
+              - 'admin/**'
+            backend:
+              - 'backend/**'
+            bot:
+              - 'bot/**'
+
+  deploy-frontend:
+    name: Deploy Frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install & build
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add known hosts
+        run: ssh-keyscan -H 173.212.239.43 >> ~/.ssh/known_hosts
+
+      - name: Deploy dist
+        run: rsync -avz --delete frontend/dist/ ${{ env.SERVER }}:${{ env.REMOTE_BASE }}/frontend/dist/
+
+  deploy-admin:
+    name: Deploy Admin Panel
+    needs: changes
+    if: needs.changes.outputs.admin == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add known hosts
+        run: ssh-keyscan -H 173.212.239.43 >> ~/.ssh/known_hosts
+
+      - name: Deploy admin
+        run: rsync -avz --delete admin/ ${{ env.SERVER }}:${{ env.REMOTE_BASE }}/admin/
+
+  deploy-backend:
+    name: Deploy Backend
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add known hosts
+        run: ssh-keyscan -H 173.212.239.43 >> ~/.ssh/known_hosts
+
+      - name: Deploy backend files
+        run: |
+          rsync -avz --delete \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='uploads/*' \
+            --exclude='!uploads/.gitkeep' \
+            --exclude='prisma/dev.db*' \
+            backend/ ${{ env.SERVER }}:${{ env.REMOTE_BASE }}/backend/
+
+      - name: Install deps, migrate & restart
+        run: |
+          ssh ${{ env.SERVER }} "cd ${{ env.REMOTE_BASE }}/backend && \
+            npm install --omit=dev && \
+            npx prisma generate && \
+            npx prisma db push && \
+            pm2 restart ugc-backend"
+
+  deploy-bot:
+    name: Deploy Bot
+    needs: changes
+    if: needs.changes.outputs.bot == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add known hosts
+        run: ssh-keyscan -H 173.212.239.43 >> ~/.ssh/known_hosts
+
+      - name: Deploy bot files
+        run: |
+          rsync -avz --delete \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            bot/ ${{ env.SERVER }}:${{ env.REMOTE_BASE }}/bot/
+
+      - name: Install deps & restart
+        run: |
+          ssh ${{ env.SERVER }} "cd ${{ env.REMOTE_BASE }}/bot && \
+            npm install --omit=dev && \
+            pm2 restart ugc-bot"
