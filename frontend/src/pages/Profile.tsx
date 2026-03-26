@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Building2, Megaphone, LogOut, Pencil, Star, MapPin, Calendar, Briefcase, ChevronRight, Shield, Globe, X, Save, Camera, Send } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 
@@ -42,7 +43,11 @@ export default function Profile() {
   const profile = user?.role === 'COMPANY' ? user?.company : user?.influencer;
   const isCompany = user?.role === 'COMPANY';
 
+  const location = useLocation();
+  const isActive = location.pathname === '/profile';
+
   useEffect(() => {
+    if (!isActive) return;
     const fetchStats = async () => {
       try {
         if (isCompany) {
@@ -59,7 +64,7 @@ export default function Profile() {
       } catch {}
     };
     fetchStats();
-  }, [isCompany]);
+  }, [isActive]);
 
   let socialLinks: Record<string, string> = {};
   if (user?.influencer?.socialLinks) {
