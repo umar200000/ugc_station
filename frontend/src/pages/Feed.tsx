@@ -69,10 +69,12 @@ export default function Feed() {
   useEffect(() => { fetchAds(); }, [industry, adType]);
 
   // Cache invalidate bo'lganda qayta fetch
+  const feedLoadDone = useRef(false);
   useEffect(() => {
-    if (cachedFeedAds === null && ads.length > 0) {
+    if (cachedFeedAds === null && feedLoadDone.current) {
       fetchAds(true);
     }
+    if (cachedFeedAds !== null) feedLoadDone.current = true;
   }, [cachedFeedAds]);
 
   const clearFilters = () => {

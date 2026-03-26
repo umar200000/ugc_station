@@ -48,10 +48,12 @@ export default function MyApplications() {
   }, []);
 
   // Cache invalidate bo'lganda qayta fetch
+  const appsLoadDone = useRef(false);
   useEffect(() => {
-    if (cachedMyApps === null && applications.length > 0) {
+    if (cachedMyApps === null && appsLoadDone.current) {
       fetchMyApps();
     }
+    if (cachedMyApps !== null) appsLoadDone.current = true;
   }, [cachedMyApps]);
 
   const loadSubmissions = async (appId: string) => {

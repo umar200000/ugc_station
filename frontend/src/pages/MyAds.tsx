@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ClipboardList, Eye, Users, Clock, CheckCircle2, XCircle, TrendingUp, Repeat2, DollarSign, ChevronRight, BarChart3 } from 'lucide-react';
 import api from '../lib/api';
@@ -35,10 +35,12 @@ export default function MyAds() {
   }, []);
 
   // Cache invalidate bo'lganda qayta fetch
+  const initialLoadDone = useRef(false);
   useEffect(() => {
-    if (cachedMyAds === null && ads.length > 0) {
+    if (cachedMyAds === null && initialLoadDone.current) {
       fetchMyAds();
     }
+    if (cachedMyAds !== null) initialLoadDone.current = true;
   }, [cachedMyAds]);
 
   const filteredAds = filter === 'ALL' ? ads : ads.filter((ad) => ad.status === filter);

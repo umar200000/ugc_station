@@ -58,10 +58,12 @@ export default function Influencers() {
   useEffect(() => { fetchInfluencers(); }, [category]);
 
   // Cache invalidate bo'lganda qayta fetch
+  const infLoadDone = useRef(false);
   useEffect(() => {
-    if (cachedInfluencers === null && influencers.length > 0) {
+    if (cachedInfluencers === null && infLoadDone.current) {
       fetchInfluencers(true);
     }
+    if (cachedInfluencers !== null) infLoadDone.current = true;
   }, [cachedInfluencers]);
 
   const handleRefresh = async () => {
