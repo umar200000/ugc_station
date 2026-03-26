@@ -16,7 +16,7 @@ import InfluencerProfile from './pages/InfluencerProfile';
 import Profile from './pages/Profile';
 import Applications from './pages/Applications';
 import EditAd from './pages/EditAd';
-import Admin from './pages/Admin';
+// Admin panel is now a separate website in /admin folder
 
 // Tab sahifalarini mount qilib, display bilan boshqarish
 function TabPage({ path, children }: { path: string; children: React.ReactNode }) {
@@ -97,7 +97,7 @@ function MainApp() {
         {user?.role === 'COMPANY' && <TabPage path="/my-ads"><MyAds /></TabPage>}
         {user?.role === 'INFLUENCER' && <TabPage path="/my-applications"><MyApplications /></TabPage>}
         <TabPage path="/profile"><Profile /></TabPage>
-        {user?.role === 'ADMIN' && <TabPage path="/admin"><Admin /></TabPage>}
+        {/* Admin panel moved to separate /admin folder */}
       </div>
 
       {/* Boshqa sahifalar — oddiy routing */}

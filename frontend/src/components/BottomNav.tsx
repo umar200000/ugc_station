@@ -1,10 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
-import { Home, Users, ClipboardList, Send, User, Shield } from 'lucide-react';
+import { Home, Users, ClipboardList, Send, User } from 'lucide-react';
 
 export default function BottomNav() {
   const { user } = useAuthStore();
-  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <div className="bottom-nav-wrap">
@@ -19,12 +18,7 @@ export default function BottomNav() {
           <span>Influenserlar</span>
         </NavLink>
 
-        {isAdmin ? (
-          <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <Shield size={22} strokeWidth={1.8} />
-            <span>Admin</span>
-          </NavLink>
-        ) : user?.role === 'COMPANY' ? (
+        {user?.role === 'COMPANY' ? (
           <NavLink to="/my-ads" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <ClipboardList size={22} strokeWidth={1.8} />
             <span>E'lonlarim</span>

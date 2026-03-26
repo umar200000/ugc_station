@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UGC Admin Panel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2563EB; --primary-dark: #1D4ED8; --primary-bg: rgba(37,99,235,0.07);
+      --danger: #EF4444; --danger-bg: rgba(239,68,68,0.07);
+      --success: #10B981; --success-bg: rgba(16,185,129,0.08);
+      --warning: #F59E0B; --warning-bg: rgba(245,158,11,0.1);
+      --bg: #F1F5F9; --card: #fff; --text: #0F172A; --text2: #475569; --text3: #94A3B8;
+      --border: rgba(15,23,42,0.08); --shadow: 0 1px 3px rgba(15,23,42,0.06);
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* LOGIN */
+    .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .login-card { background: var(--card); border-radius: 24px; padding: 40px 32px; max-width: 380px; width: 100%; box-shadow: 0 8px 30px rgba(15,23,42,0.1); text-align: center; }
+    .login-icon { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #0F172A, #334155); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+    .login-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .login-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+    .login-input { width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: 14px; font-size: 15px; font-family: inherit; outline: none; transition: 0.2s; margin-bottom: 16px; }
+    .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-bg); }
+    .login-btn { width: 100%; padding: 14px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: 0.2s; }
+    .login-btn:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+    .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .login-error { color: var(--danger); font-size: 13px; margin-top: 12px; font-weight: 600; }
+
+    /* DASHBOARD */
+    .dashboard { display: none; max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+    .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .dash-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .dash-logout { padding: 10px 20px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--text2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; }
+    .dash-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .stat-card { background: var(--card); border-radius: 16px; padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .stat-card-value { font-size: 28px; font-weight: 800; color: var(--text); }
+    .stat-card-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 4px; }
+    .stat-card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 18px; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tab-btn { padding: 10px 20px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--text2); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+    .tab-btn.active { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+    .tab-btn:hover { border-color: var(--primary); }
+    .tab-count { font-size: 11px; font-weight: 700; background: var(--border); padding: 2px 7px; border-radius: 100px; }
+    .tab-btn.active .tab-count { background: var(--primary); color: #fff; }
+
+    /* TABLE */
+    .table-wrap { background: var(--card); border-radius: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { text-align: left; padding: 14px 18px; font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); background: var(--bg); }
+    .table td { padding: 14px 18px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background: rgba(37,99,235,0.02); }
+    .table-name { font-weight: 700; color: var(--text); }
+    .table-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+    .badge-active { background: var(--success-bg); color: var(--success); }
+    .badge-closed { background: var(--danger-bg); color: var(--danger); }
+    .badge-barter { background: var(--success-bg); color: var(--success); }
+    .badge-paid { background: var(--warning-bg); color: #92400E; }
+    .del-btn { width: 34px; height: 34px; border-radius: 10px; background: var(--danger-bg); border: none; color: var(--danger); cursor: pointer; font-size: 16px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+    .del-btn:hover { background: var(--danger); color: #fff; }
+    .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 15px; }
+
+    /* MODAL */
+    .modal-bg { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
+    .modal-bg.open { display: flex; }
+    .modal { background: var(--card); border-radius: 24px; padding: 32px 28px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .modal-icon { width: 56px; height: 56px; border-radius: 16px; background: var(--danger-bg); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 26px; }
+    .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 8px; }
+    .modal-cancel { flex: 1; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .modal-confirm { flex: 1; padding: 12px; border-radius: 12px; border: none; background: var(--danger); color: #fff; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .modal-confirm:disabled { opacity: 0.5; }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .table th, .table td { padding: 10px 12px; font-size: 13px; }
+      .tabs { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-card">
+    <div class="login-icon">&#128737;</div>
+    <h1 class="login-title">Admin Panel</h1>
+    <p class="login-sub">UGC Marketplace boshqaruv paneli</p>
+    <div style="position:relative">
+      <input type="password" id="passwordInput" class="login-input" style="padding-right:48px" placeholder="Parolni kiriting..." onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="togglePassword()" id="eyeBtn" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);padding:4px">&#128065;</button>
+    </div>
+    <button class="login-btn" onclick="doLogin()" id="loginBtn">Kirish</button>
+    <div id="loginError" class="login-error" style="display:none"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard">
+  <div class="dash-header">
+    <h1 class="dash-title">&#128737; Admin Panel</h1>
+    <button class="dash-logout" onclick="doLogout()">Chiqish</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="users" onclick="switchTab('users')">
+      &#128101; Userlar <span class="tab-count" id="countUsers">0</span>
+    </button>
+    <button class="tab-btn" data-tab="companies" onclick="switchTab('companies')">
+      &#127970; Kompaniyalar <span class="tab-count" id="countCompanies">0</span>
+    </button>
+    <button class="tab-btn" data-tab="influencers" onclick="switchTab('influencers')">
+      &#128100; Influenserlar <span class="tab-count" id="countInfluencers">0</span>
+    </button>
+    <button class="tab-btn" data-tab="ads" onclick="switchTab('ads')">
+      &#128227; E'lonlar <span class="tab-count" id="countAds">0</span>
+    </button>
+  </div>
+
+  <!-- Tables -->
+  <div class="table-wrap">
+    <div id="tabUsers">
+      <table class="table">
+        <thead><tr><th>Foydalanuvchi</th><th>Telefon</th><th>Rol</th><th>Holat</th><th>Sana</th><th></th></tr></thead>
+        <tbody id="tbodyUsers"></tbody>
+      </table>
+    </div>
+    <div id="tabCompanies" style="display:none">
+      <table class="table">
+        <thead><tr><th>Kompaniya</th><th>Soha</th><th>Telefon</th><th>E'lonlar</th><th>Sana</th><th></th></tr></thead>
+        <tbody id="tbodyCompanies"></tbody>
+      </table>
+    </div>
+    <div id="tabInfluencers" style="display:none">
+      <table class="table">
+        <thead><tr><th>Influenser</th><th>Yo'nalish</th><th>Telefon</th><th>Arizalar</th><th>Sana</th><th></th></tr></thead>
+        <tbody id="tbodyInfluencers"></tbody>
+      </table>
+    </div>
+    <div id="tabAds" style="display:none">
+      <table class="table">
+        <thead><tr><th>E'lon</th><th>Kompaniya</th><th>Turi</th><th>Holati</th><th>Arizalar</th><th></th></tr></thead>
+        <tbody id="tbodyAds"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-bg" id="deleteModal">
+  <div class="modal">
+    <div class="modal-icon">&#9888;</div>
+    <h3>O'chirishni tasdiqlang</h3>
+    <p id="deleteText"></p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Bekor</button>
+      <button class="modal-confirm" id="confirmBtn" onclick="confirmDelete()">O'chirish</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = (window.location.hostname === 'localhost' ? 'http://localhost:3000' : '') + '/api/admin';
+let token = localStorage.getItem('admin_token');
+let deleteTarget = null;
+
+// ===== AUTH =====
+async function doLogin() {
+  const pw = document.getElementById('passwordInput').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  btn.disabled = true; err.style.display = 'none';
+  try {
+    const res = await fetch(API + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    token = data.token;
+    localStorage.setItem('admin_token', token);
+    showDashboard();
+  } catch (e) {
+    err.textContent = e.message || 'Xatolik';
+    err.style.display = 'block';
+  } finally { btn.disabled = false; }
+}
+
+function doLogout() {
+  token = null;
+  localStorage.removeItem('admin_token');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+function api(path, opts = {}) {
+  return fetch(API + path, { ...opts, headers: { ...opts.headers, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } });
+}
+
+// ===== DASHBOARD =====
+async function showDashboard() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  await loadAll();
+}
+
+async function loadAll() {
+  try {
+    const [statsRes, usersRes, compRes, infRes, adRes] = await Promise.all([
+      api('/stats'), api('/users'), api('/companies'), api('/influencers'), api('/ads'),
+    ]);
+    if (statsRes.status === 401) { doLogout(); return; }
+    const stats = await statsRes.json();
+    const { users } = await usersRes.json();
+    const { companies } = await compRes.json();
+    const { influencers } = await infRes.json();
+    const { ads } = await adRes.json();
+
+    renderStats(stats);
+    renderUsers(users);
+    renderCompanies(companies);
+    renderInfluencers(influencers);
+    renderAds(ads);
+
+    document.getElementById('countUsers').textContent = users.length;
+    document.getElementById('countCompanies').textContent = companies.length;
+    document.getElementById('countInfluencers').textContent = influencers.length;
+    document.getElementById('countAds').textContent = ads.length;
+  } catch (e) { console.error(e); }
+}
+
+function renderStats(s) {
+  const items = [
+    { label: 'Foydalanuvchilar', value: s.users, color: 'var(--primary-bg)', icon: '&#128101;' },
+    { label: 'Kompaniyalar', value: s.companies, color: 'var(--success-bg)', icon: '&#127970;' },
+    { label: 'Influenserlar', value: s.influencers, color: '#F3E8FF', icon: '&#128100;' },
+    { label: "E'lonlar", value: s.ads, color: 'var(--warning-bg)', icon: '&#128227;' },
+    { label: 'Faol e\'lonlar', value: s.activeAds, color: 'var(--success-bg)', icon: '&#9889;' },
+    { label: 'Arizalar', value: s.applications, color: 'var(--primary-bg)', icon: '&#128203;' },
+  ];
+  document.getElementById('statsGrid').innerHTML = items.map(i => `
+    <div class="stat-card">
+      <div class="stat-card-icon" style="background:${i.color}">${i.icon}</div>
+      <div class="stat-card-value">${i.value}</div>
+      <div class="stat-card-label">${i.label}</div>
+    </div>
+  `).join('');
+}
+
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('uz-UZ') : '—'; }
+
+function renderUsers(list) {
+  const tbody = document.getElementById('tbodyUsers');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Foydalanuvchilar yo\'q</td></tr>'; return; }
+  tbody.innerHTML = list.map(u => {
+    const role = u.role === 'COMPANY' ? 'Kompaniya' : u.role === 'INFLUENCER' ? 'Influenser' : u.role === 'ADMIN' ? 'Admin' : 'Yangi';
+    const roleBadge = u.role === 'ADMIN' ? 'badge-active' : u.role ? 'badge-paid' : 'badge-closed';
+    const name = u.company?.name || u.influencer?.name || u.firstName || '—';
+    return `<tr>
+      <td><div class="table-name">${name}</div><div class="table-meta">@${u.username || '—'} · ID: ${u.telegramId}</div></td>
+      <td>${u.phone || '—'}</td>
+      <td><span class="badge ${roleBadge}">${role}</span></td>
+      <td><span class="badge ${u.onboarded ? 'badge-active' : 'badge-closed'}">${u.onboarded ? 'Faol' : 'Tugallanmagan'}</span></td>
+      <td>${fmtDate(u.createdAt)}</td>
+      <td>${u.role !== 'ADMIN' ? '<button class="del-btn" onclick="openModal(\'user\',\'' + u.id + '\',\'' + name.replace(/'/g,'') + '\')">&#128465;</button>' : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCompanies(list) {
+  const tbody = document.getElementById('tbodyCompanies');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Kompaniyalar yo\'q</td></tr>'; return; }
+  tbody.innerHTML = list.map(c => `<tr>
+    <td><div class="table-name">${c.name}</div><div class="table-meta">@${c.user?.username || '—'}</div></td>
+    <td>${c.industry}</td>
+    <td>${c.user?.phone || '—'}</td>
+    <td>${c._count?.ads || 0}</td>
+    <td>${fmtDate(c.user?.createdAt)}</td>
+    <td><button class="del-btn" onclick="openModal('company','${c.id}','${c.name.replace(/'/g,'')}')">&#128465;</button></td>
+  </tr>`).join('');
+}
+
+function renderInfluencers(list) {
+  const tbody = document.getElementById('tbodyInfluencers');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Influenserlar yo\'q</td></tr>'; return; }
+  tbody.innerHTML = list.map(i => `<tr>
+    <td><div class="table-name">${i.name}</div><div class="table-meta">@${i.user?.username || '—'}</div></td>
+    <td>${i.category}</td>
+    <td>${i.user?.phone || '—'}</td>
+    <td>${i._count?.applications || 0}</td>
+    <td>${fmtDate(i.user?.createdAt)}</td>
+    <td><button class="del-btn" onclick="openModal('influencer','${i.id}','${i.name.replace(/'/g,'')}')">&#128465;</button></td>
+  </tr>`).join('');
+}
+
+function renderAds(list) {
+  const tbody = document.getElementById('tbodyAds');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">E\'lonlar yo\'q</td></tr>'; return; }
+  tbody.innerHTML = list.map(a => `<tr>
+    <td><div class="table-name">${a.title}</div></td>
+    <td>${a.company?.name || '—'}</td>
+    <td><span class="badge badge-${a.adType.toLowerCase()}">${a.adType === 'PAID' ? a.payment?.toLocaleString() + " so'm" : 'Barter'}</span></td>
+    <td><span class="badge badge-${a.status.toLowerCase()}">${a.status === 'ACTIVE' ? 'Faol' : 'Yopiq'}</span></td>
+    <td>${a._count?.applications || 0}</td>
+    <td><button class="del-btn" onclick="openModal('ad','${a.id}','${a.title.replace(/'/g,'')}')">&#128465;</button></td>
+  </tr>`).join('');
+}
+
+// ===== TABS =====
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.getElementById('tabUsers').style.display = name === 'users' ? '' : 'none';
+  document.getElementById('tabCompanies').style.display = name === 'companies' ? '' : 'none';
+  document.getElementById('tabInfluencers').style.display = name === 'influencers' ? '' : 'none';
+  document.getElementById('tabAds').style.display = name === 'ads' ? '' : 'none';
+}
+
+// ===== DELETE =====
+function openModal(type, id, name) {
+  deleteTarget = { type, id };
+  document.getElementById('deleteText').innerHTML = `<strong>"${name}"</strong> ni o'chirmoqchimisiz?<br>Bu amalni qaytarib bo'lmaydi.`;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeModal() {
+  deleteTarget = null;
+  document.getElementById('deleteModal').classList.remove('open');
+}
+async function confirmDelete() {
+  if (!deleteTarget) return;
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true; btn.textContent = "O'chirilmoqda...";
+  try {
+    await api(`/${deleteTarget.type}/${deleteTarget.id}`, { method: 'DELETE' });
+    closeModal();
+    await loadAll();
+  } catch (e) { alert('Xatolik'); }
+  finally { btn.disabled = false; btn.textContent = "O'chirish"; }
+}
+
+// ===== PASSWORD TOGGLE =====
+function togglePassword() {
+  const inp = document.getElementById('passwordInput');
+  const btn = document.getElementById('eyeBtn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = '&#128064;'; }
+  else { inp.type = 'password'; btn.innerHTML = '&#128065;'; }
+}
+
+// ===== INIT =====
+if (token) showDashboard();
+</script>
+</body>
+</html>

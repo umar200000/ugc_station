@@ -44,10 +44,8 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Admin web panel
-app.get('/admin-panel', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin-panel.html'));
-});
+// Admin web panel (alohida papkadan)
+app.use('/admin-panel', express.static(path.join(__dirname, '../../admin')));
 
 // Health check
 app.get('/api/health', (req, res) => {
