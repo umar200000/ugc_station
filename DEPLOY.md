@@ -5,6 +5,7 @@
 - **IP:** 173.212.239.43
 - **OS:** Ubuntu 24.04 LTS
 - **Domain:** ugcstation.org
+- **Admin:** admin.ugcstation.org
 - **SSH:** `ssh root@173.212.239.43`
 
 ## Architecture
@@ -14,9 +15,14 @@ Internet
   │
   ▼
 Nginx (port 80/443)
+  ugcstation.org:
   ├── Static files → /var/www/ugc-station/frontend/dist
   ├── /api/*       → proxy to backend (port 3002)
   └── /uploads/*   → proxy to backend (port 3002)
+
+  admin.ugcstation.org:
+  ├── Static files → /var/www/ugc-station/admin/
+  └── /api/*       → proxy to backend (port 3002)
 
 PM2 Processes:
   ├── ugc-backend  → Node.js Express API (port 3002)
@@ -41,6 +47,8 @@ PostgreSQL (port 5432)
 │   │   └── schema.prisma       # Database schema (PostgreSQL)
 │   ├── uploads/                # User uploaded files
 │   └── node_modules/
+├── admin/
+│   └── index.html              # Admin panel (static, served by nginx)
 ├── bot/
 │   ├── .env                    # Bot environment variables
 │   ├── index.js                # Telegraf bot entry point
@@ -51,9 +59,12 @@ PostgreSQL (port 5432)
     │   └── assets/
     └── src/                    # Source (not used in production)
 
-/etc/nginx/sites-available/ugc-station   # Nginx config
-/etc/nginx/sites-enabled/ugc-station     # Symlink to above
-/etc/letsencrypt/live/ugcstation.org/    # SSL certificates (auto-renewed)
+/etc/nginx/sites-available/ugc-station         # Main site nginx config
+/etc/nginx/sites-available/ugc-admin           # Admin panel nginx config
+/etc/nginx/sites-enabled/ugc-station           # Symlink to above
+/etc/nginx/sites-enabled/ugc-admin             # Symlink to above
+/etc/letsencrypt/live/ugcstation.org/          # SSL certificates (auto-renewed)
+/etc/letsencrypt/live/admin.ugcstation.org/    # Admin SSL certificates
 ```
 
 ## Technology Stack
@@ -61,6 +72,7 @@ PostgreSQL (port 5432)
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | Frontend | React 19, TypeScript, Vite | Telegram Mini App UI |
+| Admin Panel | Static HTML/JS | Admin dashboard (admin.ugcstation.org) |
 | Backend | Express.js, Node.js 20 | REST API |
 | Database | PostgreSQL 16 | Data storage |
 | ORM | Prisma 6.x | Database access |
@@ -97,6 +109,67 @@ PostgreSQL (port 5432)
 | BOT_TOKEN | `8676258941:AAE...` | Telegram bot token |
 | FRONTEND_URL | https://ugcstation.org | Web app URL for bot buttons |
 | WEB_APP_URL | https://ugcstation.org | Web app URL for bot buttons |
+
+## Admin Panel — Nginx Setup (One-time)
+
+Run these commands on the server to set up `admin.ugcstation.org`:
+
+```bash
+# 1. Add DNS A record for admin.ugcstation.org → 173.212.239.43
+
+# 2. Create nginx config
+cat > /etc/nginx/sites-available/ugc-admin << 'NGINX'
+server {
+    listen 80;
+    server_name admin.ugcstation.org;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name admin.ugcstation.org;
+
+    ssl_certificate /etc/letsencrypt/live/admin.ugcstation.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/admin.ugcstation.org/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    root /var/www/ugc-station/admin;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+NGINX
+
+# 3. Enable site
+ln -sf /etc/nginx/sites-available/ugc-admin /etc/nginx/sites-enabled/ugc-admin
+
+# 4. Get SSL certificate (do this BEFORE enabling the 443 block, or temporarily comment it out)
+certbot --nginx -d admin.ugcstation.org
+
+# 5. Test & reload nginx
+nginx -t && systemctl reload nginx
+```
 
 ## Common Commands
 
@@ -146,6 +219,7 @@ certbot renew --dry-run     # Test renewal
 See `scripts/` directory:
 - `scripts/deploy-backend.sh` — Deploy backend only
 - `scripts/deploy-frontend.sh` — Deploy frontend only
+- `scripts/deploy-admin.sh` — Deploy admin panel only
 - `scripts/deploy-bot.sh` — Deploy bot only
 - `scripts/deploy-all.sh` — Deploy everything
 
@@ -153,6 +227,7 @@ Usage from project root:
 ```bash
 ./scripts/deploy-all.sh        # Deploy everything
 ./scripts/deploy-frontend.sh   # Deploy frontend only
+./scripts/deploy-admin.sh      # Deploy admin panel only
 ./scripts/deploy-backend.sh    # Deploy backend only
 ./scripts/deploy-bot.sh        # Deploy bot only
 ```
