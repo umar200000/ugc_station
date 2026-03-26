@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Megaphone, Plus, Trash2, Link, Globe } from 'lucide-react';
+import { Megaphone, Plus, Trash2, Link, Globe, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 import { INDUSTRIES } from '../types';
 import { hapticFeedback } from '../lib/telegram';
@@ -25,7 +25,7 @@ function detectPlatform(url: string): string | null {
 }
 
 export default function OnboardingInfluencer() {
-  const { onboardInfluencer } = useAuthStore();
+  const { onboardInfluencer, goBackToRoleSelect } = useAuthStore();
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
@@ -74,6 +74,18 @@ export default function OnboardingInfluencer() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 20px', maxWidth: 420, margin: '0 auto' }}>
       <div className="slide-up">
+        {/* Orqaga tugma */}
+        <button
+          onClick={goBackToRoleSelect}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
+            color: 'var(--text-muted)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            fontFamily: 'inherit', padding: 0, marginBottom: 24,
+          }}
+        >
+          <ArrowLeft size={18} /> Orqaga
+        </button>
+
         <div style={{ display: 'flex', gap: 6, marginBottom: 32 }}>
           <div style={{ flex: 1, height: 4, borderRadius: 100, background: 'var(--primary)' }} />
           <div style={{ flex: 1, height: 4, borderRadius: 100, background: step >= 2 ? 'var(--primary)' : 'var(--border)' }} />

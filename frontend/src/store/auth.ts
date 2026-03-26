@@ -35,6 +35,7 @@ interface AuthState {
   onboardCompany: (data: { name: string; industry: string }) => Promise<void>;
   onboardInfluencer: (data: { name: string; bio: string; category: string; socialLinks: any }) => Promise<void>;
   refreshUser: () => Promise<void>;
+  goBackToRoleSelect: () => void;
   logout: () => void;
 }
 
@@ -110,6 +111,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshUser: async () => {
     const res = await api.get('/auth/me');
     set({ user: res.data.user });
+  },
+
+  goBackToRoleSelect: () => {
+    set((state) => ({
+      user: state.user ? { ...state.user, role: null, onboarded: false } : null,
+    }));
   },
 
   logout: async () => {

@@ -1,19 +1,21 @@
 import { useState } from 'react';
-import { Building2 } from 'lucide-react';
+import { Building2, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 import { hapticFeedback } from '../lib/telegram';
 
-const TOP_INDUSTRIES = [
+const INDUSTRIES = [
   'Oziq-ovqat va restoran',
   'Kiyim va moda',
   "Go'zallik va kosmetika",
   'Elektronika va telefonlar',
   "Ta'lim / O'quv markazlar",
+  'Sport va fitness',
+  "Ko'chmas mulk",
   'Boshqa',
 ];
 
 export default function OnboardingCompany() {
-  const { onboardCompany } = useAuthStore();
+  const { onboardCompany, goBackToRoleSelect } = useAuthStore();
   const [name, setName] = useState('');
   const [industry, setIndustry] = useState('');
   const [customIndustry, setCustomIndustry] = useState('');
@@ -37,6 +39,18 @@ export default function OnboardingCompany() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 20px', maxWidth: 420, margin: '0 auto' }}>
       <div className="slide-up">
+        {/* Orqaga tugma */}
+        <button
+          onClick={goBackToRoleSelect}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
+            color: 'var(--text-muted)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            fontFamily: 'inherit', padding: 0, marginBottom: 24,
+          }}
+        >
+          <ArrowLeft size={18} /> Orqaga
+        </button>
+
         <div style={{ display: 'flex', gap: 6, marginBottom: 32 }}>
           <div style={{ flex: 1, height: 4, borderRadius: 100, background: 'var(--primary)' }} />
           <div style={{ flex: 1, height: 4, borderRadius: 100, background: name.trim() ? 'var(--primary)' : 'var(--border)' }} />
@@ -59,29 +73,17 @@ export default function OnboardingCompany() {
 
         <div className="form-group">
           <label className="form-label">Soha</label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {TOP_INDUSTRIES.map((ind) => (
-              <button
-                key={ind}
-                type="button"
-                onClick={() => { setIndustry(ind); if (ind !== 'Boshqa') setCustomIndustry(''); }}
-                style={{
-                  padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-                  border: `1.5px solid ${industry === ind ? 'var(--primary)' : 'var(--border)'}`,
-                  background: industry === ind ? 'var(--primary-bg)' : 'var(--bg-card)',
-                  color: industry === ind ? 'var(--primary)' : 'var(--text-secondary)',
-                  cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-                }}
-              >
-                {ind}
-              </button>
+          <select className="form-select" value={industry} onChange={(e) => { setIndustry(e.target.value); if (e.target.value !== 'Boshqa') setCustomIndustry(''); }}>
+            <option value="">Sohangizni tanlang...</option>
+            {INDUSTRIES.map((ind) => (
+              <option key={ind} value={ind}>{ind}</option>
             ))}
-          </div>
+          </select>
         </div>
         {industry === 'Boshqa' && (
           <div className="form-group">
             <label className="form-label">Soha nomini kiriting</label>
-            <input className="form-input" placeholder="Masalan: Avtomobil, Sport..." value={customIndustry} onChange={(e) => setCustomIndustry(e.target.value)} />
+            <input className="form-input" placeholder="Masalan: Avtomobil, Mebel..." value={customIndustry} onChange={(e) => setCustomIndustry(e.target.value)} />
           </div>
         )}
 
