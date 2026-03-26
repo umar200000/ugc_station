@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
@@ -5,6 +6,17 @@ export default function VideoPlayer() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const url = params.get('url') || '';
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // Sahifa ochilganda inline play boshlash
+    const v = videoRef.current;
+    if (v) {
+      v.setAttribute('playsinline', '');
+      v.setAttribute('webkit-playsinline', '');
+      v.play().catch(() => {});
+    }
+  }, []);
 
   return (
     <div style={{
@@ -27,10 +39,10 @@ export default function VideoPlayer() {
 
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <video
+          ref={videoRef}
           src={url}
           controls
           playsInline
-          webkit-playsinline="true"
           style={{ width: '100%', maxHeight: '100vh' }}
         />
       </div>
