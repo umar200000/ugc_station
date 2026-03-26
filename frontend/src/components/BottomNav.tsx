@@ -1,12 +1,27 @@
 import { NavLink } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/auth';
 import { Home, Users, ClipboardList, Send, User } from 'lucide-react';
 
 export default function BottomNav() {
   const { user } = useAuthStore();
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard ochilganda nav bar ni yashirish
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      if (!wrapRef.current) return;
+      const keyboardOpen = vv.height < window.innerHeight * 0.8;
+      wrapRef.current.style.display = keyboardOpen ? 'none' : '';
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
 
   return (
-    <div className="bottom-nav-wrap">
+    <div className="bottom-nav-wrap" ref={wrapRef}>
       <nav className="bottom-nav">
         <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end>
           <Home size={22} strokeWidth={1.8} />
