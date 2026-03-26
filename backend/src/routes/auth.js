@@ -66,6 +66,37 @@ router.post('/telegram', async (req, res) => {
   }
 });
 
+// Telefon raqam saqlash
+router.post('/save-phone', authMiddleware, async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone || phone.length < 9) {
+      return res.status(400).json({ error: 'Telefon raqam noto\'g\'ri' });
+    }
+
+    // Raqam boshqa userda bormi tekshirish
+    const existing = await req.prisma.user.findUnique({
+      where: { phone },
+    });
+
+    if (existing && existing.id !== req.user.userId) {
+      return res.status(409).json({ error: 'Bu raqam allaqachon ro\'yxatdan o\'tgan' });
+    }
+
+    const user = await req.prisma.user.update({
+      where: { id: req.user.userId },
+      data: { phone },
+      include: { company: true, influencer: true },
+    });
+
+    res.json({ user });
+  } catch (err) {
+    console.error('Save phone error:', err);
+    res.status(500).json({ error: 'Telefon saqlashda xatolik' });
+  }
+});
+
 // Rol tanlash (onboarding)
 router.post('/select-role', authMiddleware, async (req, res) => {
   try {

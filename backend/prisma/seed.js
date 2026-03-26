@@ -182,6 +182,45 @@ async function main() {
     },
   });
 
+  // === Qo'shimcha mock influenserlar ===
+  const mockInfluencers = [
+    { telegramId: '20001', firstName: 'Madina', lastName: 'Karimova', username: 'madina_k', name: 'Madina Karimova', bio: 'Lifestyle va moda kontenti. 50K+ auditoriya. Instagram va TikTok da faol ishlayman.', category: 'Kiyim va moda', socialLinks: { Instagram: '@madina_k', TikTok: '@madina_k' } },
+    { telegramId: '20002', firstName: 'Sardor', lastName: 'Toshmatov', username: 'sardor_fit', name: 'Sardor Toshmatov', bio: "Fitness va sog'lom turmush tarzi. Mashg'ulot dasturlari va ovqatlanish rejalari. 80K auditoriya.", category: 'Sport va fitness', socialLinks: { Instagram: '@sardor_fit', TikTok: '@sardor_fit', YouTube: '@sardor_fit' } },
+    { telegramId: '20003', firstName: 'Dilfuza', lastName: 'Nazarova', username: 'dilfuza_food', name: 'Dilfuza Nazarova', bio: "Milliy va xalqaro taomlar retseptlari. Restoran obzorlari. 65K+ obunachilar.", category: 'Oziq-ovqat va restoran', socialLinks: { Instagram: '@dilfuza_food', TikTok: '@dilfuza_food' } },
+    { telegramId: '20004', firstName: 'Azizbek', lastName: 'Umarov', username: 'aziz_auto', name: 'Azizbek Umarov', bio: "Avtomobil obzorlari va ta'mirlash maslahatlari. 40K YouTube obunachilar.", category: "Avtomobil ta'miri", socialLinks: { YouTube: '@aziz_auto', Telegram: '@aziz_auto' } },
+    { telegramId: '20005', firstName: 'Shahlo', lastName: 'Mirzayeva', username: 'shahlo_edu', name: 'Shahlo Mirzayeva', bio: "Ingliz tili o'qituvchisi. Ta'lim kontenti va motivatsiya videolari. 90K+ auditoriya.", category: "Ta'lim / O'quv markazlar", socialLinks: { Instagram: '@shahlo_edu', YouTube: '@shahlo_edu', Telegram: '@shahlo_edu' } },
+    { telegramId: '20006', firstName: 'Bobur', lastName: 'Xasanov', username: 'bobur_home', name: 'Bobur Xasanov', bio: "Uy jihozlari va interior dizayn. Mebel tanlash bo'yicha maslahatlar. 35K auditoriya.", category: 'Mebel', socialLinks: { Instagram: '@bobur_home', TikTok: '@bobur_home' } },
+    { telegramId: '20007', firstName: 'Kamola', lastName: 'Sultanova', username: 'kamola_style', name: 'Kamola Sultanova', bio: "Hijob fashion va modest moda. Brend hamkorliklari. 110K Instagram obunachilar.", category: 'Kiyim va moda', socialLinks: { Instagram: '@kamola_style', TikTok: '@kamola_style', YouTube: '@kamola_style' } },
+    { telegramId: '20008', firstName: 'Otabek', lastName: 'Qodirov', username: 'otabek_realty', name: 'Otabek Qodirov', bio: "Ko'chmas mulk bo'yicha maslahatchi. Kvartira va uy obzorlari. 55K YouTube.", category: "Ko'chmas mulk", socialLinks: { Instagram: '@otabek_realty', Telegram: '@otabek_realty', YouTube: '@otabek_realty' } },
+    { telegramId: '20009', firstName: 'Zarina', lastName: 'Abdullayeva', username: 'zarina_life', name: 'Zarina Abdullayeva', bio: "Kundalik hayot va vlog. Oilaviy kontentlar. Safarlar va tajribalar. 70K+ auditoriya.", category: 'Boshqa', socialLinks: { Instagram: '@zarina_life', TikTok: '@zarina_life' } },
+    { telegramId: '20010', firstName: 'Sherzod', lastName: 'Raximov', username: 'sherzod_tech', name: 'Sherzod Raximov', bio: "IT va dasturlash. Texnologiya yangiliklari va gadget sharhlari. 45K obunachilar.", category: 'Elektronika va telefonlar', socialLinks: { YouTube: '@sherzod_tech', Telegram: '@sherzod_tech' } },
+    { telegramId: '20011', firstName: 'Gulnora', lastName: 'Ismoilova', username: 'gulnora_beauty', name: 'Gulnora Ismoilova', bio: "Makeup artist va skincare mutaxassisi. Tutorial va mahsulot obzorlari. 95K.", category: "Go'zallik va kosmetika", socialLinks: { Instagram: '@gulnora_beauty', YouTube: '@gulnora_beauty', TikTok: '@gulnora_beauty' } },
+    { telegramId: '20012', firstName: 'Ulugbek', lastName: 'Normatov', username: 'ulugbek_sport', name: 'Ulugbek Normatov', bio: "Professional trener. Bodybuilding va powerlifting kontenti. 60K auditoriya.", category: 'Sport va fitness', socialLinks: { Instagram: '@ulugbek_sport', YouTube: '@ulugbek_sport' } },
+  ];
+
+  for (const inf of mockInfluencers) {
+    const u = await prisma.user.create({
+      data: {
+        telegramId: inf.telegramId,
+        firstName: inf.firstName,
+        lastName: inf.lastName,
+        username: inf.username,
+        role: 'INFLUENCER',
+        onboarded: true,
+      },
+    });
+    await prisma.influencer.create({
+      data: {
+        userId: u.id,
+        name: inf.name,
+        bio: inf.bio,
+        category: inf.category,
+        socialLinks: JSON.stringify(inf.socialLinks),
+      },
+    });
+    console.log(`  + ${inf.name} (${inf.category})`);
+  }
+
   console.log('Seed data muvaffaqiyatli qo\'shildi!');
 }
 

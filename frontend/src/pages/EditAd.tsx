@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, ImagePlus } from 'lucide-react';
 import api from '../lib/api';
-import { PLATFORMS } from '../types';
+import { PLATFORMS, INDUSTRIES } from '../types';
 import { hapticFeedback } from '../lib/telegram';
 import { AdDetailShimmer } from '../components/Shimmer';
 import { useCacheStore } from '../store/cache';
@@ -13,7 +13,7 @@ export default function EditAd() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    title: '', description: '', videoFormat: 'ANY', faceType: 'ANY',
+    title: '', description: '', industry: '', videoFormat: 'ANY', faceType: 'ANY',
     platforms: [] as string[], influencerCount: 3, adType: 'BARTER', barterItem: '', payment: 0,
   });
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -27,6 +27,7 @@ export default function EditAd() {
         setForm({
           title: ad.title || '',
           description: ad.description || '',
+          industry: ad.industry || '',
           videoFormat: ad.videoFormat || 'ANY',
           faceType: ad.faceType || 'ANY',
           platforms: ad.platforms || [],
@@ -117,6 +118,14 @@ export default function EditAd() {
         <div className="form-group">
           <label className="form-label">Tavsif</label>
           <textarea className="form-textarea" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Kategoriya</label>
+          <select className="form-select" value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })}>
+            <option value="">Kategoriya tanlang</option>
+            {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
+          </select>
         </div>
 
         <div className="form-group">

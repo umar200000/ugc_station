@@ -16,6 +16,7 @@ model User {
   lastName   String   @default("")
   username   String   @default("")
   photoUrl   String   @default("")
+  phone      String?  @unique
   role       String?
   onboarded  Boolean  @default(false)
   language   String   @default("uz")

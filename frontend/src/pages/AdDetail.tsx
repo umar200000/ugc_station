@@ -189,8 +189,8 @@ export default function AdDetail() {
           )}
           {/* Gradient overlay */}
           <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
-            background: 'linear-gradient(to top, var(--bg), transparent)',
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 50,
+            background: 'linear-gradient(to top, rgba(241,245,249,0.6), transparent)',
             pointerEvents: 'none',
           }} />
           {/* Dots */}

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ImagePlus, ArrowLeft, ArrowRight, Rocket } from 'lucide-react';
+
 import api from '../lib/api';
-import { PLATFORMS } from '../types';
+import { PLATFORMS, INDUSTRIES } from '../types';
 import { hapticFeedback } from '../lib/telegram';
 import { useCacheStore } from '../store/cache';
 
@@ -11,7 +12,7 @@ export default function CreateAd() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
-    title: '', description: '', videoFormat: 'ANY', faceType: 'ANY',
+    title: '', description: '', industry: '', videoFormat: 'ANY', faceType: 'ANY',
     platforms: [] as string[], influencerCount: 3, adType: 'BARTER', barterItem: '', payment: 0,
   });
   const [images, setImages] = useState<File[]>([]);
@@ -67,6 +68,10 @@ export default function CreateAd() {
 
   return (
     <div className="page">
+      <button className="back-btn" onClick={() => navigate(-1)}>
+        <ArrowLeft size={18} /> Orqaga
+      </button>
+
       <div className="page-header">
         <h1 className="page-title">Yangi e'lon</h1>
         <p className="page-subtitle">E'loningizni yarating va influenserlarni toping</p>
@@ -89,6 +94,14 @@ export default function CreateAd() {
           <div className="form-group">
             <label className="form-label">Tavsif</label>
             <textarea className="form-textarea" placeholder="Reklama haqida batafsil yozing..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Kategoriya</label>
+            <select className="form-select" value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })}>
+              <option value="">Kategoriya tanlang</option>
+              {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
+            </select>
           </div>
 
           <div className="form-group">
@@ -119,7 +132,7 @@ export default function CreateAd() {
           {images.length === 0 && form.title.trim() && form.description.trim() && (
             <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 8 }}>Kamida 1 ta rasm qo'shing</p>
           )}
-          <button className="btn btn-primary" disabled={!form.title.trim() || !form.description.trim() || images.length === 0} onClick={() => setStep(2)}>
+          <button className="btn btn-primary" disabled={!form.title.trim() || !form.description.trim() || !form.industry || images.length === 0} onClick={() => setStep(2)}>
             Davom etish <ArrowRight size={18} />
           </button>
         </div>

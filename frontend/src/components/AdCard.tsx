@@ -1,76 +1,161 @@
 import { useNavigate } from 'react-router-dom';
-import { Repeat2, DollarSign, XCircle } from 'lucide-react';
+import { Repeat2, DollarSign, XCircle, Users, Eye, Zap, Clock, MapPin } from 'lucide-react';
 import type { Ad } from '../types';
 
 interface Props {
   ad: Ad;
+  index?: number;
 }
 
-export default function AdCard({ ad }: Props) {
+export default function AdCard({ ad, index = 0 }: Props) {
   const navigate = useNavigate();
   const slotsLeft = ad.slotsLeft ?? (ad.influencerCount - (ad.acceptedCount || 0));
   const progress = ad.influencerCount > 0 ? ((ad.acceptedCount || 0) / ad.influencerCount) * 100 : 0;
   const isClosed = ad.status === 'CLOSED';
+  const hasImage = ad.images?.length > 0;
+  const isUrgent = slotsLeft <= 2 && slotsLeft > 0 && !isClosed;
+
+  const timeAgo = (date: string) => {
+    const diff = Date.now() - new Date(date).getTime();
+    const hours = Math.floor(diff / 3600000);
+    if (hours < 1) return 'Hozirgina';
+    if (hours < 24) return `${hours} soat oldin`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} kun oldin`;
+    return `${Math.floor(days / 7)} hafta oldin`;
+  };
 
   return (
-    <div className="card card-interactive fade-in" onClick={() => navigate(`/ad/${ad.id}`)}
-      style={{ opacity: isClosed ? 0.6 : 1, position: 'relative' }}>
+    <div
+      className="ad-card fade-in"
+      onClick={() => navigate(`/ad/${ad.id}`)}
+      style={{ animationDelay: `${index * 0.06}s`, opacity: isClosed ? 0.65 : 1 }}
+    >
+      {/* Image Section */}
+      {hasImage ? (
+        <div className="ad-card-image-wrap">
+          <img src={ad.images[0]} alt="" className="ad-card-image" style={{ filter: isClosed ? 'grayscale(0.5)' : 'none' }} />
+          <div className="ad-card-image-overlay" />
 
-      {isClosed && (
-        <div style={{
-          position: 'absolute', top: 12, right: 12, zIndex: 2,
-          display: 'flex', alignItems: 'center', gap: 4,
-          padding: '4px 10px', borderRadius: 'var(--radius-xs)',
-          background: 'var(--danger-bg)', color: 'var(--danger)',
-          fontSize: 11, fontWeight: 600,
+          {/* Top badges on image */}
+          <div className="ad-card-image-badges">
+            {isClosed ? (
+              <span className="ad-card-badge ad-card-badge--closed">
+                <XCircle size={12} /> Yopilgan
+              </span>
+            ) : isUrgent ? (
+              <span className="ad-card-badge ad-card-badge--urgent">
+                <Zap size={12} /> {slotsLeft} joy qoldi
+              </span>
+            ) : null}
+          </div>
+
+          {/* Payment badge */}
+          {!isClosed && (
+            <div className="ad-card-payment-badge">
+              {ad.adType === 'PAID' ? (
+                <span className="ad-card-badge ad-card-badge--paid">
+                  <DollarSign size={13} /> {ad.payment?.toLocaleString()} so'm
+                </span>
+              ) : (
+                <span className="ad-card-badge ad-card-badge--barter">
+                  <Repeat2 size={13} /> Barter
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Image count indicator */}
+          {ad.images.length > 1 && (
+            <div className="ad-card-img-count">
+              <Eye size={11} /> {ad.images.length}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* No image - colorful header */
+        <div className="ad-card-no-image" style={{
+          background: ad.adType === 'PAID'
+            ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
+            : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
         }}>
-          <XCircle size={12} /> Yopilgan
-        </div>
-      )}
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0 }}>
-          <div className="avatar avatar-sm" style={{
-            background: ad.adType === 'PAID' ? 'var(--warning-bg)' : 'var(--secondary-bg)',
-            color: ad.adType === 'PAID' ? 'var(--warning-text)' : 'var(--secondary)'
-          }}>
-            {ad.adType === 'PAID' ? <DollarSign size={18} /> : <Repeat2 size={18} />}
+          <div className="ad-card-no-image-icon">
+            {ad.adType === 'PAID' ? <DollarSign size={28} /> : <Repeat2 size={28} />}
           </div>
-          <div style={{ minWidth: 0 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ad.title}</h3>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 1 }}>{ad.company?.name}</p>
-          </div>
-        </div>
-        {!isClosed && (
-          <span className={`badge badge-${ad.adType.toLowerCase()}`} style={{ flexShrink: 0, marginLeft: 8 }}>
-            {ad.adType === 'BARTER' ? 'Barter' : `${ad.payment?.toLocaleString()} so'm`}
+          <span className="ad-card-no-image-label">
+            {ad.adType === 'PAID' ? `${ad.payment?.toLocaleString()} so'm` : 'Barter'}
           </span>
-        )}
-      </div>
-
-      <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 12 }}>
-        {ad.description.length > 100 ? ad.description.slice(0, 100) + '...' : ad.description}
-      </p>
-
-      {ad.images?.length > 0 && (
-        <div style={{ borderRadius: 'var(--radius-sm)', overflow: 'hidden', marginBottom: 12, filter: isClosed ? 'grayscale(0.5)' : 'none' }}>
-          <img src={ad.images[0]} alt="" style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
+          {isClosed && (
+            <div className="ad-card-image-badges">
+              <span className="ad-card-badge ad-card-badge--closed">
+                <XCircle size={12} /> Yopilgan
+              </span>
+            </div>
+          )}
         </div>
       )}
 
-      {ad.platforms?.length > 0 && (
-        <div className="tag-list" style={{ marginBottom: 12 }}>
-          {ad.platforms.map((p) => <span key={p} className="tag">{p}</span>)}
+      {/* Content Section */}
+      <div className="ad-card-content">
+        {/* Company row */}
+        <div className="ad-card-company">
+          <div className="ad-card-company-avatar">
+            {ad.company?.user?.photoUrl
+              ? <img src={ad.company.user.photoUrl} alt="" />
+              : ad.company?.name?.[0] || '?'}
+          </div>
+          <div className="ad-card-company-info">
+            <span className="ad-card-company-name">{ad.company?.name}</span>
+            <span className="ad-card-time">
+              <Clock size={11} /> {timeAgo(ad.createdAt)}
+            </span>
+          </div>
         </div>
-      )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div className="slot-progress" style={{ flex: 1 }}>
-          <div className="slot-progress-fill" style={{ width: `${Math.min(progress, 100)}%` }} />
+        {/* Title & description */}
+        <h3 className="ad-card-title">{ad.title}</h3>
+        <p className="ad-card-desc">
+          {ad.description.length > 120 ? ad.description.slice(0, 120) + '...' : ad.description}
+        </p>
+
+        {/* Tags row */}
+        <div className="ad-card-tags">
+          {ad.industry && <span className="ad-card-tag ad-card-tag--industry">{ad.industry}</span>}
+          {ad.platforms?.slice(0, 3).map((p) => (
+            <span key={p} className="ad-card-tag">{p}</span>
+          ))}
+          {ad.platforms?.length > 3 && (
+            <span className="ad-card-tag ad-card-tag--more">+{ad.platforms.length - 3}</span>
+          )}
         </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: isClosed ? 'var(--danger)' : slotsLeft > 0 ? 'var(--primary)' : 'var(--danger)', whiteSpace: 'nowrap' }}>
-          {isClosed ? 'Yopilgan' : slotsLeft > 0 ? `${slotsLeft} joy` : "To'lgan"}
-        </span>
+
+        {/* Bottom: slots progress */}
+        <div className="ad-card-footer">
+          <div className="ad-card-slots">
+            <Users size={14} />
+            <div className="ad-card-slots-bar">
+              <div
+                className="ad-card-slots-fill"
+                style={{
+                  width: `${Math.min(progress, 100)}%`,
+                  background: isClosed
+                    ? 'var(--danger)'
+                    : progress >= 80
+                    ? 'var(--warning)'
+                    : 'linear-gradient(90deg, var(--primary), var(--primary-light))',
+                }}
+              />
+            </div>
+            <span className="ad-card-slots-text" style={{
+              color: isClosed ? 'var(--danger)' : slotsLeft > 0 ? 'var(--primary)' : 'var(--danger)',
+            }}>
+              {isClosed ? 'Yopilgan' : slotsLeft > 0 ? `${ad.acceptedCount || 0}/${ad.influencerCount}` : "To'lgan"}
+            </span>
+          </div>
+          <div className="ad-card-cta">
+            Ko'rish
+          </div>
+        </div>
       </div>
     </div>
   );

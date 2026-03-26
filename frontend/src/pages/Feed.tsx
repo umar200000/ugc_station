@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import api from '../lib/api';
 import AdCard from '../components/AdCard';
 import BottomNav from '../components/BottomNav';
@@ -58,6 +58,11 @@ export default function Feed() {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchAds(); }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   useEffect(() => { fetchAds(); }, [industry, adType]);
 
   const clearFilters = () => {
@@ -73,104 +78,96 @@ export default function Feed() {
   return (
     <PullToRefresh onRefresh={handleRefresh}>
     <div className="page">
-      {/* Header */}
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', fontWeight: 500 }}>Salom, {user?.firstName}</p>
-          <h1 className="page-title">E'lonlar</h1>
-        </div>
-        <div className="avatar avatar-sm">
-          {user?.photoUrl ? <img src={user.photoUrl} alt="" /> : user?.firstName?.[0] || '?'}
+      {/* Hero Header */}
+      <div className="feed-header slide-up">
+        <div className="feed-header-bg" />
+        <div className="feed-header-content">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p className="feed-greeting">Salom, {user?.firstName}</p>
+              <h1 className="feed-title">
+                <Sparkles size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6, color: '#FBBF24' }} />
+                UGC Marketplace
+              </h1>
+            </div>
+            <div className="feed-avatar">
+              {user?.photoUrl ? <img src={user.photoUrl} alt="" /> : user?.firstName?.[0] || '?'}
+            </div>
+          </div>
+
+          {/* Quick stats */}
+          <div className="feed-stats">
+            <div className="feed-stat">
+              <TrendingUp size={14} />
+              <span>{ads.length} e'lon</span>
+            </div>
+            <div className="feed-stat-divider" />
+            <div className="feed-stat">
+              <Zap size={14} />
+              <span>{ads.filter(a => a.status === 'ACTIVE').length} faol</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Sentinel — sticky top ga yetganini aniqlaydi */}
+      {/* Sentinel */}
       <div ref={stickyRef} style={{ height: 1, marginBottom: -1 }} />
 
       {/* Sticky search + filter */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: 'var(--bg)',
-        paddingTop: 8, paddingBottom: 12,
+      <div className="feed-search-bar" style={{
         boxShadow: isStuck ? '0 4px 20px rgba(15,23,42,0.08)' : 'none',
-        transition: 'box-shadow 0.3s ease',
-        marginLeft: -16, marginRight: -16, paddingLeft: 16, paddingRight: 16,
       }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <div className="search-wrap" style={{ flex: 1 }}>
             <Search size={18} className="search-icon-svg" />
             <input
               className="form-input"
-              style={{ paddingLeft: 42 }}
+              style={{ paddingLeft: 42, borderRadius: 14 }}
               placeholder="Qidirish..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchAds()}
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
+            className="feed-filter-btn"
             style={{
-              width: 48, height: 48, borderRadius: 'var(--radius-sm)',
-              border: `1.5px solid ${showFilters || activeFilterCount ? 'var(--primary-border)' : 'var(--border-strong)'}`,
+              borderColor: showFilters || activeFilterCount ? 'var(--primary-border)' : 'var(--border-strong)',
               background: showFilters || activeFilterCount ? 'var(--primary-bg)' : 'var(--bg-card)',
               color: showFilters || activeFilterCount ? 'var(--primary)' : 'var(--text-muted)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative', flexShrink: 0, transition: 'all 0.2s ease',
             }}
           >
             <SlidersHorizontal size={20} />
             {activeFilterCount > 0 && (
-              <span style={{
-                position: 'absolute', top: -4, right: -4,
-                width: 18, height: 18, borderRadius: '50%',
-                background: 'var(--primary)', color: '#fff',
-                fontSize: 10, fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>{activeFilterCount}</span>
+              <span className="feed-filter-count">{activeFilterCount}</span>
             )}
           </button>
         </div>
 
         {/* Filter panel */}
         {showFilters && (
-          <div className="fade-in" style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)', padding: 16, marginTop: 10,
-            boxShadow: 'var(--shadow-md)',
-          }}>
+          <div className="feed-filter-panel fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Filtrlar</span>
+              <span style={{ fontSize: 15, fontWeight: 700 }}>Filtrlar</span>
               {activeFilterCount > 0 && (
-                <button onClick={clearFilters} style={{
-                  background: 'none', border: 'none', color: 'var(--primary)',
-                  fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
-                  display: 'flex', alignItems: 'center', gap: 4,
-                }}>
+                <button onClick={clearFilters} className="feed-filter-clear">
                   <X size={14} /> Tozalash
                 </button>
               )}
             </div>
 
             <div style={{ marginBottom: 14 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>To'lov turi</span>
+              <span className="feed-filter-label">To'lov turi</span>
               <div style={{ display: 'flex', gap: 8 }}>
                 {[
-                  { value: '', label: 'Barchasi' },
-                  { value: 'BARTER', label: 'Barter' },
-                  { value: 'PAID', label: 'Pullik' },
+                  { value: '', label: 'Barchasi', icon: null },
+                  { value: 'BARTER', label: 'Barter', icon: null },
+                  { value: 'PAID', label: 'Pullik', icon: null },
                 ].map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setAdType(opt.value)}
-                    style={{
-                      flex: 1, padding: '8px 12px', borderRadius: 'var(--radius-xs)',
-                      border: `1.5px solid ${adType === opt.value ? 'var(--primary-border)' : 'var(--border)'}`,
-                      background: adType === opt.value ? 'var(--primary-bg)' : 'transparent',
-                      color: adType === opt.value ? 'var(--primary)' : 'var(--text-secondary)',
-                      fontSize: 13, fontWeight: adType === opt.value ? 600 : 500,
-                      cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s ease',
-                    }}
+                    className={`feed-type-btn ${adType === opt.value ? 'active' : ''}`}
                   >
                     {opt.label}
                   </button>
@@ -179,8 +176,8 @@ export default function Feed() {
             </div>
 
             <div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>Soha</span>
-              <select className="form-select" value={industry} onChange={(e) => setIndustry(e.target.value)} style={{ fontSize: 13 }}>
+              <span className="feed-filter-label">Soha</span>
+              <select className="form-select" value={industry} onChange={(e) => setIndustry(e.target.value)} style={{ fontSize: 13, borderRadius: 12 }}>
                 <option value="">Barcha sohalar</option>
                 {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
               </select>
@@ -191,27 +188,17 @@ export default function Feed() {
 
       {/* Active filter tags */}
       {activeFilterCount > 0 && !showFilters && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12, marginTop: 4, flexWrap: 'wrap' }}>
+        <div className="feed-active-filters fade-in">
           {adType && (
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '5px 10px', borderRadius: 'var(--radius-xs)',
-              background: 'var(--primary-bg)', color: 'var(--primary)',
-              fontSize: 12, fontWeight: 600,
-            }}>
+            <span className="feed-active-tag">
               {adType === 'BARTER' ? 'Barter' : 'Pullik'}
-              <X size={14} style={{ cursor: 'pointer' }} onClick={() => setAdType('')} />
+              <X size={14} onClick={(e) => { e.stopPropagation(); setAdType(''); }} />
             </span>
           )}
           {industry && (
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '5px 10px', borderRadius: 'var(--radius-xs)',
-              background: 'var(--primary-bg)', color: 'var(--primary)',
-              fontSize: 12, fontWeight: 600,
-            }}>
+            <span className="feed-active-tag">
               {industry}
-              <X size={14} style={{ cursor: 'pointer' }} onClick={() => setIndustry('')} />
+              <X size={14} onClick={(e) => { e.stopPropagation(); setIndustry(''); }} />
             </span>
           )}
         </div>
@@ -221,16 +208,21 @@ export default function Feed() {
       {loading ? (
         <FeedShimmer />
       ) : ads.length === 0 ? (
-        <div className="empty-state">
-          <Search size={40} style={{ color: 'var(--text-muted)', opacity: 0.4, marginBottom: 12 }} />
-          <p>Hozircha e'lonlar yo'q</p>
+        <div className="empty-state fade-in">
+          <div style={{
+            width: 80, height: 80, borderRadius: 24,
+            background: 'var(--primary-bg)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
+          }}>
+            <Search size={36} style={{ color: 'var(--primary)', opacity: 0.5 }} />
+          </div>
+          <p style={{ fontWeight: 600, fontSize: 16 }}>E'lonlar topilmadi</p>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>Filtrlarni o'zgartiring yoki keyinroq tekshiring</p>
         </div>
       ) : (
-        <div>
+        <div className="feed-grid">
           {ads.map((ad, i) => (
-            <div key={ad.id} style={{ animationDelay: `${i * 0.05}s` }}>
-              <AdCard ad={ad} />
-            </div>
+            <AdCard key={ad.id} ad={ad} index={i} />
           ))}
         </div>
       )}

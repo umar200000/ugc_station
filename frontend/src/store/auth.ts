@@ -2,6 +2,12 @@ import { create } from 'zustand';
 import api from '../lib/api';
 import { getInitData, getTelegramUser, expandApp } from '../lib/telegram';
 
+function getTokenKey() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('user') || 'default';
+  return `token_${userId}`;
+}
+
 interface User {
   id: string;
   telegramId: string;
@@ -11,6 +17,7 @@ interface User {
   photoUrl: string;
   role: 'COMPANY' | 'INFLUENCER' | 'ADMIN' | null;
   onboarded: boolean;
+  createdAt?: string;
   company?: any;
   influencer?: any;
 }
@@ -29,22 +36,23 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem(getTokenKey()),
   isLoading: true,
 
   login: async () => {
     try {
       expandApp();
+      const tokenKey = getTokenKey();
 
       // Agar token mavjud bo'lsa — userni olish
-      const existingToken = localStorage.getItem('token');
+      const existingToken = localStorage.getItem(tokenKey);
       if (existingToken) {
         try {
           const res = await api.get('/auth/me');
           set({ user: res.data.user, isLoading: false });
           return;
         } catch {
-          localStorage.removeItem('token');
+          localStorage.removeItem(tokenKey);
         }
       }
 
@@ -67,7 +75,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         devUser: !initData ? selectedDev || devUser || { id: 10001, first_name: 'Kompaniya', username: 'company_user' } : undefined,
       });
 
-      localStorage.setItem('token', res.data.token);
+      localStorage.setItem(tokenKey, res.data.token);
       set({ user: res.data.user, token: res.data.token, isLoading: false });
     } catch (err) {
       console.error('Login error:', err);
@@ -77,7 +85,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   selectRole: async (role) => {
     const res = await api.post('/auth/select-role', { role });
-    localStorage.setItem('token', res.data.token);
+    localStorage.setItem(getTokenKey(), res.data.token);
     set({ user: res.data.user, token: res.data.token });
   },
 
@@ -100,7 +108,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await api.post('/auth/logout');
     } catch {}
-    localStorage.removeItem('token');
+    localStorage.removeItem(getTokenKey());
     set({ user: null, token: null });
   },
 }));
