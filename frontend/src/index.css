@@ -33,9 +33,15 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
+html {
   height: 100%;
   overflow: hidden;
+}
+body {
+  height: 100%;
+  overflow: hidden;
+  /* Keyboard ochilganda body ni resize qilmaslik */
+  min-height: 100%;
 }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
