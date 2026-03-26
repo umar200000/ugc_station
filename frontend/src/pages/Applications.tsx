@@ -235,7 +235,13 @@ export default function Applications() {
                             controls
                             playsInline
                             preload="metadata"
-                            style={{ width: '100%', maxHeight: 300, background: '#000', display: 'block' }}
+                            onClick={(e) => {
+                              const v = e.currentTarget;
+                              if (v.requestFullscreen) v.requestFullscreen();
+                              else if ((v as any).webkitEnterFullscreen) (v as any).webkitEnterFullscreen();
+                              v.play();
+                            }}
+                            style={{ width: '100%', maxHeight: 300, background: '#000', display: 'block', cursor: 'pointer' }}
                           />
                           <div style={{ padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
