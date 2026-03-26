@@ -18,9 +18,9 @@ router.post('/telegram', async (req, res) => {
         return res.status(401).json({ error: 'Telegram ma\'lumotlari yaroqsiz' });
       }
       telegramUser = parseInitData(initData);
-    } else if (process.env.NODE_ENV === 'development') {
-      // Dev mode — devUser yoki default
-      telegramUser = req.body.devUser || { id: 99999, first_name: 'Dev', last_name: 'User', username: 'devuser' };
+    } else if (req.body.devUser) {
+      // Dev/test mode — devUser bilan kirish
+      telegramUser = req.body.devUser;
     }
 
     if (!telegramUser) {
