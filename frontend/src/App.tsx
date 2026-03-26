@@ -12,6 +12,7 @@ import CreateAd from './pages/CreateAd';
 import MyAds from './pages/MyAds';
 import MyApplications from './pages/MyApplications';
 import Influencers from './pages/Influencers';
+import Videos from './pages/Videos';
 import InfluencerProfile from './pages/InfluencerProfile';
 import Profile from './pages/Profile';
 import Applications from './pages/Applications';
@@ -86,7 +87,7 @@ function App() {
 function MainApp() {
   const { user } = useAuthStore();
   const location = useLocation();
-  const TAB_PATHS = ['/', '/influencers', '/my-ads', '/my-applications', '/profile', '/admin'];
+  const TAB_PATHS = ['/', '/videos', '/influencers', '/my-ads', '/my-applications', '/profile'];
   const isTabPage = TAB_PATHS.includes(location.pathname);
 
   return (
@@ -94,6 +95,7 @@ function MainApp() {
       {/* Tab sahifalari — doim mount, display bilan boshqariladi */}
       <div style={{ display: isTabPage ? 'block' : 'none' }}>
         <TabPage path="/"><Feed /></TabPage>
+        <TabPage path="/videos"><Videos /></TabPage>
         <TabPage path="/influencers"><Influencers /></TabPage>
         {user?.role === 'COMPANY' && <TabPage path="/my-ads"><MyAds /></TabPage>}
         {user?.role === 'INFLUENCER' && <TabPage path="/my-applications"><MyApplications /></TabPage>}

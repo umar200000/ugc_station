@@ -100,6 +100,30 @@ router.post('/', authMiddleware, influencerOnly, upload.single('video'), async (
   }
 });
 
+// Barcha videolar (feed uchun)
+router.get('/feed', async (req, res) => {
+  try {
+    const submissions = await req.prisma.submission.findMany({
+      where: { status: 'APPROVED' },
+      include: {
+        application: {
+          include: {
+            influencer: {
+              include: { user: { select: { photoUrl: true, username: true } } },
+            },
+            ad: { select: { title: true, company: { select: { name: true } } } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(submissions);
+  } catch (err) {
+    console.error('Video feed error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
 // Application bo'yicha videolarni olish
 router.get('/application/:applicationId', authMiddleware, async (req, res) => {
   try {

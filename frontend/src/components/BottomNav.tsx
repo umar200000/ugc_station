@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
-import { Home, Users, ClipboardList, Send, User } from 'lucide-react';
+import { Home, Play, ClipboardList, Send, User } from 'lucide-react';
 
 export default function BottomNav() {
   const { user } = useAuthStore();
@@ -13,9 +13,9 @@ export default function BottomNav() {
           <span>Bosh sahifa</span>
         </NavLink>
 
-        <NavLink to="/influencers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Users size={22} strokeWidth={1.8} />
-          <span>Influenserlar</span>
+        <NavLink to="/videos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <Play size={22} strokeWidth={1.8} />
+          <span>Videolar</span>
         </NavLink>
 
         {user?.role === 'COMPANY' ? (
