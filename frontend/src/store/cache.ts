@@ -14,6 +14,7 @@ interface CacheState {
   setMyApplications: (apps: any[]) => void;
   invalidateMyAds: () => void;
   invalidateFeed: () => void;
+  invalidateAll: () => void;
 }
 
 export const useCacheStore = create<CacheState>((set) => ({
@@ -30,4 +31,5 @@ export const useCacheStore = create<CacheState>((set) => ({
   setMyApplications: (apps) => set({ myApplications: apps }),
   invalidateMyAds: () => set({ myAds: null }),
   invalidateFeed: () => set({ feedAds: null, feedParams: '' }),
+  invalidateAll: () => set({ feedAds: null, feedParams: '', influencers: null, influencerParams: '', myAds: null, myApplications: null }),
 }));

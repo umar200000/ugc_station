@@ -49,6 +49,8 @@ export default function AdDetail() {
     try {
       await api.post('/applications', { adId: ad.id });
       setApplied(true);
+      useCacheStore.getState().invalidateFeed();
+      useCacheStore.getState().setMyApplications(null as any);
     } catch (err: any) {
       alert(err.response?.data?.error || 'Xatolik');
     } finally {

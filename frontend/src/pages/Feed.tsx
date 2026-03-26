@@ -59,12 +59,21 @@ export default function Feed() {
     }
   };
 
+  const cachedFeedAds = useCacheStore(s => s.feedAds);
+
   useEffect(() => {
     const timer = setTimeout(() => { fetchAds(); }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => { fetchAds(); }, [industry, adType]);
+
+  // Cache invalidate bo'lganda qayta fetch
+  useEffect(() => {
+    if (cachedFeedAds === null && ads.length > 0) {
+      fetchAds(true);
+    }
+  }, [cachedFeedAds]);
 
   const clearFilters = () => {
     setIndustry('');

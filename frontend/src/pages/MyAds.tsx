@@ -14,6 +14,16 @@ export default function MyAds() {
   const [loading, setLoading] = useState(!cache.myAds);
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'CLOSED'>('ALL');
 
+  const cachedMyAds = useCacheStore(s => s.myAds);
+
+  const fetchMyAds = () => {
+    setLoading(true);
+    api.get('/ads/my/list')
+      .then((res) => { setAds(res.data); useCacheStore.getState().setMyAds(res.data); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     const cached = useCacheStore.getState().myAds;
     if (cached) {
@@ -21,11 +31,15 @@ export default function MyAds() {
       setLoading(false);
       return;
     }
-    api.get('/ads/my/list')
-      .then((res) => { setAds(res.data); useCacheStore.getState().setMyAds(res.data); })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    fetchMyAds();
   }, []);
+
+  // Cache invalidate bo'lganda qayta fetch
+  useEffect(() => {
+    if (cachedMyAds === null && ads.length > 0) {
+      fetchMyAds();
+    }
+  }, [cachedMyAds]);
 
   const filteredAds = filter === 'ALL' ? ads : ads.filter((ad) => ad.status === filter);
   const activeCount = ads.filter((a) => a.status === 'ACTIVE').length;

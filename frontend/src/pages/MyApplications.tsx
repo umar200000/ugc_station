@@ -27,6 +27,16 @@ export default function MyApplications() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadAppId, setUploadAppId] = useState<string | null>(null);
 
+  const cachedMyApps = useCacheStore(s => s.myApplications);
+
+  const fetchMyApps = () => {
+    setLoading(true);
+    api.get('/applications/my')
+      .then((res) => { setApplications(res.data); useCacheStore.getState().setMyApplications(res.data); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     const cached = useCacheStore.getState().myApplications;
     if (cached) {
@@ -34,11 +44,15 @@ export default function MyApplications() {
       setLoading(false);
       return;
     }
-    api.get('/applications/my')
-      .then((res) => { setApplications(res.data); useCacheStore.getState().setMyApplications(res.data); })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    fetchMyApps();
   }, []);
+
+  // Cache invalidate bo'lganda qayta fetch
+  useEffect(() => {
+    if (cachedMyApps === null && applications.length > 0) {
+      fetchMyApps();
+    }
+  }, [cachedMyApps]);
 
   const loadSubmissions = async (appId: string) => {
     try {
