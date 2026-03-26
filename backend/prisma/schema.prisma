@@ -95,12 +95,26 @@ model Application {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  ad         Ad         @relation(fields: [adId], references: [id], onDelete: Cascade)
-  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  reviews    Review[]
+  ad          Ad           @relation(fields: [adId], references: [id], onDelete: Cascade)
+  influencer  Influencer   @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  reviews     Review[]
+  submissions Submission[]
 
   @@unique([adId, influencerId])
   @@map("applications")
+}
+
+model Submission {
+  id            String   @id @default(uuid())
+  applicationId String
+  videoUrl      String
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("submissions")
 }
 
 model Review {

@@ -29,7 +29,7 @@ export default function AdCard({ ad, index = 0 }: Props) {
     <div
       className="ad-card fade-in"
       onClick={() => navigate(`/ad/${ad.id}`)}
-      style={{ animationDelay: `${index * 0.06}s`, opacity: isClosed ? 0.65 : 1 }}
+      style={{ opacity: isClosed ? 0.65 : 1 }}
     >
       {/* Image Section */}
       {hasImage ? (

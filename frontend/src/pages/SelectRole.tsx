@@ -34,7 +34,7 @@ export default function SelectRole() {
         </p>
       </div>
 
-      <div className="slide-up" style={{ animationDelay: '0.1s' }}>
+      <div className="slide-up">
         <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center', marginBottom: 16 }}>
           Siz kim sifatida davom etasiz?
         </p>

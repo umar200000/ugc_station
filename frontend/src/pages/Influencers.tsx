@@ -32,8 +32,9 @@ export default function Influencers() {
 
   const fetchInfluencers = async (force = false) => {
     const paramKey = `${category}|${search}`;
-    if (!force && cache.influencers && cache.influencerParams === paramKey) {
-      setInfluencers(cache.influencers);
+    const cacheState = useCacheStore.getState();
+    if (!force && cacheState.influencers && cacheState.influencerParams === paramKey) {
+      setInfluencers(cacheState.influencers);
       setLoading(false);
       return;
     }
@@ -44,7 +45,7 @@ export default function Influencers() {
       if (search) params.search = search;
       const res = await api.get('/users/influencers', { params });
       setInfluencers(res.data.influencers);
-      cache.setInfluencers(res.data.influencers, paramKey);
+      useCacheStore.getState().setInfluencers(res.data.influencers, paramKey);
     } catch (err) {
       console.error(err);
     } finally {
@@ -164,7 +165,6 @@ export default function Influencers() {
         <div className="inf-grid">
           {influencers.map((inf, i) => (
             <div key={inf.id} className="inf-card fade-in"
-              style={{ animationDelay: `${i * 0.05}s` }}
               onClick={() => navigate(`/influencer/${inf.id}`)}>
 
               <div className="inf-card-body">

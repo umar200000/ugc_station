@@ -9,6 +9,7 @@ const applicationRoutes = require('./routes/applications');
 const userRoutes = require('./routes/users');
 const reviewRoutes = require('./routes/reviews');
 const uploadRoutes = require('./routes/upload');
+const submissionRoutes = require('./routes/submissions');
 const adminRoutes = require('./routes/admin');
 
 const prisma = new PrismaClient();
@@ -40,6 +41,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/submissions', submissionRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Admin web panel

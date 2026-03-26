@@ -59,7 +59,7 @@ export interface Application {
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
   ad?: Ad;
-  influencer?: Influencer & { user?: { username: string; photoUrl: string }; reviews?: { rating: number }[] };
+  influencer?: Influencer & { user?: { username: string; photoUrl: string; phone?: string }; reviews?: { rating: number }[] };
 }
 
 export interface Review {

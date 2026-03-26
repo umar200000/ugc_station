@@ -15,13 +15,14 @@ export default function MyAds() {
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'CLOSED'>('ALL');
 
   useEffect(() => {
-    if (cache.myAds) {
-      setAds(cache.myAds);
+    const cached = useCacheStore.getState().myAds;
+    if (cached) {
+      setAds(cached);
       setLoading(false);
       return;
     }
     api.get('/ads/my/list')
-      .then((res) => { setAds(res.data); cache.setMyAds(res.data); })
+      .then((res) => { setAds(res.data); useCacheStore.getState().setMyAds(res.data); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -131,7 +132,7 @@ export default function MyAds() {
               const platforms = typeof ad.platforms === 'string' ? JSON.parse(ad.platforms || '[]') : ad.platforms || [];
 
               return (
-                <div key={ad.id} className="card card-interactive fade-in" style={{ animationDelay: `${i * 0.05}s`, padding: 0, overflow: 'hidden' }}
+                <div key={ad.id} className="card card-interactive fade-in" style={{ padding: 0, overflow: 'hidden' }}
                   onClick={() => navigate(`/ad/${ad.id}`)}>
 
                   {/* Image banner */}

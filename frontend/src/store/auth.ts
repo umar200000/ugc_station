@@ -4,7 +4,11 @@ import { getInitData, getTelegramUser, expandApp } from '../lib/telegram';
 
 function getTokenKey() {
   const urlParams = new URLSearchParams(window.location.search);
-  const userId = urlParams.get('user') || 'default';
+  const userFromUrl = urlParams.get('user');
+  if (userFromUrl) {
+    sessionStorage.setItem('dev_user_key', userFromUrl);
+  }
+  const userId = userFromUrl || sessionStorage.getItem('dev_user_key') || 'default';
   return `token_${userId}`;
 }
 
@@ -62,11 +66,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Dev mode: URL da ?user=1,2,3... orqali boshqa account tanlash
       const urlParams = new URLSearchParams(window.location.search);
-      const devAccId = urlParams.get('user');
+      const userFromUrl = urlParams.get('user');
+      if (userFromUrl) sessionStorage.setItem('dev_user_key', userFromUrl);
+      const devAccId = userFromUrl || sessionStorage.getItem('dev_user_key');
       const devAccounts: Record<string, any> = {
         '1': { id: 10001, first_name: 'Kompaniya', username: 'company_user' },
         '2': { id: 10002, first_name: 'Influenser', username: 'influencer_user' },
         '3': { id: 10003, first_name: 'Kompaniya2', username: 'company2_user' },
+        '5': { id: 10005, first_name: 'Umar', username: 'umar_user' },
         'admin': { id: 99900, first_name: 'Admin', username: 'admin_user' },
       };
       const selectedDev = devAccId ? devAccounts[devAccId] : null;

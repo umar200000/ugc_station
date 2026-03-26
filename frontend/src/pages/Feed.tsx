@@ -37,8 +37,9 @@ export default function Feed() {
 
   const fetchAds = async (force = false) => {
     const paramKey = `${industry}|${adType}|${search}`;
-    if (!force && cache.feedAds && cache.feedParams === paramKey) {
-      setAds(cache.feedAds);
+    const cacheState = useCacheStore.getState();
+    if (!force && cacheState.feedAds && cacheState.feedParams === paramKey) {
+      setAds(cacheState.feedAds);
       setLoading(false);
       return;
     }
@@ -50,7 +51,7 @@ export default function Feed() {
       if (search) params.search = search;
       const res = await api.get('/ads', { params });
       setAds(res.data.ads);
-      cache.setFeedAds(res.data.ads, paramKey);
+      useCacheStore.getState().setFeedAds(res.data.ads, paramKey);
     } catch (err) {
       console.error(err);
     } finally {
@@ -84,7 +85,7 @@ export default function Feed() {
         <div className="feed-header-content">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <p className="feed-greeting">Salom, {user?.firstName}</p>
+              <p className="feed-greeting">Xush kelibsiz, {user?.firstName}</p>
               <h1 className="feed-title">
                 <Sparkles size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6, color: '#FBBF24' }} />
                 UGC Marketplace

@@ -366,7 +366,7 @@ export default function AdDetail() {
               {applied ? (
                 <><Handshake size={18} /> Ariza yuborildi</>
               ) : applying ? 'Yuborilmoqda...' : (
-                <><Handshake size={18} /> Qiziqish bildirish</>
+                <><Handshake size={18} /> Ariza yuborish</>
               )}
             </button>
           )}

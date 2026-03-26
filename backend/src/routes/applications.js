@@ -3,6 +3,16 @@ const { authMiddleware, influencerOnly, companyOnly } = require('../middleware/a
 
 const router = express.Router();
 
+// Telegram orqali xabar yuborish
+async function sendTelegramNotification(telegramId, message) {
+  try {
+    const { bot } = require('../bot');
+    await bot.telegram.sendMessage(telegramId, message, { parse_mode: 'HTML' });
+  } catch (err) {
+    console.error('Telegram notification error:', err.message);
+  }
+}
+
 // Qiziqish bildirish (influenser)
 router.post('/', authMiddleware, influencerOnly, async (req, res) => {
   try {
@@ -10,6 +20,7 @@ router.post('/', authMiddleware, influencerOnly, async (req, res) => {
 
     const influencer = await req.prisma.influencer.findUnique({
       where: { userId: req.user.userId },
+      include: { user: true },
     });
 
     if (!influencer) {
@@ -19,7 +30,10 @@ router.post('/', authMiddleware, influencerOnly, async (req, res) => {
     // E'lon mavjudligini tekshirish
     const ad = await req.prisma.ad.findUnique({
       where: { id: adId },
-      include: { _count: { select: { applications: { where: { status: 'ACCEPTED' } } } } },
+      include: {
+        company: { include: { user: true } },
+        _count: { select: { applications: { where: { status: 'ACCEPTED' } } } },
+      },
     });
 
     if (!ad || ad.status !== 'ACTIVE') {
@@ -48,6 +62,16 @@ router.post('/', authMiddleware, influencerOnly, async (req, res) => {
       include: { ad: { include: { company: true } }, influencer: true },
     });
 
+    // Kompaniyaga Telegram notification yuborish
+    if (ad.company?.user?.telegramId) {
+      const msg = `📩 <b>Yangi ariza!</b>\n\n`
+        + `📢 E'lon: <b>${ad.title}</b>\n`
+        + `👤 Influenser: <b>${influencer.name}</b>\n`
+        + `📂 Yo'nalish: ${influencer.category || 'Belgilanmagan'}\n\n`
+        + `Mini App ni ochib arizani ko'ring!`;
+      sendTelegramNotification(ad.company.user.telegramId, msg);
+    }
+
     res.status(201).json(application);
   } catch (err) {
     console.error('Apply error:', err);
@@ -73,7 +97,7 @@ router.get('/ad/:adId', authMiddleware, companyOnly, async (req, res) => {
       include: {
         influencer: {
           include: {
-            user: { select: { username: true, photoUrl: true } },
+            user: { select: { username: true, photoUrl: true, phone: true } },
             reviews: { select: { rating: true } },
           },
         },
@@ -128,8 +152,30 @@ router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
     const updated = await req.prisma.application.update({
       where: { id: req.params.id },
       data: { status },
-      include: { influencer: { include: { user: true } }, ad: true },
+      include: {
+        influencer: { include: { user: true } },
+        ad: { include: { company: { include: { user: true } } } },
+      },
     });
+
+    // Influenserga Telegram notification yuborish
+    if (updated.influencer?.user?.telegramId) {
+      if (status === 'ACCEPTED') {
+        const companyPhone = updated.ad?.company?.user?.phone || 'Belgilanmagan';
+        const msg = `✅ <b>Arizangiz qabul qilindi!</b>\n\n`
+          + `📢 E'lon: <b>${updated.ad.title}</b>\n`
+          + `🏢 Kompaniya: <b>${updated.ad.company.name}</b>\n`
+          + `📞 Telefon: <b>${companyPhone}</b>\n\n`
+          + `Kompaniya bilan bog'laning!`;
+        sendTelegramNotification(updated.influencer.user.telegramId, msg);
+      } else if (status === 'REJECTED') {
+        const msg = `❌ <b>Arizangiz rad etildi</b>\n\n`
+          + `📢 E'lon: <b>${updated.ad.title}</b>\n`
+          + `🏢 Kompaniya: <b>${updated.ad.company.name}</b>\n\n`
+          + `Boshqa e'lonlarga ariza berishingiz mumkin!`;
+        sendTelegramNotification(updated.influencer.user.telegramId, msg);
+      }
+    }
 
     res.json(updated);
   } catch (err) {
@@ -148,7 +194,7 @@ router.get('/my', authMiddleware, influencerOnly, async (req, res) => {
     const applications = await req.prisma.application.findMany({
       where: { influencerId: influencer.id },
       include: {
-        ad: { include: { company: true } },
+        ad: { include: { company: { include: { user: { select: { phone: true } } } } } },
       },
       orderBy: { createdAt: 'desc' },
     });

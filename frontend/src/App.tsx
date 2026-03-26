@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from './store/auth';
 
 // Pages
@@ -17,6 +17,26 @@ import Profile from './pages/Profile';
 import Applications from './pages/Applications';
 import EditAd from './pages/EditAd';
 import Admin from './pages/Admin';
+
+// Tab sahifalarini mount qilib, display bilan boshqarish
+function TabPage({ path, children }: { path: string; children: React.ReactNode }) {
+  const location = useLocation();
+  const isActive = location.pathname === path;
+  const [visited, setVisited] = useState(isActive);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isActive && !visited) setVisited(true);
+  }, [isActive]);
+
+  if (!visited) return null;
+
+  return (
+    <div ref={ref} style={{ display: isActive ? 'block' : 'none' }}>
+      {children}
+    </div>
+  );
+}
 
 function App() {
   const { user, isLoading, login } = useAuthStore();
@@ -58,28 +78,40 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* Umumiy */}
-      <Route path="/" element={<Feed />} />
-      <Route path="/ad/:id" element={<AdDetail />} />
-      <Route path="/influencers" element={<Influencers />} />
-      <Route path="/influencer/:id" element={<InfluencerProfile />} />
-      <Route path="/profile" element={<Profile />} />
+    <MainApp />
+  );
+}
 
-      {/* Kompaniya */}
-      <Route path="/create-ad" element={<CreateAd />} />
-      <Route path="/my-ads" element={<MyAds />} />
-      <Route path="/ad/:id/edit" element={<EditAd />} />
-      <Route path="/ad/:id/applications" element={<Applications />} />
+function MainApp() {
+  const { user } = useAuthStore();
+  const location = useLocation();
+  const TAB_PATHS = ['/', '/influencers', '/my-ads', '/my-applications', '/profile', '/admin'];
+  const isTabPage = TAB_PATHS.includes(location.pathname);
 
-      {/* Influenser */}
-      <Route path="/my-applications" element={<MyApplications />} />
+  return (
+    <>
+      {/* Tab sahifalari — doim mount, display bilan boshqariladi */}
+      <div style={{ display: isTabPage ? 'block' : 'none' }}>
+        <TabPage path="/"><Feed /></TabPage>
+        <TabPage path="/influencers"><Influencers /></TabPage>
+        {user?.role === 'COMPANY' && <TabPage path="/my-ads"><MyAds /></TabPage>}
+        {user?.role === 'INFLUENCER' && <TabPage path="/my-applications"><MyApplications /></TabPage>}
+        <TabPage path="/profile"><Profile /></TabPage>
+        {user?.role === 'ADMIN' && <TabPage path="/admin"><Admin /></TabPage>}
+      </div>
 
-      {/* Admin */}
-      <Route path="/admin" element={<Admin />} />
-
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+      {/* Boshqa sahifalar — oddiy routing */}
+      {!isTabPage && (
+        <Routes>
+          <Route path="/ad/:id" element={<AdDetail />} />
+          <Route path="/influencer/:id" element={<InfluencerProfile />} />
+          <Route path="/create-ad" element={<CreateAd />} />
+          <Route path="/ad/:id/edit" element={<EditAd />} />
+          <Route path="/ad/:id/applications" element={<Applications />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      )}
+    </>
   );
 }
 
