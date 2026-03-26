@@ -141,20 +141,8 @@ export default function OnboardingInfluencer() {
                 return (
                   <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <div style={{ position: 'relative', flex: 1 }}>
-                      {social && (
-                        <div style={{
-                          position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          width: 24, height: 24, borderRadius: 6,
-                          background: social.color + '15',
-                          fontSize: 14, zIndex: 1,
-                        }}>
-                          <span>{social.icon}</span>
-                        </div>
-                      )}
                       <input
                         className="form-input"
-                        style={{ paddingLeft: social ? 44 : 14 }}
                         placeholder="https://instagram.com/username"
                         value={link}
                         onChange={(e) => handleLinkChange(index, e.target.value)}
