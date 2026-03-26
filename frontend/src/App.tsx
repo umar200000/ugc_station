@@ -32,7 +32,7 @@ function TabPage({ path, children }: { path: string; children: React.ReactNode }
   if (!visited) return null;
 
   return (
-    <div ref={ref} style={{ display: isActive ? 'block' : 'none', height: '100%' }}>
+    <div ref={ref} style={{ display: isActive ? 'block' : 'none' }}>
       {children}
     </div>
   );
@@ -91,7 +91,7 @@ function MainApp() {
   return (
     <>
       {/* Tab sahifalari — doim mount, display bilan boshqariladi */}
-      <div style={{ display: isTabPage ? 'block' : 'none', height: '100%' }}>
+      <div style={{ display: isTabPage ? 'block' : 'none' }}>
         <TabPage path="/"><Feed /></TabPage>
         <TabPage path="/influencers"><Influencers /></TabPage>
         {user?.role === 'COMPANY' && <TabPage path="/my-ads"><MyAds /></TabPage>}

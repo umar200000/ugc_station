@@ -33,16 +33,6 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html {
-  height: 100%;
-  overflow: hidden;
-}
-body {
-  height: 100%;
-  overflow: hidden;
-  /* Keyboard ochilganda body ni resize qilmaslik */
-  min-height: 100%;
-}
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
@@ -50,10 +40,6 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-#root {
-  height: 100%;
-  overflow: hidden;
 }
 
 /* ===== LOADING ===== */
@@ -82,9 +68,7 @@ body {
   padding: 20px 16px 120px;
   max-width: 480px;
   margin: 0 auto;
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  min-height: 100vh;
 }
 
 .page-header {
