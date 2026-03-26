@@ -29,8 +29,8 @@ export default function VideoPlayer() {
         <video
           src={url}
           controls
-          autoPlay
           playsInline
+          webkit-playsinline="true"
           style={{ width: '100%', maxHeight: '100vh' }}
         />
       </div>
