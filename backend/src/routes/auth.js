@@ -35,6 +35,10 @@ router.post('/telegram', async (req, res) => {
 
     const isNew = !user;
 
+    // Admin IDs ro'yxati
+    const adminIds = (process.env.ADMIN_TELEGRAM_IDS || '99900').split(',').map(id => id.trim());
+    const isAdmin = adminIds.includes(String(telegramUser.id));
+
     if (!user) {
       user = await req.prisma.user.create({
         data: {
@@ -43,7 +47,16 @@ router.post('/telegram', async (req, res) => {
           lastName: telegramUser.last_name || '',
           username: telegramUser.username || '',
           photoUrl: telegramUser.photo_url || '',
+          role: isAdmin ? 'ADMIN' : null,
+          onboarded: isAdmin ? true : false,
         },
+        include: { company: true, influencer: true },
+      });
+    } else if (isAdmin && user.role !== 'ADMIN') {
+      // Mavjud user admin bo'lishi kerak
+      user = await req.prisma.user.update({
+        where: { id: user.id },
+        data: { role: 'ADMIN', onboarded: true },
         include: { company: true, influencer: true },
       });
     }

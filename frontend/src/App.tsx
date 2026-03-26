@@ -16,6 +16,7 @@ import InfluencerProfile from './pages/InfluencerProfile';
 import Profile from './pages/Profile';
 import Applications from './pages/Applications';
 import EditAd from './pages/EditAd';
+import Admin from './pages/Admin';
 
 function App() {
   const { user, isLoading, login } = useAuthStore();
@@ -73,6 +74,9 @@ function App() {
 
       {/* Influenser */}
       <Route path="/my-applications" element={<MyApplications />} />
+
+      {/* Admin */}
+      <Route path="/admin" element={<Admin />} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

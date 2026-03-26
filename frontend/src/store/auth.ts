@@ -67,6 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         '1': { id: 10001, first_name: 'Kompaniya', username: 'company_user' },
         '2': { id: 10002, first_name: 'Influenser', username: 'influencer_user' },
         '3': { id: 10003, first_name: 'Kompaniya2', username: 'company2_user' },
+        'admin': { id: 99900, first_name: 'Admin', username: 'admin_user' },
       };
       const selectedDev = devAccId ? devAccounts[devAccId] : null;
 
