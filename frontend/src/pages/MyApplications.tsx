@@ -64,6 +64,14 @@ export default function MyApplications() {
     } catch (err) { console.error(err); }
   };
 
+  // ACCEPTED arizalar uchun submissions ni avtomatik yuklash
+  useEffect(() => {
+    const accepted = applications.filter(a => a.status === 'ACCEPTED');
+    accepted.forEach(a => {
+      if (!submissions[a.id]) loadSubmissions(a.id);
+    });
+  }, [applications]);
+
   const handleExpand = (appId: string) => {
     if (expandedId === appId) {
       setExpandedId(null);
