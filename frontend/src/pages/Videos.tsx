@@ -24,6 +24,7 @@ interface VideoItem {
 
 function VideoCard({ video }: { video: VideoItem }) {
   const [playing, setPlaying] = useState(false);
+  const [thumbLoaded, setThumbLoaded] = useState(false);
   const inf = video.application.influencer;
   const ad = video.application.ad;
 
@@ -64,18 +65,22 @@ function VideoCard({ video }: { video: VideoItem }) {
       </div>
 
       {/* Video */}
-      <div style={{ position: 'relative', background: '#000' }}>
+      <div style={{ position: 'relative', background: '#000', height: 220, overflow: 'hidden' }}>
         {!playing ? (
           <div
             onClick={() => setPlaying(true)}
-            style={{ position: 'relative', cursor: 'pointer' }}
+            style={{ position: 'relative', cursor: 'pointer', height: '100%' }}
           >
+            {!thumbLoaded && (
+              <div className="shimmer" style={{ position: 'absolute', inset: 0, borderRadius: 0 }} />
+            )}
             <video
               src={video.videoUrl + '#t=0.5'}
               preload="auto"
               muted
               playsInline
-              style={{ width: '100%', maxHeight: 240, display: 'block', opacity: 0.8 }}
+              onLoadedData={() => setThumbLoaded(true)}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: thumbLoaded ? 0.8 : 0 }}
             />
             <div style={{
               position: 'absolute', inset: 0,
@@ -97,7 +102,7 @@ function VideoCard({ video }: { video: VideoItem }) {
             controls
             autoPlay
             playsInline
-            style={{ width: '100%', maxHeight: 240, display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         )}
       </div>
