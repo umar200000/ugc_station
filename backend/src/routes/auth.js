@@ -1,9 +1,47 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 const { validateInitData, parseInitData } = require('../utils/telegram');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Telegram dan profil rasmini yuklab olish
+async function downloadTelegramPhoto(telegramId) {
+  try {
+    const botToken = process.env.BOT_TOKEN;
+    if (!botToken) return '';
+
+    // Get user profile photos
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/getUserProfilePhotos?user_id=${telegramId}&limit=1`);
+    const data = await res.json();
+    if (!data.ok || !data.result.photos?.length) return '';
+
+    const fileId = data.result.photos[0][data.result.photos[0].length - 1].file_id;
+
+    // Get file path
+    const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
+    const fileData = await fileRes.json();
+    if (!fileData.ok) return '';
+
+    // Download file
+    const fileUrl = `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
+    const imgRes = await fetch(fileUrl);
+    const buffer = Buffer.from(await imgRes.arrayBuffer());
+
+    // Save to uploads
+    const filename = `avatar-${telegramId}-${Date.now()}.jpg`;
+    const uploadDir = path.join(__dirname, '../../uploads');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    fs.writeFileSync(path.join(uploadDir, filename), buffer);
+
+    return `/uploads/${filename}`;
+  } catch (err) {
+    console.error('Download telegram photo error:', err.message);
+    return '';
+  }
+}
 
 // Telegram orqali login / ro'yxatdan o'tish
 router.post('/telegram', async (req, res) => {
@@ -40,19 +78,36 @@ router.post('/telegram', async (req, res) => {
     const isAdmin = adminIds.includes(String(telegramUser.id));
 
     if (!user) {
+      // Telegram dan profil rasmini yuklab olish
+      let photoUrl = telegramUser.photo_url || '';
+      const downloaded = await downloadTelegramPhoto(telegramUser.id);
+      if (downloaded) photoUrl = downloaded;
+
       user = await req.prisma.user.create({
         data: {
           telegramId: String(telegramUser.id),
           firstName: telegramUser.first_name || '',
           lastName: telegramUser.last_name || '',
           username: telegramUser.username || '',
-          photoUrl: telegramUser.photo_url || '',
+          photoUrl,
           role: isAdmin ? 'ADMIN' : null,
           onboarded: isAdmin ? true : false,
         },
         include: { company: true, influencer: true },
       });
-    } else if (isAdmin && user.role !== 'ADMIN') {
+    } else if (!user.photoUrl || user.photoUrl.startsWith('http')) {
+      // Mavjud user — rasmni yangilash (agar hali yuklanmagan bo'lsa)
+      const downloaded = await downloadTelegramPhoto(telegramUser.id);
+      if (downloaded) {
+        user = await req.prisma.user.update({
+          where: { id: user.id },
+          data: { photoUrl: downloaded },
+          include: { company: true, influencer: true },
+        });
+      }
+    }
+
+    if (isAdmin && user.role !== 'ADMIN') {
       // Mavjud user admin bo'lishi kerak
       user = await req.prisma.user.update({
         where: { id: user.id },
