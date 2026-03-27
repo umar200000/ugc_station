@@ -25,8 +25,10 @@ interface VideoItem {
 function VideoCard({ video }: { video: VideoItem }) {
   const [playing, setPlaying] = useState(false);
   const [thumbLoaded, setThumbLoaded] = useState(false);
-  const inf = video.application.influencer;
-  const ad = video.application.ad;
+  const inf = video.application?.influencer;
+  const ad = video.application?.ad;
+
+  if (!inf || !ad) return null;
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -75,8 +77,8 @@ function VideoCard({ video }: { video: VideoItem }) {
               <div className="shimmer" style={{ position: 'absolute', inset: 0, borderRadius: 0 }} />
             )}
             <video
-              src={video.videoUrl + '#t=0.5'}
-              preload="auto"
+              src={video.videoUrl + '#t=0.1'}
+              preload="metadata"
               muted
               playsInline
               onLoadedData={() => setThumbLoaded(true)}
