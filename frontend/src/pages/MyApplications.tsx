@@ -231,7 +231,8 @@ export default function MyApplications() {
                             background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                           }}>
                             <video
-                              src={sub.videoUrl}
+                              src={sub.videoUrl + '#t=0.5'}
+                              preload="auto"
                               style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', background: '#000' }}
                             />
                             <div style={{ flex: 1, minWidth: 0 }}>

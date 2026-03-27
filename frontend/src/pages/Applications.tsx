@@ -231,10 +231,10 @@ export default function Applications() {
                           background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                         }}>
                           <video
-                            src={sub.videoUrl}
+                            src={sub.videoUrl + '#t=0.5'}
                             controls
                             playsInline
-                            preload="metadata"
+                            preload="auto"
                             style={{ width: '100%', maxHeight: 300, display: 'block', background: '#000' }}
                           />
                           <div style={{ padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

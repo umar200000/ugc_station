@@ -77,11 +77,11 @@ function VideoCard({ video }: { video: VideoItem }) {
             style={{ position: 'relative', cursor: 'pointer' }}
           >
             <video
-              src={video.videoUrl}
-              preload="metadata"
+              src={video.videoUrl + '#t=0.5'}
+              preload="auto"
               muted
               playsInline
-              style={{ width: '100%', maxHeight: 400, display: 'block', opacity: 0.75 }}
+              style={{ width: '100%', maxHeight: 400, display: 'block', opacity: 0.8 }}
             />
             <div style={{
               position: 'absolute', inset: 0,
