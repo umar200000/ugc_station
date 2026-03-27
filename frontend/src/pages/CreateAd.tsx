@@ -13,7 +13,7 @@ export default function CreateAd() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     title: '', description: '', industry: '', videoFormat: 'ANY', faceType: 'ANY',
-    platforms: [] as string[], influencerCount: 3, adType: 'BARTER', barterItem: '', payment: 0,
+    platforms: [] as string[], influencerCount: 1, adType: 'BARTER', barterItem: '', payment: 0,
   });
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -171,8 +171,8 @@ export default function CreateAd() {
 
           <div className="form-group">
             <label className="form-label">Influenser soni</label>
-            <input className="form-input" type="number" min={3} value={form.influencerCount}
-              onChange={(e) => setForm({ ...form, influencerCount: Math.max(3, Number(e.target.value)) })} />
+            <input className="form-input" type="number" min={1} value={form.influencerCount}
+              onChange={(e) => setForm({ ...form, influencerCount: Math.max(1, Number(e.target.value) || 1) })} />
             <p className="form-hint">Minimum 3 ta influenser</p>
           </div>
 
