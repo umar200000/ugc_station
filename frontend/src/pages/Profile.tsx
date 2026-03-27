@@ -628,22 +628,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Logout */}
-      <div className="fade-in" style={{ marginBottom: 24 }}>
-        <button
-          onClick={async () => { hapticFeedback('heavy'); await logout(); window.location.reload(); }}
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            padding: '16px', borderRadius: 'var(--radius)',
-            background: 'var(--danger-bg)', border: '1.5px solid transparent',
-            color: 'var(--danger)', fontSize: 15, fontWeight: 600,
-            cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s ease',
-          }}
-        >
-          <LogOut size={18} /> Hisobdan chiqish
-        </button>
-      </div>
-
       <BottomNav />
     </div>
   );
