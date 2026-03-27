@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ClipboardList, Eye, Users, Clock, CheckCircle2, XCircle, TrendingUp, Repeat2, DollarSign, ChevronRight, BarChart3 } from 'lucide-react';
+import { Plus, ClipboardList, Eye, Users, Clock, CheckCircle2, XCircle, TrendingUp, Repeat2, Banknote, ChevronRight, BarChart3 } from 'lucide-react';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
 import { MyAdCardShimmer } from '../components/Shimmer';
@@ -174,7 +174,7 @@ export default function MyAds() {
                         <h3 style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}>{ad.title}</h3>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)' }}>
-                            {ad.adType === 'BARTER' ? <Repeat2 size={13} /> : <DollarSign size={13} />}
+                            {ad.adType === 'BARTER' ? <Repeat2 size={13} /> : <Banknote size={13} />}
                             {ad.adType === 'BARTER' ? 'Barter' : `${ad.payment?.toLocaleString()} so'm`}
                           </span>
                           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border-strong)' }} />

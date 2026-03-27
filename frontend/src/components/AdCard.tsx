@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Repeat2, DollarSign, XCircle, Users, Eye, Zap, Clock, MapPin } from 'lucide-react';
+import { Repeat2, Banknote, XCircle, Users, Eye, Zap, Clock, MapPin } from 'lucide-react';
 import type { Ad } from '../types';
 
 interface Props {
@@ -55,7 +55,7 @@ export default function AdCard({ ad, index = 0 }: Props) {
             <div className="ad-card-payment-badge">
               {ad.adType === 'PAID' ? (
                 <span className="ad-card-badge ad-card-badge--paid">
-                  <DollarSign size={13} /> {ad.payment?.toLocaleString()} so'm
+                  <Banknote size={13} /> {ad.payment?.toLocaleString()} so'm
                 </span>
               ) : (
                 <span className="ad-card-badge ad-card-badge--barter">
@@ -80,7 +80,7 @@ export default function AdCard({ ad, index = 0 }: Props) {
             : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
         }}>
           <div className="ad-card-no-image-icon">
-            {ad.adType === 'PAID' ? <DollarSign size={28} /> : <Repeat2 size={28} />}
+            {ad.adType === 'PAID' ? <Banknote size={28} /> : <Repeat2 size={28} />}
           </div>
           <span className="ad-card-no-image-label">
             {ad.adType === 'PAID' ? `${ad.payment?.toLocaleString()} so'm` : 'Barter'}

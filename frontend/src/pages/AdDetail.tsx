@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Handshake, ClipboardList, Repeat2, DollarSign, Pencil, Power, PowerOff, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Share2, Handshake, ClipboardList, Repeat2, Banknote, Pencil, Power, PowerOff, AlertTriangle } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../store/auth';
 import { AdDetailShimmer } from '../components/Shimmer';
