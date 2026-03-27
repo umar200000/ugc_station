@@ -61,12 +61,6 @@ function VideoCard({ video }: { video: VideoItem }) {
             <Clock size={11} /> {timeAgo(video.createdAt)}
           </div>
         </div>
-        <span style={{
-          fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100,
-          background: 'var(--primary-bg)', color: 'var(--primary)',
-        }}>
-          {inf.category}
-        </span>
       </div>
 
       {/* Video */}
@@ -81,7 +75,7 @@ function VideoCard({ video }: { video: VideoItem }) {
               preload="auto"
               muted
               playsInline
-              style={{ width: '100%', maxHeight: 400, display: 'block', opacity: 0.8 }}
+              style={{ width: '100%', maxHeight: 240, display: 'block', opacity: 0.8 }}
             />
             <div style={{
               position: 'absolute', inset: 0,
@@ -103,7 +97,7 @@ function VideoCard({ video }: { video: VideoItem }) {
             controls
             autoPlay
             playsInline
-            style={{ width: '100%', maxHeight: 400, display: 'block' }}
+            style={{ width: '100%', maxHeight: 240, display: 'block' }}
           />
         )}
       </div>
