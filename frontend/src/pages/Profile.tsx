@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Building2, Megaphone, LogOut, Pencil, Star, MapPin, Calendar, Briefcase, ChevronRight, Shield, Globe, X, Save, Camera, Send } from 'lucide-react';
+import { Building2, Megaphone, LogOut, Pencil, Star, MapPin, Calendar, Briefcase, ChevronRight, Shield, Globe, X, Save, Camera, Send, Plus, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 
 const InstagramIcon = ({ size = 18 }: { size?: number }) => (
@@ -73,20 +73,75 @@ export default function Profile() {
     } catch { socialLinks = {}; }
   }
 
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
   const startEdit = () => {
     if (isCompany && user?.company) {
-      setForm({ name: user.company.name, industry: user.company.industry, description: user.company.description || '' });
+      setForm({
+        name: user.company.name,
+        industry: user.company.industry,
+        description: user.company.description || '',
+        logo: user.company.logo || '',
+      });
+      setLogoPreview(user.company.logo || null);
     } else if (user?.influencer) {
-      setForm({ name: user.influencer.name, bio: user.influencer.bio || '', category: user.influencer.category || '' });
+      const links = typeof user.influencer.socialLinks === 'string'
+        ? JSON.parse(user.influencer.socialLinks || '{}')
+        : (user.influencer.socialLinks || {});
+      const linkList = Object.values(links).filter((v: any) => v.trim()) as string[];
+      setForm({
+        name: user.influencer.name,
+        bio: user.influencer.bio || '',
+        category: user.influencer.category || '',
+        socialLinks: linkList.length > 0 ? linkList : [''],
+      });
     }
     setEditing(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    // Upload image
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const url = res.data.url || res.data.path;
+      setForm((prev: any) => ({ ...prev, logo: url }));
+      setLogoPreview(url);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSave = async () => {
     setLoading(true);
     hapticFeedback('medium');
     try {
-      await api.put('/users/profile', form);
+      const data: any = { ...form };
+      // Influencer: socialLinks ni object ga convert
+      if (!isCompany && data.socialLinks) {
+        const linksObj: Record<string, string> = {};
+        (data.socialLinks as string[]).forEach((url: string, i: number) => {
+          if (url.trim()) {
+            const lower = url.toLowerCase();
+            let key = `link_${i}`;
+            if (lower.includes('instagram')) key = 'instagram';
+            else if (lower.includes('youtube') || lower.includes('youtu.be')) key = 'youtube';
+            else if (lower.includes('tiktok')) key = 'tiktok';
+            else if (lower.includes('t.me') || lower.includes('telegram')) key = 'telegram';
+            else if (lower.includes('facebook') || lower.includes('fb.com')) key = 'facebook';
+            linksObj[key] = url.trim();
+          }
+        });
+        data.socialLinks = linksObj;
+      }
+      await api.put('/users/profile', data);
       await refreshUser();
       setEditing(false);
     } catch (err) {
@@ -141,20 +196,26 @@ export default function Profile() {
           </button>
         </div>
 
-        {/* Avatar preview */}
+        {/* Avatar / Logo upload */}
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ position: 'relative', display: 'inline-block' }}>
-            <div className="avatar" style={{ width: 90, height: 90, fontSize: 36, margin: '0 auto' }}>
-              {user?.photoUrl ? <img src={user.photoUrl} alt="" /> : profile?.name?.[0] || '?'}
+          <div style={{ position: 'relative', display: 'inline-block' }} onClick={() => fileRef.current?.click()}>
+            <div className="avatar" style={{ width: 90, height: 90, fontSize: 36, margin: '0 auto', cursor: 'pointer' }}>
+              {logoPreview
+                ? <img src={logoPreview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : user?.photoUrl
+                  ? <img src={user.photoUrl} alt="" />
+                  : profile?.name?.[0] || '?'}
             </div>
             <div style={{
               position: 'absolute', bottom: 0, right: 0, width: 30, height: 30, borderRadius: '50%',
               background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '3px solid var(--bg)',
+              border: '3px solid var(--bg)', cursor: 'pointer',
             }}>
               <Camera size={14} color="#fff" />
             </div>
           </div>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>Rasmni o'zgartirish uchun bosing</p>
         </div>
 
         <div className="fade-in">
@@ -173,7 +234,7 @@ export default function Profile() {
               </div>
               <div className="form-group">
                 <label className="form-label">Tavsif</label>
-                <textarea className="form-textarea" placeholder="Kompaniya haqida..." value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <textarea className="form-textarea" rows={4} placeholder="Kompaniya haqida..." value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
             </>
           ) : (
@@ -191,7 +252,48 @@ export default function Profile() {
               </div>
               <div className="form-group">
                 <label className="form-label">Bio</label>
-                <textarea className="form-textarea" placeholder="O'zingiz haqingizda..." value={form.bio || ''} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                <textarea className="form-textarea" rows={3} placeholder="O'zingiz haqingizda..." value={form.bio || ''} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+              </div>
+              {/* Social links */}
+              <div className="form-group">
+                <label className="form-label">Ijtimoiy tarmoqlar</label>
+                {(form.socialLinks || ['']).map((link: string, i: number) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                    <input
+                      className="form-input"
+                      style={{ flex: 1 }}
+                      placeholder="https://instagram.com/username"
+                      value={link}
+                      onChange={(e) => {
+                        const updated = [...(form.socialLinks || [''])];
+                        updated[i] = e.target.value;
+                        setForm({ ...form, socialLinks: updated });
+                      }}
+                    />
+                    {(form.socialLinks || ['']).length > 1 && (
+                      <button onClick={() => {
+                        const updated = (form.socialLinks || []).filter((_: any, idx: number) => idx !== i);
+                        setForm({ ...form, socialLinks: updated });
+                      }} style={{
+                        width: 40, height: 40, borderRadius: 12, border: '1px solid var(--border)',
+                        background: 'var(--bg-card)', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', cursor: 'pointer', color: 'var(--danger)', flexShrink: 0,
+                      }}>
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button onClick={() => setForm({ ...form, socialLinks: [...(form.socialLinks || ['']), ''] })}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    width: '100%', padding: '10px 0', borderRadius: 12,
+                    border: '1.5px dashed var(--border-strong)', background: 'transparent',
+                    color: 'var(--primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}>
+                  <Plus size={18} /> Havola qo'shish
+                </button>
               </div>
             </>
           )}
