@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Building2, Megaphone, LogOut, Pencil, Star, MapPin, Calendar, Briefcase, ChevronRight, Shield, Globe, X, Save, Camera, Send, Plus, Trash2 } from 'lucide-react';
+import { Building2, Megaphone, LogOut, Pencil, Star, MapPin, Calendar, Briefcase, ChevronRight, Shield, Globe, X, Save, Camera, Send, Plus, Trash2, Check } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 
 const InstagramIcon = ({ size = 18 }: { size?: number }) => (
@@ -33,12 +33,24 @@ import api from '../lib/api';
 import { hapticFeedback } from '../lib/telegram';
 import { INDUSTRIES } from '../types';
 
+const SUGGESTED_CATEGORIES = [
+  'Oziq-ovqat va restoranlar',
+  "Go'zallik va kosmetologiya",
+  'Fitness va sog\'lom turmush',
+  'Texnologiya va gadjetlar',
+  'Moda va kiyim-kechak',
+  'Uy xizmatlari va ustalar',
+  'Sayohat va joylar',
+];
+
 export default function Profile() {
   const { user, refreshUser, logout } = useAuthStore();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ ads: 0, applications: 0, accepted: 0, reviews: 0, avgRating: 0 });
   const [form, setForm] = useState<any>({});
+  const [editCategories, setEditCategories] = useState<string[]>([]);
+  const [customCatInput, setCustomCatInput] = useState('');
 
   const profile = user?.role === 'COMPANY' ? user?.company : user?.influencer;
   const isCompany = user?.role === 'COMPANY';
@@ -90,10 +102,11 @@ export default function Profile() {
         ? JSON.parse(user.influencer.socialLinks || '{}')
         : (user.influencer.socialLinks || {});
       const linkList = Object.values(links).filter((v: any) => v.trim()) as string[];
+      const cats = (user.influencer.category || '').split(',').map((c: string) => c.trim()).filter(Boolean);
+      setEditCategories(cats);
       setForm({
         name: user.influencer.name,
         bio: user.influencer.bio || '',
-        category: user.influencer.category || '',
         socialLinks: linkList.length > 0 ? linkList : [''],
       });
     }
@@ -124,7 +137,10 @@ export default function Profile() {
     hapticFeedback('medium');
     try {
       const data: any = { ...form };
-      // Influencer: socialLinks ni object ga convert
+      // Influencer: category va socialLinks
+      if (!isCompany) {
+        data.category = editCategories.join(', ');
+      }
       if (!isCompany && data.socialLinks) {
         const linksObj: Record<string, string> = {};
         (data.socialLinks as string[]).forEach((url: string, i: number) => {
@@ -244,11 +260,48 @@ export default function Profile() {
                 <input className="form-input" value={form.name || ''} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="form-group">
-                <label className="form-label">Yo'nalish</label>
-                <select className="form-select" value={form.category || ''} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                  <option value="">Yo'nalish tanlang</option>
-                  {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
-                </select>
+                <label className="form-label">Yo'nalishlar <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({editCategories.length})</span></label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                  {SUGGESTED_CATEGORIES.map(cat => {
+                    const sel = editCategories.includes(cat);
+                    return (
+                      <button key={cat} type="button"
+                        onClick={() => setEditCategories(prev => sel ? prev.filter(c => c !== cat) : [...prev, cat])}
+                        style={{
+                          padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600,
+                          border: `1.5px solid ${sel ? 'var(--primary)' : 'var(--border-strong)'}`,
+                          background: sel ? 'var(--primary)' : 'var(--bg-card)',
+                          color: sel ? '#fff' : 'var(--text-secondary)',
+                          cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                          display: 'flex', alignItems: 'center', gap: 4,
+                        }}>
+                        {sel && <Check size={12} />}{cat}
+                      </button>
+                    );
+                  })}
+                </div>
+                {editCategories.filter(c => !SUGGESTED_CATEGORIES.includes(c)).map(cat => (
+                  <span key={cat} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4, marginRight: 6, marginBottom: 6,
+                    padding: '5px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600,
+                    background: 'var(--primary)', color: '#fff',
+                  }}>
+                    {cat} <X size={12} style={{ cursor: 'pointer' }} onClick={() => setEditCategories(prev => prev.filter(c => c !== cat))} />
+                  </span>
+                ))}
+                <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                  <input className="form-input" style={{ flex: 1 }} placeholder="Boshqa yo'nalish..."
+                    value={customCatInput} onChange={(e) => setCustomCatInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const v = customCatInput.trim(); if (v && !editCategories.includes(v)) { setEditCategories(p => [...p, v]); setCustomCatInput(''); } } }}
+                  />
+                  <button type="button" onClick={() => { const v = customCatInput.trim(); if (v && !editCategories.includes(v)) { setEditCategories(p => [...p, v]); setCustomCatInput(''); } }}
+                    disabled={!customCatInput.trim()} style={{
+                      width: 40, height: 40, borderRadius: 12, border: 'none', flexShrink: 0,
+                      background: customCatInput.trim() ? 'var(--primary)' : 'var(--border)',
+                      color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: customCatInput.trim() ? 'pointer' : 'not-allowed',
+                    }}><Plus size={18} /></button>
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">Bio</label>

@@ -1,38 +1,41 @@
 import { useState } from 'react';
-import { Megaphone, Plus, Trash2, Link, Globe, ArrowLeft } from 'lucide-react';
+import { Megaphone, Plus, Trash2, X, ArrowLeft, Check } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
-import { INDUSTRIES } from '../types';
 import { hapticFeedback } from '../lib/telegram';
 
-const SOCIAL_ICONS: Record<string, { icon: string; color: string }> = {
-  instagram: { icon: '📷', color: '#E4405F' },
-  youtube: { icon: '▶️', color: '#FF0000' },
-  tiktok: { icon: '🎵', color: '#000000' },
-  telegram: { icon: '✈️', color: '#26A5E4' },
-  facebook: { icon: '📘', color: '#1877F2' },
-  twitter: { icon: '𝕏', color: '#1DA1F2' },
-};
-
-function detectPlatform(url: string): string | null {
-  const lower = url.toLowerCase();
-  if (lower.includes('instagram.com') || lower.includes('instagram')) return 'instagram';
-  if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'youtube';
-  if (lower.includes('tiktok.com') || lower.includes('tiktok')) return 'tiktok';
-  if (lower.includes('t.me') || lower.includes('telegram')) return 'telegram';
-  if (lower.includes('facebook.com') || lower.includes('fb.com')) return 'facebook';
-  if (lower.includes('twitter.com') || lower.includes('x.com')) return 'twitter';
-  return null;
-}
+const SUGGESTED_CATEGORIES = [
+  'Oziq-ovqat va restoranlar',
+  "Go'zallik va kosmetologiya",
+  'Fitness va sog\'lom turmush',
+  'Texnologiya va gadjetlar',
+  'Moda va kiyim-kechak',
+  'Uy xizmatlari va ustalar',
+  'Sayohat va joylar',
+];
 
 export default function OnboardingInfluencer() {
   const { onboardInfluencer, goBackToRoleSelect } = useAuthStore();
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [category, setCategory] = useState('');
-  const [customCategory, setCustomCategory] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [customInput, setCustomInput] = useState('');
   const [linkInputs, setLinkInputs] = useState<string[]>(['']);
   const [loading, setLoading] = useState(false);
+
+  const toggleCategory = (cat: string) => {
+    setCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const addCustomCategory = () => {
+    const val = customInput.trim();
+    if (val && !categories.includes(val)) {
+      setCategories(prev => [...prev, val]);
+      setCustomInput('');
+    }
+  };
 
   const handleLinkChange = (index: number, value: string) => {
     setLinkInputs(prev => {
@@ -51,16 +54,21 @@ export default function OnboardingInfluencer() {
   };
 
   const handleSubmit = async () => {
-    const finalCategory = category === 'Boshqa' ? customCategory.trim() : category;
-    if (!name.trim() || !finalCategory) return;
+    const finalCategory = categories.join(', ');
+    if (!name.trim() || categories.length === 0) return;
     setLoading(true);
     hapticFeedback('medium');
     try {
       const filteredLinks: Record<string, string> = {};
       for (const url of linkInputs) {
         if (!url.trim()) continue;
-        const platform = detectPlatform(url);
-        const key = platform || `link_${Object.keys(filteredLinks).length}`;
+        const lower = url.toLowerCase();
+        let key = `link_${Object.keys(filteredLinks).length}`;
+        if (lower.includes('instagram')) key = 'instagram';
+        else if (lower.includes('youtube') || lower.includes('youtu.be')) key = 'youtube';
+        else if (lower.includes('tiktok')) key = 'tiktok';
+        else if (lower.includes('t.me') || lower.includes('telegram')) key = 'telegram';
+        else if (lower.includes('facebook') || lower.includes('fb.com')) key = 'facebook';
         filteredLinks[key] = url.trim();
       }
       await onboardInfluencer({ name: name.trim(), bio, category: finalCategory, socialLinks: filteredLinks });
@@ -110,19 +118,62 @@ export default function OnboardingInfluencer() {
               <textarea className="form-textarea" placeholder="O'zingiz haqingizda qisqacha..." value={bio} onChange={(e) => setBio(e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Yo'nalish</label>
-              <select className="form-select" value={category} onChange={(e) => { setCategory(e.target.value); if (e.target.value !== 'Boshqa') setCustomCategory(''); }}>
-                <option value="">Tanlang...</option>
-                {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
-              </select>
-            </div>
-            {category === 'Boshqa' && (
-              <div className="form-group">
-                <label className="form-label">Yo'nalishingizni kiriting</label>
-                <input className="form-input" placeholder="Masalan: Sayohat, Texnologiya..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} />
+              <label className="form-label">Yo'nalishlar <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({categories.length} tanlandi)</span></label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                {SUGGESTED_CATEGORIES.map((cat) => {
+                  const selected = categories.includes(cat);
+                  return (
+                    <button key={cat} type="button" onClick={() => toggleCategory(cat)}
+                      style={{
+                        padding: '8px 14px', borderRadius: 100, fontSize: 13, fontWeight: 600,
+                        border: `1.5px solid ${selected ? 'var(--primary)' : 'var(--border-strong)'}`,
+                        background: selected ? 'var(--primary)' : 'var(--bg-card)',
+                        color: selected ? '#fff' : 'var(--text-secondary)',
+                        cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                        display: 'flex', alignItems: 'center', gap: 5,
+                      }}>
+                      {selected && <Check size={14} />}
+                      {cat}
+                    </button>
+                  );
+                })}
               </div>
-            )}
-            <button className="btn btn-primary" disabled={!name.trim() || !category || (category === 'Boshqa' && !customCategory.trim())} onClick={() => setStep(2)}>
+              {/* Tanlangan custom yo'nalishlar */}
+              {categories.filter(c => !SUGGESTED_CATEGORIES.includes(c)).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                  {categories.filter(c => !SUGGESTED_CATEGORIES.includes(c)).map(cat => (
+                    <span key={cat} style={{
+                      display: 'flex', alignItems: 'center', gap: 4,
+                      padding: '6px 12px', borderRadius: 100, fontSize: 13, fontWeight: 600,
+                      background: 'var(--primary)', color: '#fff',
+                    }}>
+                      {cat}
+                      <X size={14} style={{ cursor: 'pointer' }} onClick={() => setCategories(prev => prev.filter(c => c !== cat))} />
+                    </span>
+                  ))}
+                </div>
+              )}
+              {/* Custom qo'shish */}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input className="form-input" style={{ flex: 1 }}
+                  placeholder="Boshqa yo'nalish qo'shing..."
+                  value={customInput}
+                  onChange={(e) => setCustomInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomCategory())}
+                />
+                <button type="button" onClick={addCustomCategory}
+                  disabled={!customInput.trim()}
+                  style={{
+                    width: 44, height: 44, borderRadius: 12, border: 'none', flexShrink: 0,
+                    background: customInput.trim() ? 'var(--primary)' : 'var(--border)',
+                    color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: customInput.trim() ? 'pointer' : 'not-allowed',
+                  }}>
+                  <Plus size={20} />
+                </button>
+              </div>
+            </div>
+            <button className="btn btn-primary" disabled={!name.trim() || categories.length === 0} onClick={() => setStep(2)}>
               Davom etish
             </button>
           </>
@@ -136,8 +187,6 @@ export default function OnboardingInfluencer() {
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {linkInputs.map((link, index) => {
-                const platform = detectPlatform(link);
-                const social = platform ? SOCIAL_ICONS[platform] : null;
                 return (
                   <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <div style={{ position: 'relative', flex: 1 }}>
