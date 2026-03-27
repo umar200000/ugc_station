@@ -507,9 +507,16 @@ export default function Profile() {
                 <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Ism</span>
                 <span style={{ fontSize: 14, fontWeight: 600 }}>{user.influencer.name}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Yo'nalish</span>
-                <span className="tag" style={{ fontSize: 12 }}>{user.influencer.category}</span>
+              <div style={{ padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ fontSize: 14, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Yo'nalishlar</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {user.influencer.category.split(',').map((cat: string) => cat.trim()).filter(Boolean).map((cat: string) => (
+                    <span key={cat} style={{
+                      fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
+                      background: 'var(--primary-bg)', color: 'var(--primary)',
+                    }}>{cat}</span>
+                  ))}
+                </div>
               </div>
               {user.influencer.bio && (
                 <div style={{ paddingTop: 12 }}>
