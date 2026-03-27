@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Building2, Megaphone, LogOut, Pencil, Star, MapPin, Calendar, Briefcase, ChevronRight, Shield, Globe, X, Save, Camera, Send, Plus, Trash2, Check } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 
@@ -45,9 +45,10 @@ const SUGGESTED_CATEGORIES = [
 
 export default function Profile() {
   const { user, refreshUser, logout } = useAuthStore();
+  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ ads: 0, applications: 0, accepted: 0, reviews: 0, avgRating: 0 });
+  const [stats, setStats] = useState({ ads: 0, applications: 0, accepted: 0, reviews: 0, avgRating: 0, approvedVideos: 0, sentVideos: 0 });
   const [form, setForm] = useState<any>({});
   const [editCategories, setEditCategories] = useState<string[]>([]);
   const [customCatInput, setCustomCatInput] = useState('');
@@ -63,10 +64,14 @@ export default function Profile() {
     const fetchStats = async () => {
       try {
         if (isCompany) {
-          const res = await api.get('/ads/my/list');
-          const ads = res.data || [];
+          const [adsRes, videosRes] = await Promise.all([
+            api.get('/ads/my/list'),
+            api.get('/submissions/company/approved'),
+          ]);
+          const ads = adsRes.data || [];
           const totalApps = ads.reduce((sum: number, ad: any) => sum + (ad._count?.applications || 0), 0);
-          setStats(prev => ({ ...prev, ads: ads.length, applications: totalApps }));
+          const approvedVideos = (videosRes.data || []).filter((v: any) => v.status === 'APPROVED').length;
+          setStats(prev => ({ ...prev, ads: ads.length, applications: totalApps, approvedVideos }));
         } else {
           const res = await api.get('/applications/my');
           const apps = res.data || [];
@@ -436,9 +441,9 @@ export default function Profile() {
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Arizalar</div>
               </div>
               <div style={{ width: 1, background: 'var(--border)' }} />
-              <div style={{ flex: 1, textAlign: 'center', padding: '8px 0' }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>{stats.ads > 0 ? 'Faol' : '—'}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Holat</div>
+              <div style={{ flex: 1, textAlign: 'center', padding: '8px 0', cursor: 'pointer' }} onClick={() => navigate('/my-videos')}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>{stats.approvedVideos}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Videolar</div>
               </div>
             </>
           ) : (

@@ -19,6 +19,7 @@ import Applications from './pages/Applications';
 import EditAd from './pages/EditAd';
 import VideoPlayer from './pages/VideoPlayer';
 import NotificationsPage from './pages/Notifications';
+import MyVideos from './pages/MyVideos';
 // Admin panel is now a separate website in /admin folder
 
 // Tab sahifalarini mount qilib, display bilan boshqarish
@@ -142,6 +143,7 @@ function MainApp() {
           <Route path="/ad/:id/applications" element={<Applications />} />
           <Route path="/video" element={<VideoPlayer />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/my-videos" element={<MyVideos />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       )}

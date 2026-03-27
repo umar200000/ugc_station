@@ -190,7 +190,7 @@ export default function MyApplications() {
                       disabled={isUploading}
                       onClick={() => handleVideoSelect(app.id)}
                     >
-                      {isUploading ? <><Loader2 size={15} className="spin" /> {uploadProgress}%</> : <><Video size={15} /> Video joylash</>}
+                      {isUploading ? <><Loader2 size={15} className="spin" /> {uploadProgress}%</> : <><Video size={15} /> Video joylash {appSubs.length > 0 ? `(${appSubs.length})` : ''}</>}
                     </button>
                   </div>
 
