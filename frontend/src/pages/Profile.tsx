@@ -117,14 +117,13 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
-    // Upload image
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('image', file);
     try {
-      const res = await api.post('/upload', formData, {
+      const res = await api.post('/upload/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      const url = res.data.url || res.data.path;
+      const url = res.data.url;
       setForm((prev: any) => ({ ...prev, logo: url }));
       setLogoPreview(url);
     } catch (err) {
@@ -396,7 +395,7 @@ export default function Profile() {
               background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 30, fontWeight: 700, color: '#fff',
             }}>
-              {user?.photoUrl ? <img src={user.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : profile?.name?.[0] || user?.firstName?.[0] || '?'}
+              {(user?.company?.logo || user?.photoUrl) ? <img src={user?.company?.logo || user?.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : profile?.name?.[0] || user?.firstName?.[0] || '?'}
             </div>
             <div>
               <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>{profile?.name || user?.firstName}</h2>

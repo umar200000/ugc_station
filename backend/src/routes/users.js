@@ -99,13 +99,21 @@ router.put('/profile', authMiddleware, async (req, res) => {
       where: { id: req.user.userId },
     });
 
+    // Avatar/logo saqlanganda user.photoUrl ni ham yangilash
+    if (req.body.logo) {
+      await req.prisma.user.update({
+        where: { id: user.id },
+        data: { photoUrl: req.body.logo },
+      });
+    }
+
     if (user.role === 'COMPANY') {
       const company = await req.prisma.company.update({
         where: { userId: user.id },
         data: {
           name: req.body.name,
           industry: req.body.industry,
-          logo: req.body.logo,
+          logo: req.body.logo || undefined,
           description: req.body.description,
         },
       });

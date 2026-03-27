@@ -46,4 +46,18 @@ router.post('/images', authMiddleware, upload.array('images', 5), (req, res) => 
   }
 });
 
+// Bitta rasm yuklash (profil uchun)
+router.post('/avatar', authMiddleware, upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Rasm yuklanmadi' });
+    }
+    const url = `/uploads/${req.file.filename}`;
+    res.json({ url });
+  } catch (err) {
+    console.error('Avatar upload error:', err);
+    res.status(500).json({ error: 'Rasm yuklashda xatolik' });
+  }
+});
+
 module.exports = router;
