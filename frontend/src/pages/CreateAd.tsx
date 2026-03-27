@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ImagePlus, ArrowLeft, ArrowRight, Rocket } from 'lucide-react';
+import { ImagePlus, ArrowLeft, ArrowRight, Rocket, Loader2 } from 'lucide-react';
 
 import api from '../lib/api';
 import { PLATFORMS, INDUSTRIES } from '../types';
@@ -209,7 +209,7 @@ export default function CreateAd() {
               <ArrowLeft size={18} /> Orqaga
             </button>
             <button className="btn btn-primary" style={{ flex: 2 }} disabled={loading || form.influencerCount < 3} onClick={handleSubmit}>
-              {loading ? 'Yaratilmoqda...' : <><Rocket size={18} /> E'lon yaratish</>}
+              {loading ? <><Loader2 size={18} className="spin" /> Yaratilmoqda...</> : <><Rocket size={18} /> E'lon yaratish</>}
             </button>
           </div>
         </div>
