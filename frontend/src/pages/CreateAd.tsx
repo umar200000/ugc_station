@@ -13,7 +13,7 @@ export default function CreateAd() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     title: '', description: '', industry: '', videoFormat: 'ANY', faceType: 'ANY',
-    platforms: [] as string[], influencerCount: 1, adType: 'BARTER', barterItem: '', payment: 0,
+    platforms: [] as string[], influencerCount: 3, adType: 'BARTER', barterItem: '', payment: 0,
   });
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -171,9 +171,14 @@ export default function CreateAd() {
 
           <div className="form-group">
             <label className="form-label">Influenser soni</label>
-            <input className="form-input" type="number" min={1} value={form.influencerCount}
-              onChange={(e) => setForm({ ...form, influencerCount: Math.max(1, Number(e.target.value) || 1) })} />
-            <p className="form-hint">Minimum 3 ta influenser</p>
+            <input className="form-input" type="number" min={1} value={form.influencerCount || ''}
+              onChange={(e) => setForm({ ...form, influencerCount: Number(e.target.value) || 0 })}
+              style={{ borderColor: form.influencerCount > 0 && form.influencerCount < 3 ? 'var(--danger)' : undefined }} />
+            {form.influencerCount > 0 && form.influencerCount < 3 ? (
+              <p style={{ fontSize: 12, color: 'var(--danger)', fontWeight: 600, marginTop: 6 }}>Kamida 3 ta influenser bo'lishi kerak</p>
+            ) : (
+              <p className="form-hint">Minimum 3 ta influenser</p>
+            )}
           </div>
 
           <div className="form-group">
@@ -203,7 +208,7 @@ export default function CreateAd() {
             <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setStep(1)}>
               <ArrowLeft size={18} /> Orqaga
             </button>
-            <button className="btn btn-primary" style={{ flex: 2 }} disabled={loading} onClick={handleSubmit}>
+            <button className="btn btn-primary" style={{ flex: 2 }} disabled={loading || form.influencerCount < 3} onClick={handleSubmit}>
               {loading ? 'Yaratilmoqda...' : <><Rocket size={18} /> E'lon yaratish</>}
             </button>
           </div>
