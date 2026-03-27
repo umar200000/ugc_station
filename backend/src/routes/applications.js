@@ -1,23 +1,8 @@
 const express = require('express');
 const { authMiddleware, influencerOnly, companyOnly } = require('../middleware/auth');
+const { notify } = require('../utils/notify');
 
 const router = express.Router();
-
-// Telegram orqali xabar yuborish (to'g'ridan-to'g'ri HTTP API)
-async function sendTelegramNotification(telegramId, message) {
-  try {
-    const botToken = process.env.BOT_TOKEN;
-    if (!botToken) return;
-    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: telegramId, text: message, parse_mode: 'HTML' }),
-    });
-  } catch (err) {
-    console.error('Telegram notification error:', err.message);
-  }
-}
 
 // Qiziqish bildirish (influenser)
 router.post('/', authMiddleware, influencerOnly, async (req, res) => {
@@ -68,14 +53,15 @@ router.post('/', authMiddleware, influencerOnly, async (req, res) => {
       include: { ad: { include: { company: true } }, influencer: true },
     });
 
-    // Kompaniyaga Telegram notification yuborish
-    if (ad.company?.user?.telegramId) {
-      const msg = `📩 <b>Yangi ariza!</b>\n\n`
-        + `📢 E'lon: <b>${ad.title}</b>\n`
-        + `👤 Influenser: <b>${influencer.name}</b>\n`
-        + `📂 Yo'nalish: ${influencer.category || 'Belgilanmagan'}\n\n`
-        + `Mini App ni ochib arizani ko'ring!`;
-      sendTelegramNotification(ad.company.user.telegramId, msg);
+    // Kompaniyaga notification
+    if (ad.company?.userId) {
+      notify(ad.company.userId, {
+        title: 'Yangi ariza!',
+        message: `${influencer.name} "${ad.title}" e'loniga ariza yubordi`,
+        type: 'application',
+        link: `/ad/${ad.id}/applications`,
+        telegramMsg: `📩 <b>Yangi ariza!</b>\n\n📢 E'lon: <b>${ad.title}</b>\n👤 Influenser: <b>${influencer.name}</b>\n\nMini App ni ochib arizani ko'ring!`,
+      });
     }
 
     res.status(201).json(application);
@@ -164,22 +150,25 @@ router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
       },
     });
 
-    // Influenserga Telegram notification yuborish
-    if (updated.influencer?.user?.telegramId) {
+    // Influenserga notification
+    if (updated.influencer?.userId) {
+      const companyPhone = updated.ad?.company?.user?.phone || '';
       if (status === 'ACCEPTED') {
-        const companyPhone = updated.ad?.company?.user?.phone || 'Belgilanmagan';
-        const msg = `✅ <b>Arizangiz qabul qilindi!</b>\n\n`
-          + `📢 E'lon: <b>${updated.ad.title}</b>\n`
-          + `🏢 Kompaniya: <b>${updated.ad.company.name}</b>\n`
-          + `📞 Telefon: <b>${companyPhone}</b>\n\n`
-          + `Kompaniya bilan bog'laning!`;
-        sendTelegramNotification(updated.influencer.user.telegramId, msg);
-      } else if (status === 'REJECTED') {
-        const msg = `❌ <b>Arizangiz rad etildi</b>\n\n`
-          + `📢 E'lon: <b>${updated.ad.title}</b>\n`
-          + `🏢 Kompaniya: <b>${updated.ad.company.name}</b>\n\n`
-          + `Boshqa e'lonlarga ariza berishingiz mumkin!`;
-        sendTelegramNotification(updated.influencer.user.telegramId, msg);
+        notify(updated.influencer.userId, {
+          title: 'Ariza qabul qilindi!',
+          message: `"${updated.ad.title}" e'loniga arizangiz qabul qilindi. Kompaniya: ${updated.ad.company.name}`,
+          type: 'accepted',
+          link: '/my-applications',
+          telegramMsg: `✅ <b>Arizangiz qabul qilindi!</b>\n\n📢 E'lon: <b>${updated.ad.title}</b>\n🏢 Kompaniya: <b>${updated.ad.company.name}</b>\n📞 Telefon: <b>${companyPhone || 'Belgilanmagan'}</b>\n\nKompaniya bilan bog'laning!`,
+        });
+      } else {
+        notify(updated.influencer.userId, {
+          title: 'Ariza rad etildi',
+          message: `"${updated.ad.title}" e'loniga arizangiz rad etildi`,
+          type: 'rejected',
+          link: '/my-applications',
+          telegramMsg: `❌ <b>Arizangiz rad etildi</b>\n\n📢 E'lon: <b>${updated.ad.title}</b>\n🏢 Kompaniya: <b>${updated.ad.company.name}</b>\n\nBoshqa e'lonlarga ariza berishingiz mumkin!`,
+        });
       }
     }
 

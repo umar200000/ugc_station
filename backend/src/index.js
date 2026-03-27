@@ -10,6 +10,7 @@ const userRoutes = require('./routes/users');
 const reviewRoutes = require('./routes/reviews');
 const uploadRoutes = require('./routes/upload');
 const submissionRoutes = require('./routes/submissions');
+const notificationRoutes = require('./routes/notifications');
 const adminRoutes = require('./routes/admin');
 
 const prisma = new PrismaClient();
@@ -42,6 +43,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/submissions', submissionRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Admin web panel (alohida papkadan)

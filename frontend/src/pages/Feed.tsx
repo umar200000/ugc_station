@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, SlidersHorizontal, X, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import NotificationBell from '../components/NotificationBell';
 import api from '../lib/api';
 import AdCard from '../components/AdCard';
 import BottomNav from '../components/BottomNav';
@@ -102,9 +103,7 @@ export default function Feed() {
                 UGC Marketplace
               </h1>
             </div>
-            <div className="feed-avatar">
-              {user?.photoUrl ? <img src={user.photoUrl} alt="" /> : user?.firstName?.[0] || '?'}
-            </div>
+            <NotificationBell />
           </div>
 
           {/* Quick stats */}

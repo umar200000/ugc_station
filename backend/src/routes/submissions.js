@@ -2,24 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { authMiddleware, influencerOnly, companyOnly } = require('../middleware/auth');
+const { notify } = require('../utils/notify');
 
 const router = express.Router();
-
-// Telegram notification (to'g'ridan-to'g'ri HTTP API)
-async function sendTelegramNotification(telegramId, message) {
-  try {
-    const botToken = process.env.BOT_TOKEN;
-    if (!botToken) return;
-    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: telegramId, text: message, parse_mode: 'HTML' }),
-    });
-  } catch (err) {
-    console.error('Telegram notification error:', err.message);
-  }
-}
 
 // Video upload sozlamalari
 const storage = multer.diskStorage({
@@ -85,12 +70,14 @@ router.post('/', authMiddleware, influencerOnly, upload.single('video'), async (
     });
 
     // Kompaniyaga notification
-    if (application.ad?.company?.user?.telegramId) {
-      const msg = `🎬 <b>Yangi video keldi!</b>\n\n`
-        + `📢 E'lon: <b>${application.ad.title}</b>\n`
-        + `👤 Influenser: <b>${application.influencer.name}</b>\n\n`
-        + `Mini App ni ochib videoni ko'ring!`;
-      sendTelegramNotification(application.ad.company.user.telegramId, msg);
+    if (application.ad?.company?.userId) {
+      notify(application.ad.company.userId, {
+        title: 'Yangi video keldi!',
+        message: `${application.influencer.name} "${application.ad.title}" uchun video yukladi`,
+        type: 'video',
+        link: `/ad/${application.adId}/applications`,
+        telegramMsg: `🎬 <b>Yangi video keldi!</b>\n\n📢 E'lon: <b>${application.ad.title}</b>\n👤 Influenser: <b>${application.influencer.name}</b>\n\nMini App ni ochib videoni ko'ring!`,
+      });
     }
 
     res.status(201).json(submission);
@@ -178,19 +165,23 @@ router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
     });
 
     // Influenserga notification
-    if (submission.application.influencer?.user?.telegramId) {
+    if (submission.application.influencer?.userId) {
       if (status === 'APPROVED') {
-        const msg = `✅ <b>Videongiz tasdiqlandi!</b>\n\n`
-          + `📢 E'lon: <b>${submission.application.ad.title}</b>\n`
-          + `🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>\n\n`
-          + `Ajoyib ish! Video yoqdi! 🎉`;
-        sendTelegramNotification(submission.application.influencer.user.telegramId, msg);
+        notify(submission.application.influencer.userId, {
+          title: 'Video tasdiqlandi!',
+          message: `"${submission.application.ad.title}" uchun videongiz tasdiqlandi. Ajoyib ish!`,
+          type: 'approved',
+          link: '/my-applications',
+          telegramMsg: `✅ <b>Videongiz tasdiqlandi!</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>\n\nAjoyib ish! Video yoqdi! 🎉`,
+        });
       } else {
-        const msg = `❌ <b>Video rad etildi</b>\n\n`
-          + `📢 E'lon: <b>${submission.application.ad.title}</b>\n`
-          + `🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>\n\n`
-          + `Yangi video yuklashingiz mumkin.`;
-        sendTelegramNotification(submission.application.influencer.user.telegramId, msg);
+        notify(submission.application.influencer.userId, {
+          title: 'Video rad etildi',
+          message: `"${submission.application.ad.title}" uchun video rad etildi. Yangi video yuklashingiz mumkin.`,
+          type: 'rejected',
+          link: '/my-applications',
+          telegramMsg: `❌ <b>Video rad etildi</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>\n\nYangi video yuklashingiz mumkin.`,
+        });
       }
     }
 
