@@ -34,17 +34,20 @@ router.use(authMiddleware, adminOnly);
 // Dashboard statistika
 router.get('/stats', async (req, res) => {
   try {
-    const [users, companies, influencers, ads, applications] = await Promise.all([
+    const [users, companies, influencers, ads, applications, submissions] = await Promise.all([
       req.prisma.user.count(),
       req.prisma.company.count(),
       req.prisma.influencer.count(),
       req.prisma.ad.count(),
       req.prisma.application.count(),
+      req.prisma.submission.count(),
     ]);
     const activeAds = await req.prisma.ad.count({ where: { status: 'ACTIVE' } });
     const acceptedApps = await req.prisma.application.count({ where: { status: 'ACCEPTED' } });
+    const approvedVideos = await req.prisma.submission.count({ where: { status: 'APPROVED' } });
+    const pendingApps = await req.prisma.application.count({ where: { status: 'PENDING' } });
 
-    res.json({ users, companies, influencers, ads, activeAds, applications, acceptedApps });
+    res.json({ users, companies, influencers, ads, activeAds, applications, acceptedApps, submissions, approvedVideos, pendingApps });
   } catch (err) {
     console.error('Admin stats error:', err);
     res.status(500).json({ error: 'Xatolik' });
@@ -134,6 +137,75 @@ router.get('/ads', async (req, res) => {
     console.error('Admin get ads error:', err);
     res.status(500).json({ error: 'Xatolik' });
   }
+});
+
+// Barcha arizalar
+router.get('/applications', async (req, res) => {
+  try {
+    const applications = await req.prisma.application.findMany({
+      include: {
+        influencer: { include: { user: { select: { username: true, phone: true, photoUrl: true } } } },
+        ad: { include: { company: { select: { name: true } } } },
+        _count: { select: { submissions: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ applications });
+  } catch (err) {
+    console.error('Admin get applications error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Barcha videolar
+router.get('/submissions', async (req, res) => {
+  try {
+    const submissions = await req.prisma.submission.findMany({
+      include: {
+        application: {
+          include: {
+            influencer: { include: { user: { select: { username: true, photoUrl: true } } } },
+            ad: { select: { title: true, company: { select: { name: true } } } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ submissions });
+  } catch (err) {
+    console.error('Admin get submissions error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Ariza statusini o'zgartirish
+router.patch('/application/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['PENDING', 'ACCEPTED', 'REJECTED'].includes(status)) return res.status(400).json({ error: 'Noto\'g\'ri status' });
+    const app = await req.prisma.application.update({ where: { id: req.params.id }, data: { status } });
+    res.json(app);
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+});
+
+// Video statusini o'zgartirish
+router.patch('/submission/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['PENDING', 'APPROVED', 'REJECTED'].includes(status)) return res.status(400).json({ error: 'Noto\'g\'ri status' });
+    const sub = await req.prisma.submission.update({ where: { id: req.params.id }, data: { status } });
+    res.json(sub);
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+});
+
+// E'lon statusini o'zgartirish
+router.patch('/ad/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['ACTIVE', 'CLOSED'].includes(status)) return res.status(400).json({ error: 'Noto\'g\'ri status' });
+    const ad = await req.prisma.ad.update({ where: { id: req.params.id }, data: { status } });
+    res.json(ad);
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
 });
 
 // Kompaniya o'chirish

@@ -6,363 +6,309 @@
   <title>UGC Admin Panel</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --primary: #2563EB; --primary-dark: #1D4ED8; --primary-bg: rgba(37,99,235,0.07);
-      --danger: #EF4444; --danger-bg: rgba(239,68,68,0.07);
-      --success: #10B981; --success-bg: rgba(16,185,129,0.08);
-      --warning: #F59E0B; --warning-bg: rgba(245,158,11,0.1);
-      --bg: #F1F5F9; --card: #fff; --text: #0F172A; --text2: #475569; --text3: #94A3B8;
-      --border: rgba(15,23,42,0.08); --shadow: 0 1px 3px rgba(15,23,42,0.06);
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --p:#2563EB;--p-dark:#1D4ED8;--p-bg:rgba(37,99,235,0.07);
+      --g:#10B981;--g-bg:rgba(16,185,129,0.08);
+      --r:#EF4444;--r-bg:rgba(239,68,68,0.07);
+      --w:#F59E0B;--w-bg:rgba(245,158,11,0.1);
+      --bg:#F8FAFC;--card:#fff;--t:#0F172A;--t2:#475569;--t3:#94A3B8;
+      --b:rgba(15,23,42,0.06);--bs:rgba(15,23,42,0.08);
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
+    .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-card{background:var(--card);border-radius:24px;padding:40px 32px;max-width:380px;width:100%;box-shadow:0 8px 30px rgba(15,23,42,0.1);text-align:center}
+    .login-icon{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#0F172A,#334155);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+    .login-title{font-size:22px;font-weight:800;margin-bottom:6px}
+    .login-sub{font-size:14px;color:var(--t2);margin-bottom:28px}
+    .input{width:100%;padding:12px 16px;border:2px solid var(--b);border-radius:12px;font-size:14px;font-family:inherit;outline:none;transition:.2s;background:var(--card)}
+    .input:focus{border-color:var(--p);box-shadow:0 0 0 4px var(--p-bg)}
+    .btn{padding:12px 20px;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+    .btn-p{background:linear-gradient(135deg,var(--p),var(--p-dark));color:#fff;width:100%}
+    .btn-p:hover{box-shadow:0 4px 16px rgba(37,99,235,0.3)}
+    .btn-p:disabled{opacity:.5;cursor:not-allowed}
+    .btn-s{background:var(--bg);border:1.5px solid var(--bs);color:var(--t2)}
+    .btn-s:hover{border-color:var(--p);color:var(--p)}
+    .btn-g{background:var(--g-bg);color:var(--g);border:1.5px solid transparent}
+    .btn-r{background:var(--r-bg);color:var(--r);border:1.5px solid transparent}
+    .btn-w{background:var(--w-bg);color:#92400E;border:1.5px solid transparent}
+    .btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+    .login-error{color:var(--r);font-size:13px;margin-top:12px;font-weight:600;display:none}
 
-    /* LOGIN */
-    .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .login-card { background: var(--card); border-radius: 24px; padding: 40px 32px; max-width: 380px; width: 100%; box-shadow: 0 8px 30px rgba(15,23,42,0.1); text-align: center; }
-    .login-icon { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #0F172A, #334155); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
-    .login-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
-    .login-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
-    .login-input { width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: 14px; font-size: 15px; font-family: inherit; outline: none; transition: 0.2s; margin-bottom: 16px; }
-    .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-bg); }
-    .login-btn { width: 100%; padding: 14px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: 0.2s; }
-    .login-btn:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
-    .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .login-error { color: var(--danger); font-size: 13px; margin-top: 12px; font-weight: 600; }
+    .dash{display:none;max-width:1200px;margin:0 auto;padding:20px}
+    .dash-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .dash-title{font-size:24px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+    .dash-actions{display:flex;gap:8px}
 
-    /* DASHBOARD */
-    .dashboard { display: none; max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
-    .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-    .dash-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
-    .dash-logout { padding: 10px 20px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--text2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; }
-    .dash-logout:hover { border-color: var(--danger); color: var(--danger); }
+    .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+    .stat{background:var(--card);border-radius:16px;padding:18px;border:1px solid var(--b)}
+    .stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:18px}
+    .stat-val{font-size:28px;font-weight:800}
+    .stat-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
 
-    /* STATS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
-    .stat-card { background: var(--card); border-radius: 16px; padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-    .stat-card-value { font-size: 28px; font-weight: 800; color: var(--text); }
-    .stat-card-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 4px; }
-    .stat-card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 18px; }
+    .tabs{display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px}
+    .tab{padding:10px 18px;border-radius:12px;border:1.5px solid var(--b);background:var(--card);color:var(--t2);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+    .tab.on{border-color:var(--p);background:var(--p-bg);color:var(--p)}
+    .tab:hover{border-color:var(--p)}
+    .cnt{font-size:11px;font-weight:700;background:var(--b);padding:2px 7px;border-radius:100px}
+    .tab.on .cnt{background:var(--p);color:#fff}
 
-    /* TABS */
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-    .tab-btn { padding: 10px 20px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--text2); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
-    .tab-btn.active { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
-    .tab-btn:hover { border-color: var(--primary); }
-    .tab-count { font-size: 11px; font-weight: 700; background: var(--border); padding: 2px 7px; border-radius: 100px; }
-    .tab-btn.active .tab-count { background: var(--primary); color: #fff; }
+    .table-wrap{background:var(--card);border-radius:16px;border:1px solid var(--b);overflow:hidden}
+    .tbl{width:100%;border-collapse:collapse}
+    .tbl th{text-align:left;padding:12px 16px;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b);background:var(--bg)}
+    .tbl td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--b);vertical-align:middle}
+    .tbl tr:last-child td{border-bottom:none}
+    .tbl tr:hover td{background:rgba(37,99,235,0.02)}
+    .name{font-weight:700;color:var(--t)}
+    .meta{font-size:11px;color:var(--t3);margin-top:2px}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700}
+    .b-active{background:var(--g-bg);color:var(--g)}
+    .b-closed{background:var(--r-bg);color:var(--r)}
+    .b-pending{background:var(--w-bg);color:#92400E}
+    .b-accepted{background:var(--g-bg);color:var(--g)}
+    .b-rejected{background:var(--r-bg);color:var(--r)}
+    .b-approved{background:var(--g-bg);color:var(--g)}
+    .b-company{background:var(--g-bg);color:var(--g)}
+    .b-influencer{background:var(--p-bg);color:var(--p)}
+    .b-admin{background:var(--w-bg);color:#92400E}
+    .b-new{background:var(--b);color:var(--t3)}
+    .del{width:32px;height:32px;border-radius:8px;background:var(--r-bg);border:none;color:var(--r);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.2s}
+    .del:hover{background:var(--r);color:#fff}
+    .empty{text-align:center;padding:40px;color:var(--t3);font-size:14px}
+    .avatar{width:32px;height:32px;border-radius:8px;object-fit:cover;background:var(--p-bg);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--p);overflow:hidden;flex-shrink:0}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .row{display:flex;align-items:center;gap:10px}
+    .search{margin-bottom:16px}
 
-    /* TABLE */
-    .table-wrap { background: var(--card); border-radius: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th { text-align: left; padding: 14px 18px; font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); background: var(--bg); }
-    .table td { padding: 14px 18px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .table tr:last-child td { border-bottom: none; }
-    .table tr:hover td { background: rgba(37,99,235,0.02); }
-    .table-name { font-weight: 700; color: var(--text); }
-    .table-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
-    .badge-active { background: var(--success-bg); color: var(--success); }
-    .badge-closed { background: var(--danger-bg); color: var(--danger); }
-    .badge-barter { background: var(--success-bg); color: var(--success); }
-    .badge-paid { background: var(--warning-bg); color: #92400E; }
-    .del-btn { width: 34px; height: 34px; border-radius: 10px; background: var(--danger-bg); border: none; color: var(--danger); cursor: pointer; font-size: 16px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-    .del-btn:hover { background: var(--danger); color: #fff; }
-    .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 15px; }
+    .modal-bg{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+    .modal-bg.open{display:flex}
+    .modal{background:var(--card);border-radius:20px;padding:28px 24px;max-width:360px;width:100%;text-align:center}
+    .modal-icon{width:52px;height:52px;border-radius:14px;background:var(--r-bg);color:var(--r);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px}
+    .modal h3{font-size:17px;font-weight:700;margin-bottom:8px}
+    .modal p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:18px}
+    .modal-acts{display:flex;gap:8px}
+    .modal-acts .btn{flex:1}
 
-    /* MODAL */
-    .modal-bg { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
-    .modal-bg.open { display: flex; }
-    .modal { background: var(--card); border-radius: 24px; padding: 32px 28px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
-    .modal-icon { width: 56px; height: 56px; border-radius: 16px; background: var(--danger-bg); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 26px; }
-    .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .modal p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
-    .modal-actions { display: flex; gap: 8px; }
-    .modal-cancel { flex: 1; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
-    .modal-confirm { flex: 1; padding: 12px; border-radius: 12px; border: none; background: var(--danger); color: #fff; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
-    .modal-confirm:disabled { opacity: 0.5; }
-
-    @media (max-width: 600px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .table th, .table td { padding: 10px 12px; font-size: 13px; }
-      .tabs { overflow-x: auto; }
-    }
+    .video-thumb{width:60px;height:60px;border-radius:8px;object-fit:cover;background:#000}
+    @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.tbl th,.tbl td{padding:10px 12px;font-size:12px}.tabs{gap:4px}.dash{padding:12px}}
   </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginPage" class="login-wrap">
   <div class="login-card">
     <div class="login-icon">&#128737;</div>
     <h1 class="login-title">Admin Panel</h1>
     <p class="login-sub">UGC Marketplace boshqaruv paneli</p>
-    <div style="position:relative">
-      <input type="password" id="passwordInput" class="login-input" style="padding-right:48px" placeholder="Parolni kiriting..." onkeydown="if(event.key==='Enter')doLogin()">
-      <button onclick="togglePassword()" id="eyeBtn" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);padding:4px">&#128065;</button>
-    </div>
-    <button class="login-btn" onclick="doLogin()" id="loginBtn">Kirish</button>
-    <div id="loginError" class="login-error" style="display:none"></div>
+    <input type="password" id="pw" class="input" placeholder="Parolni kiriting..." onkeydown="if(event.key==='Enter')doLogin()" style="margin-bottom:16px">
+    <button class="btn btn-p" onclick="doLogin()" id="loginBtn">Kirish</button>
+    <div id="loginErr" class="login-error"></div>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="dashboard">
-  <div class="dash-header">
-    <h1 class="dash-title">&#128737; Admin Panel</h1>
-    <button class="dash-logout" onclick="doLogout()">Chiqish</button>
+<div id="dash" class="dash">
+  <div class="dash-head">
+    <h1 class="dash-title">&#128737; UGC Admin</h1>
+    <div class="dash-actions">
+      <button class="btn btn-s" onclick="loadAll()">&#128260; Yangilash</button>
+      <button class="btn btn-s" onclick="doLogout()">Chiqish</button>
+    </div>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-grid" id="statsGrid"></div>
+  <div class="stats" id="statsGrid"></div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="users" onclick="switchTab('users')">
-      &#128101; Userlar <span class="tab-count" id="countUsers">0</span>
-    </button>
-    <button class="tab-btn" data-tab="companies" onclick="switchTab('companies')">
-      &#127970; Kompaniyalar <span class="tab-count" id="countCompanies">0</span>
-    </button>
-    <button class="tab-btn" data-tab="influencers" onclick="switchTab('influencers')">
-      &#128100; Influenserlar <span class="tab-count" id="countInfluencers">0</span>
-    </button>
-    <button class="tab-btn" data-tab="ads" onclick="switchTab('ads')">
-      &#128227; E'lonlar <span class="tab-count" id="countAds">0</span>
-    </button>
+  <div class="search">
+    <input class="input" id="searchInput" placeholder="Qidirish..." oninput="filterTable()">
   </div>
 
-  <!-- Tables -->
+  <div class="tabs" id="tabsWrap"></div>
+
   <div class="table-wrap">
-    <div id="tabUsers">
-      <table class="table">
-        <thead><tr><th>Foydalanuvchi</th><th>Telefon</th><th>Rol</th><th>Holat</th><th>Sana</th><th></th></tr></thead>
-        <tbody id="tbodyUsers"></tbody>
-      </table>
-    </div>
-    <div id="tabCompanies" style="display:none">
-      <table class="table">
-        <thead><tr><th>Kompaniya</th><th>Soha</th><th>Telefon</th><th>E'lonlar</th><th>Sana</th><th></th></tr></thead>
-        <tbody id="tbodyCompanies"></tbody>
-      </table>
-    </div>
-    <div id="tabInfluencers" style="display:none">
-      <table class="table">
-        <thead><tr><th>Influenser</th><th>Yo'nalish</th><th>Telefon</th><th>Arizalar</th><th>Sana</th><th></th></tr></thead>
-        <tbody id="tbodyInfluencers"></tbody>
-      </table>
-    </div>
-    <div id="tabAds" style="display:none">
-      <table class="table">
-        <thead><tr><th>E'lon</th><th>Kompaniya</th><th>Turi</th><th>Holati</th><th>Arizalar</th><th></th></tr></thead>
-        <tbody id="tbodyAds"></tbody>
-      </table>
-    </div>
+    <table class="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
   </div>
 </div>
 
-<!-- DELETE MODAL -->
-<div class="modal-bg" id="deleteModal">
+<div class="modal-bg" id="modal">
   <div class="modal">
     <div class="modal-icon">&#9888;</div>
     <h3>O'chirishni tasdiqlang</h3>
-    <p id="deleteText"></p>
-    <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeModal()">Bekor</button>
-      <button class="modal-confirm" id="confirmBtn" onclick="confirmDelete()">O'chirish</button>
+    <p id="modalText"></p>
+    <div class="modal-acts">
+      <button class="btn btn-s" onclick="closeModal()">Bekor</button>
+      <button class="btn btn-r" id="modalBtn" onclick="confirmDelete()">O'chirish</button>
     </div>
   </div>
 </div>
 
 <script>
-const API = (window.location.hostname === 'localhost' ? 'http://localhost:3000' : '') + '/api/admin';
-let token = localStorage.getItem('admin_token');
-let deleteTarget = null;
+const API=(location.hostname==='localhost'?'http://localhost:3000':'')+'/api/admin';
+let token=localStorage.getItem('admin_token');
+let delTarget=null;
+let currentTab='users';
+let allData={};
 
-// ===== AUTH =====
-async function doLogin() {
-  const pw = document.getElementById('passwordInput').value;
-  const btn = document.getElementById('loginBtn');
-  const err = document.getElementById('loginError');
-  btn.disabled = true; err.style.display = 'none';
-  try {
-    const res = await fetch(API + '/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    token = data.token;
-    localStorage.setItem('admin_token', token);
-    showDashboard();
-  } catch (e) {
-    err.textContent = e.message || 'Xatolik';
-    err.style.display = 'block';
-  } finally { btn.disabled = false; }
+async function doLogin(){
+  const btn=document.getElementById('loginBtn'),err=document.getElementById('loginErr');
+  btn.disabled=true;err.style.display='none';
+  try{
+    const r=await fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('pw').value})});
+    const d=await r.json();if(!r.ok)throw new Error(d.error);
+    token=d.token;localStorage.setItem('admin_token',token);showDash();
+  }catch(e){err.textContent=e.message;err.style.display='block'}
+  finally{btn.disabled=false}
 }
+function doLogout(){token=null;localStorage.removeItem('admin_token');document.getElementById('dash').style.display='none';document.getElementById('loginPage').style.display='flex'}
+function api(p,o={}){return fetch(API+p,{...o,headers:{...o.headers,Authorization:'Bearer '+token,'Content-Type':'application/json'}})}
 
-function doLogout() {
-  token = null;
-  localStorage.removeItem('admin_token');
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('loginPage').style.display = 'flex';
-}
-
-function api(path, opts = {}) {
-  return fetch(API + path, { ...opts, headers: { ...opts.headers, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } });
-}
-
-// ===== DASHBOARD =====
-async function showDashboard() {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
+async function showDash(){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('dash').style.display='block';
   await loadAll();
 }
 
-async function loadAll() {
-  try {
-    const [statsRes, usersRes, compRes, infRes, adRes] = await Promise.all([
-      api('/stats'), api('/users'), api('/companies'), api('/influencers'), api('/ads'),
-    ]);
-    if (statsRes.status === 401) { doLogout(); return; }
-    const stats = await statsRes.json();
-    const { users } = await usersRes.json();
-    const { companies } = await compRes.json();
-    const { influencers } = await infRes.json();
-    const { ads } = await adRes.json();
-
-    renderStats(stats);
-    renderUsers(users);
-    renderCompanies(companies);
-    renderInfluencers(influencers);
-    renderAds(ads);
-
-    document.getElementById('countUsers').textContent = users.length;
-    document.getElementById('countCompanies').textContent = companies.length;
-    document.getElementById('countInfluencers').textContent = influencers.length;
-    document.getElementById('countAds').textContent = ads.length;
-  } catch (e) { console.error(e); }
+async function loadAll(){
+  try{
+    const[sr,ur,cr,ir,ar,apr,subr]=await Promise.all([api('/stats'),api('/users'),api('/companies'),api('/influencers'),api('/ads'),api('/applications'),api('/submissions')]);
+    if(sr.status===401){doLogout();return}
+    const stats=await sr.json();
+    allData.users=(await ur.json()).users||[];
+    allData.companies=(await cr.json()).companies||[];
+    allData.influencers=(await ir.json()).influencers||[];
+    allData.ads=(await ar.json()).ads||[];
+    allData.applications=(await apr.json()).applications||[];
+    allData.submissions=(await subr.json()).submissions||[];
+    renderStats(stats);renderTabs();renderTable();
+  }catch(e){console.error(e)}
 }
 
-function renderStats(s) {
-  const items = [
-    { label: 'Foydalanuvchilar', value: s.users, color: 'var(--primary-bg)', icon: '&#128101;' },
-    { label: 'Kompaniyalar', value: s.companies, color: 'var(--success-bg)', icon: '&#127970;' },
-    { label: 'Influenserlar', value: s.influencers, color: '#F3E8FF', icon: '&#128100;' },
-    { label: "E'lonlar", value: s.ads, color: 'var(--warning-bg)', icon: '&#128227;' },
-    { label: 'Faol e\'lonlar', value: s.activeAds, color: 'var(--success-bg)', icon: '&#9889;' },
-    { label: 'Arizalar', value: s.applications, color: 'var(--primary-bg)', icon: '&#128203;' },
+function renderStats(s){
+  const items=[
+    {l:'Foydalanuvchilar',v:s.users,c:'var(--p-bg)',ic:'&#128101;'},
+    {l:'Kompaniyalar',v:s.companies,c:'var(--g-bg)',ic:'&#127970;'},
+    {l:'Influenserlar',v:s.influencers,c:'#F3E8FF',ic:'&#128100;'},
+    {l:"E'lonlar",v:s.ads,c:'var(--w-bg)',ic:'&#128227;'},
+    {l:'Faol e\'lonlar',v:s.activeAds,c:'var(--g-bg)',ic:'&#9889;'},
+    {l:'Arizalar',v:s.applications,c:'var(--p-bg)',ic:'&#128203;'},
+    {l:'Kutilmoqda',v:s.pendingApps,c:'var(--w-bg)',ic:'&#9200;'},
+    {l:'Videolar',v:s.submissions,c:'#FEE2E2',ic:'&#127909;'},
   ];
-  document.getElementById('statsGrid').innerHTML = items.map(i => `
-    <div class="stat-card">
-      <div class="stat-card-icon" style="background:${i.color}">${i.icon}</div>
-      <div class="stat-card-value">${i.value}</div>
-      <div class="stat-card-label">${i.label}</div>
-    </div>
-  `).join('');
+  document.getElementById('statsGrid').innerHTML=items.map(i=>`<div class="stat"><div class="stat-icon" style="background:${i.c}">${i.ic}</div><div class="stat-val">${i.v}</div><div class="stat-lbl">${i.l}</div></div>`).join('');
 }
 
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('uz-UZ') : '—'; }
+const tabConfig=[
+  {key:'users',label:'Foydalanuvchilar',ic:'&#128101;'},
+  {key:'companies',label:'Kompaniyalar',ic:'&#127970;'},
+  {key:'influencers',label:'Influenserlar',ic:'&#128100;'},
+  {key:'ads',label:"E'lonlar",ic:'&#128227;'},
+  {key:'applications',label:'Arizalar',ic:'&#128203;'},
+  {key:'submissions',label:'Videolar',ic:'&#127909;'},
+];
 
-function renderUsers(list) {
-  const tbody = document.getElementById('tbodyUsers');
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Foydalanuvchilar yo\'q</td></tr>'; return; }
-  tbody.innerHTML = list.map(u => {
-    const role = u.role === 'COMPANY' ? 'Kompaniya' : u.role === 'INFLUENCER' ? 'Influenser' : u.role === 'ADMIN' ? 'Admin' : 'Yangi';
-    const roleBadge = u.role === 'ADMIN' ? 'badge-active' : u.role ? 'badge-paid' : 'badge-closed';
-    const name = u.company?.name || u.influencer?.name || u.firstName || '—';
-    return `<tr>
-      <td><div class="table-name">${name}</div><div class="table-meta">@${u.username || '—'} · ID: ${u.telegramId}</div></td>
-      <td>${u.phone || '—'}</td>
-      <td><span class="badge ${roleBadge}">${role}</span></td>
-      <td><span class="badge ${u.onboarded ? 'badge-active' : 'badge-closed'}">${u.onboarded ? 'Faol' : 'Tugallanmagan'}</span></td>
-      <td>${fmtDate(u.createdAt)}</td>
-      <td>${u.role !== 'ADMIN' ? '<button class="del-btn" onclick="openModal(\'user\',\'' + u.id + '\',\'' + name.replace(/'/g,'') + '\')">&#128465;</button>' : ''}</td>
-    </tr>`;
-  }).join('');
+function renderTabs(){
+  document.getElementById('tabsWrap').innerHTML=tabConfig.map(t=>
+    `<button class="tab ${currentTab===t.key?'on':''}" onclick="switchTab('${t.key}')">${t.ic} ${t.label} <span class="cnt">${(allData[t.key]||[]).length}</span></button>`
+  ).join('');
 }
 
-function renderCompanies(list) {
-  const tbody = document.getElementById('tbodyCompanies');
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Kompaniyalar yo\'q</td></tr>'; return; }
-  tbody.innerHTML = list.map(c => `<tr>
-    <td><div class="table-name">${c.name}</div><div class="table-meta">@${c.user?.username || '—'}</div></td>
-    <td>${c.industry}</td>
-    <td>${c.user?.phone || '—'}</td>
-    <td>${c._count?.ads || 0}</td>
-    <td>${fmtDate(c.user?.createdAt)}</td>
-    <td><button class="del-btn" onclick="openModal('company','${c.id}','${c.name.replace(/'/g,'')}')">&#128465;</button></td>
-  </tr>`).join('');
+function switchTab(t){currentTab=t;renderTabs();renderTable();document.getElementById('searchInput').value=''}
+
+function fmtDate(d){if(!d)return'—';const dt=new Date(d);const m=['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];return`${dt.getDate()} ${m[dt.getMonth()]} ${dt.getFullYear()}`}
+
+function roleBadge(r){
+  if(r==='COMPANY')return'<span class="badge b-company">Kompaniya</span>';
+  if(r==='INFLUENCER')return'<span class="badge b-influencer">Influenser</span>';
+  if(r==='ADMIN')return'<span class="badge b-admin">Admin</span>';
+  return'<span class="badge b-new">Yangi</span>';
+}
+function statusBadge(s){
+  const m={ACTIVE:'b-active',CLOSED:'b-closed',PENDING:'b-pending',ACCEPTED:'b-accepted',REJECTED:'b-rejected',APPROVED:'b-approved'};
+  const l={ACTIVE:'Faol',CLOSED:'Yopiq',PENDING:'Kutilmoqda',ACCEPTED:'Qabul',REJECTED:'Rad',APPROVED:'Tasdiqlangan'};
+  return`<span class="badge ${m[s]||'b-new'}">${l[s]||s}</span>`;
+}
+function avatarHtml(url,name){
+  if(url&&url.startsWith('/'))return`<div class="avatar"><img src="${url}"></div>`;
+  return`<div class="avatar">${(name||'?')[0]}</div>`;
 }
 
-function renderInfluencers(list) {
-  const tbody = document.getElementById('tbodyInfluencers');
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Influenserlar yo\'q</td></tr>'; return; }
-  tbody.innerHTML = list.map(i => `<tr>
-    <td><div class="table-name">${i.name}</div><div class="table-meta">@${i.user?.username || '—'}</div></td>
-    <td>${i.category}</td>
-    <td>${i.user?.phone || '—'}</td>
-    <td>${i._count?.applications || 0}</td>
-    <td>${fmtDate(i.user?.createdAt)}</td>
-    <td><button class="del-btn" onclick="openModal('influencer','${i.id}','${i.name.replace(/'/g,'')}')">&#128465;</button></td>
-  </tr>`).join('');
+function renderTable(){
+  const data=allData[currentTab]||[];
+  let h='',rows='';
+
+  if(currentTab==='users'){
+    h='<tr><th>Foydalanuvchi</th><th>Telefon</th><th>Rol</th><th>Holat</th><th>Sana</th><th></th></tr>';
+    rows=data.map(u=>{
+      const n=u.company?.name||u.influencer?.name||u.firstName||'—';
+      return`<tr data-s="${n} ${u.username} ${u.phone||''}"><td><div class="row">${avatarHtml(u.photoUrl,n)}<div><div class="name">${n}</div><div class="meta">@${u.username||'—'}</div></div></div></td><td>${u.phone||'—'}</td><td>${roleBadge(u.role)}</td><td>${u.onboarded?statusBadge('ACTIVE'):statusBadge('PENDING')}</td><td>${fmtDate(u.createdAt)}</td><td>${u.role!=='ADMIN'?`<button class="del" onclick="openModal('user','${u.id}','${n.replace(/'/g,'')}')">&#128465;</button>`:''}</td></tr>`;
+    }).join('');
+  }
+  else if(currentTab==='companies'){
+    h='<tr><th>Kompaniya</th><th>Soha</th><th>Telefon</th><th>E\'lonlar</th><th>Sana</th><th></th></tr>';
+    rows=data.map(c=>`<tr data-s="${c.name} ${c.industry} ${c.user?.phone||''}"><td><div class="name">${c.name}</div><div class="meta">@${c.user?.username||'—'}</div></td><td>${c.industry}</td><td>${c.user?.phone||'—'}</td><td><span class="badge b-active">${c._count?.ads||0}</span></td><td>${fmtDate(c.user?.createdAt)}</td><td><button class="del" onclick="openModal('company','${c.id}','${c.name.replace(/'/g,'')}')">&#128465;</button></td></tr>`).join('');
+  }
+  else if(currentTab==='influencers'){
+    h='<tr><th>Influenser</th><th>Yo\'nalish</th><th>Telefon</th><th>Arizalar</th><th>Sana</th><th></th></tr>';
+    rows=data.map(i=>`<tr data-s="${i.name} ${i.category} ${i.user?.phone||''}"><td><div class="row">${avatarHtml(i.user?.photoUrl,i.name)}<div><div class="name">${i.name}</div><div class="meta">@${i.user?.username||'—'}</div></div></div></td><td><div style="max-width:200px">${(i.category||'').split(',').map(c=>`<span class="badge b-influencer" style="margin:2px">${c.trim()}</span>`).join('')}</div></td><td>${i.user?.phone||'—'}</td><td><span class="badge b-pending">${i._count?.applications||0}</span></td><td>${fmtDate(i.user?.createdAt)}</td><td><button class="del" onclick="openModal('influencer','${i.id}','${i.name.replace(/'/g,'')}')">&#128465;</button></td></tr>`).join('');
+  }
+  else if(currentTab==='ads'){
+    h='<tr><th>E\'lon</th><th>Kompaniya</th><th>Turi</th><th>Holati</th><th>Arizalar</th><th></th></tr>';
+    rows=data.map(a=>`<tr data-s="${a.title} ${a.company?.name||''}"><td><div class="name">${a.title}</div></td><td>${a.company?.name||'—'}</td><td>${a.adType==='PAID'?`<span class="badge b-pending">${(a.payment||0).toLocaleString()} so'm</span>`:'<span class="badge b-active">Barter</span>'}</td><td>${statusBadge(a.status)} <button class="btn btn-sm ${a.status==='ACTIVE'?'btn-r':'btn-g'}" onclick="toggleAdStatus('${a.id}','${a.status}')" style="margin-left:4px">${a.status==='ACTIVE'?'Yopish':'Ochish'}</button></td><td><span class="badge b-pending">${a._count?.applications||0}</span></td><td><button class="del" onclick="openModal('ad','${a.id}','${a.title.replace(/'/g,'')}')">&#128465;</button></td></tr>`).join('');
+  }
+  else if(currentTab==='applications'){
+    h='<tr><th>Influenser</th><th>E\'lon</th><th>Kompaniya</th><th>Holati</th><th>Videolar</th><th>Sana</th></tr>';
+    rows=data.map(a=>{
+      const inf=a.influencer;const ad=a.ad;
+      return`<tr data-s="${inf?.name||''} ${ad?.title||''} ${ad?.company?.name||''}"><td><div class="row">${avatarHtml(inf?.user?.photoUrl,inf?.name)}<div><div class="name">${inf?.name||'—'}</div><div class="meta">${inf?.user?.phone||'—'}</div></div></div></td><td>${ad?.title||'—'}</td><td>${ad?.company?.name||'—'}</td><td>${statusBadge(a.status)} ${a.status==='PENDING'?`<button class="btn btn-sm btn-g" onclick="setAppStatus('${a.id}','ACCEPTED')">&#10004;</button><button class="btn btn-sm btn-r" onclick="setAppStatus('${a.id}','REJECTED')" style="margin-left:4px">&#10006;</button>`:''}</td><td><span class="badge b-active">${a._count?.submissions||0}</span></td><td>${fmtDate(a.createdAt)}</td></tr>`;
+    }).join('');
+  }
+  else if(currentTab==='submissions'){
+    h='<tr><th>Video</th><th>Influenser</th><th>E\'lon</th><th>Holati</th><th>Sana</th></tr>';
+    rows=data.map(s=>{
+      const inf=s.application?.influencer;const ad=s.application?.ad;
+      return`<tr data-s="${inf?.name||''} ${ad?.title||''}"><td><video src="${s.videoUrl}#t=0.5" class="video-thumb" preload="auto" onclick="this.paused?this.play():this.pause()"></video></td><td><div class="row">${avatarHtml(inf?.user?.photoUrl,inf?.name)}<div><div class="name">${inf?.name||'—'}</div></div></div></td><td>${ad?.title||'—'}<div class="meta">${ad?.company?.name||''}</div></td><td>${statusBadge(s.status)} ${s.status==='PENDING'?`<button class="btn btn-sm btn-g" onclick="setSubStatus('${s.id}','APPROVED')">&#128077;</button><button class="btn btn-sm btn-r" onclick="setSubStatus('${s.id}','REJECTED')" style="margin-left:4px">&#128078;</button>`:''}</td><td>${fmtDate(s.createdAt)}</td></tr>`;
+    }).join('');
+  }
+
+  document.getElementById('thead').innerHTML=h;
+  document.getElementById('tbody').innerHTML=rows||'<tr><td colspan="10" class="empty">Ma\'lumot yo\'q</td></tr>';
 }
 
-function renderAds(list) {
-  const tbody = document.getElementById('tbodyAds');
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">E\'lonlar yo\'q</td></tr>'; return; }
-  tbody.innerHTML = list.map(a => `<tr>
-    <td><div class="table-name">${a.title}</div></td>
-    <td>${a.company?.name || '—'}</td>
-    <td><span class="badge badge-${a.adType.toLowerCase()}">${a.adType === 'PAID' ? a.payment?.toLocaleString() + " so'm" : 'Barter'}</span></td>
-    <td><span class="badge badge-${a.status.toLowerCase()}">${a.status === 'ACTIVE' ? 'Faol' : 'Yopiq'}</span></td>
-    <td>${a._count?.applications || 0}</td>
-    <td><button class="del-btn" onclick="openModal('ad','${a.id}','${a.title.replace(/'/g,'')}')">&#128465;</button></td>
-  </tr>`).join('');
+function filterTable(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('#tbody tr').forEach(tr=>{
+    const s=tr.dataset.s||tr.textContent;
+    tr.style.display=s.toLowerCase().includes(q)?'':'none';
+  });
 }
 
-// ===== TABS =====
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  document.getElementById('tabUsers').style.display = name === 'users' ? '' : 'none';
-  document.getElementById('tabCompanies').style.display = name === 'companies' ? '' : 'none';
-  document.getElementById('tabInfluencers').style.display = name === 'influencers' ? '' : 'none';
-  document.getElementById('tabAds').style.display = name === 'ads' ? '' : 'none';
+async function toggleAdStatus(id,cur){
+  const ns=cur==='ACTIVE'?'CLOSED':'ACTIVE';
+  await api(`/ad/${id}/status`,{method:'PATCH',body:JSON.stringify({status:ns})});
+  await loadAll();
+}
+async function setAppStatus(id,status){
+  await api(`/application/${id}/status`,{method:'PATCH',body:JSON.stringify({status})});
+  await loadAll();
+}
+async function setSubStatus(id,status){
+  await api(`/submission/${id}/status`,{method:'PATCH',body:JSON.stringify({status})});
+  await loadAll();
 }
 
-// ===== DELETE =====
-function openModal(type, id, name) {
-  deleteTarget = { type, id };
-  document.getElementById('deleteText').innerHTML = `<strong>"${name}"</strong> ni o'chirmoqchimisiz?<br>Bu amalni qaytarib bo'lmaydi.`;
-  document.getElementById('deleteModal').classList.add('open');
+function openModal(type,id,name){
+  delTarget={type,id};
+  document.getElementById('modalText').innerHTML=`<strong>"${name}"</strong> ni o'chirmoqchimisiz?`;
+  document.getElementById('modal').classList.add('open');
 }
-function closeModal() {
-  deleteTarget = null;
-  document.getElementById('deleteModal').classList.remove('open');
-}
-async function confirmDelete() {
-  if (!deleteTarget) return;
-  const btn = document.getElementById('confirmBtn');
-  btn.disabled = true; btn.textContent = "O'chirilmoqda...";
-  try {
-    await api(`/${deleteTarget.type}/${deleteTarget.id}`, { method: 'DELETE' });
-    closeModal();
-    await loadAll();
-  } catch (e) { alert('Xatolik'); }
-  finally { btn.disabled = false; btn.textContent = "O'chirish"; }
+function closeModal(){delTarget=null;document.getElementById('modal').classList.remove('open')}
+async function confirmDelete(){
+  if(!delTarget)return;
+  const btn=document.getElementById('modalBtn');btn.disabled=true;btn.textContent="O'chirilmoqda...";
+  try{await api(`/${delTarget.type}/${delTarget.id}`,{method:'DELETE'});closeModal();await loadAll()}
+  catch(e){alert('Xatolik')}
+  finally{btn.disabled=false;btn.textContent="O'chirish"}
 }
 
-// ===== PASSWORD TOGGLE =====
-function togglePassword() {
-  const inp = document.getElementById('passwordInput');
-  const btn = document.getElementById('eyeBtn');
-  if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = '&#128064;'; }
-  else { inp.type = 'password'; btn.innerHTML = '&#128065;'; }
-}
-
-// ===== INIT =====
-if (token) showDashboard();
+if(token)showDash();
 </script>
 </body>
 </html>
