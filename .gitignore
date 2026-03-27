@@ -10,9 +10,7 @@ coverage/
 *.db
 *.db-journal
 backend/prisma/migrations/
-backend/uploads/*.jpg
-backend/uploads/*.jpeg
-backend/uploads/*.png
-backend/uploads/*.webp
+backend/uploads/*
+!backend/uploads/.gitkeep
 cloudflared.exe
 test_images/
