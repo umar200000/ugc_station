@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, Megaphone } from 'lucide-react';
+import { Building2, Megaphone, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 import { hapticFeedback } from '../lib/telegram';
 
@@ -9,6 +9,7 @@ export default function SelectRole() {
   const [selected, setSelected] = useState<string | null>(null);
 
   const handleSelect = async (role: 'COMPANY' | 'INFLUENCER') => {
+    if (loading) return;
     setSelected(role);
     setLoading(true);
     hapticFeedback('medium');
@@ -17,7 +18,6 @@ export default function SelectRole() {
     } catch (err) {
       console.error(err);
       setSelected(null);
-    } finally {
       setLoading(false);
     }
   };
@@ -52,11 +52,13 @@ export default function SelectRole() {
             }}
           >
             <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg, #10B981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(16,185,129,0.25)' }}>
-              <Building2 size={24} color="#fff" />
+              {selected === 'COMPANY' && loading ? <Loader2 size={24} color="#fff" className="spin" /> : <Building2 size={24} color="#fff" />}
             </div>
             <div>
               <span style={{ fontSize: 17, fontWeight: 700, display: 'block', color: 'var(--text)' }}>Kompaniya</span>
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginTop: 2 }}>Reklama e'loni joylang, influenserlarni toping</span>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginTop: 2 }}>
+                {selected === 'COMPANY' && loading ? 'Yuklanmoqda...' : 'Reklama e\'loni joylang, influenserlarni toping'}
+              </span>
             </div>
           </button>
 
@@ -72,11 +74,13 @@ export default function SelectRole() {
             }}
           >
             <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }}>
-              <Megaphone size={24} color="#fff" />
+              {selected === 'INFLUENCER' && loading ? <Loader2 size={24} color="#fff" className="spin" /> : <Megaphone size={24} color="#fff" />}
             </div>
             <div>
               <span style={{ fontSize: 17, fontWeight: 700, display: 'block', color: 'var(--text)' }}>Influenser</span>
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginTop: 2 }}>E'lonlarni ko'ring, hamkorlik qiling, daromad oling</span>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginTop: 2 }}>
+                {selected === 'INFLUENCER' && loading ? 'Yuklanmoqda...' : "E'lonlarni ko'ring, hamkorlik qiling, daromad oling"}
+              </span>
             </div>
           </button>
         </div>
