@@ -185,9 +185,12 @@ export default function Profile() {
     return 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
   };
 
-  const memberSince = user?.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long' })
-    : '';
+  const memberSince = (() => {
+    if (!user?.createdAt) return '';
+    const d = new Date(user.createdAt);
+    const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+    return `${months[d.getMonth()]} ${d.getFullYear()}`;
+  })();
 
   if (editing) {
     return (
