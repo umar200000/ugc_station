@@ -32,12 +32,12 @@ function VideoCard({ video }: { video: VideoItem }) {
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Hozirgina';
+    if (mins < 60) return `${mins} daqiqa oldin`;
     const hours = Math.floor(diff / 3600000);
-    if (hours < 1) return 'Hozirgina';
     if (hours < 24) return `${hours} soat oldin`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days} kun oldin`;
-    return `${Math.floor(days / 7)} hafta oldin`;
+    return new Date(date).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (
