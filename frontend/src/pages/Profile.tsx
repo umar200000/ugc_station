@@ -431,12 +431,12 @@ export default function Profile() {
         }}>
           {isCompany ? (
             <>
-              <div style={{ flex: 1, textAlign: 'center', padding: '8px 0' }}>
+              <div style={{ flex: 1, textAlign: 'center', padding: '8px 0', cursor: 'pointer' }} onClick={() => navigate('/my-ads')}>
                 <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)' }}>{stats.ads}</div>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>E'lonlar</div>
               </div>
               <div style={{ width: 1, background: 'var(--border)' }} />
-              <div style={{ flex: 1, textAlign: 'center', padding: '8px 0' }}>
+              <div style={{ flex: 1, textAlign: 'center', padding: '8px 0', cursor: 'pointer' }} onClick={() => navigate('/my-ads')}>
                 <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)' }}>{stats.applications}</div>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Arizalar</div>
               </div>

@@ -91,7 +91,10 @@ export default function Notifications() {
                     {!n.read && <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', flexShrink: 0 }} />}
                   </div>
                   <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3, lineHeight: 1.4 }}>{n.message}</p>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>{timeAgo(n.createdAt)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{timeAgo(n.createdAt)}</span>
+                    {n.link && <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--primary)' }}>Ko'rish →</span>}
+                  </div>
                 </div>
               </div>
             );
