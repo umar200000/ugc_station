@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, ChevronRight, ChevronDown, Check, X, Clock, CheckCircle2, XCircle, Send, Phone, Link, User, Video, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight, ChevronDown, Check, X, Clock, CheckCircle2, XCircle, Send, Phone, Link, User, Video, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
 import api from '../lib/api';
 import { ApplicationShimmer } from '../components/Shimmer';
 import { hapticFeedback } from '../lib/telegram';
@@ -11,8 +11,20 @@ interface Submission {
   applicationId: string;
   videoUrl: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  comment?: string;
   createdAt: string;
 }
+
+const REJECT_REASONS = [
+  'Video sifati past',
+  'Mahsulot to\'g\'ri ko\'rsatilmagan',
+  'Ovoz yozuvi sifatsiz',
+  'Video formati noto\'g\'ri',
+  'Kontent mos emas',
+  'Montaj sifatsiz',
+  'Video juda qisqa',
+  'Video juda uzun',
+];
 
 const SOCIAL_ICONS: Record<string, string> = {
   instagram: '📷',
@@ -37,6 +49,9 @@ export default function Applications() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
+  const [reviewModal, setReviewModal] = useState<{ subId: string; appId: string; action: 'APPROVED' | 'REJECTED' } | null>(null);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   const loadSubmissions = async (appId: string) => {
     try {
@@ -45,16 +60,27 @@ export default function Applications() {
     } catch (err) { console.error(err); }
   };
 
-  const handleSubStatus = async (subId: string, appId: string, status: 'APPROVED' | 'REJECTED') => {
+  const openReviewModal = (subId: string, appId: string, action: 'APPROVED' | 'REJECTED') => {
+    setReviewModal({ subId, appId, action });
+    setReviewComment('');
+  };
+
+  const handleSubStatus = async () => {
+    if (!reviewModal) return;
+    const { subId, appId, action } = reviewModal;
+    setReviewLoading(true);
     hapticFeedback('medium');
     try {
-      await api.patch(`/submissions/${subId}/status`, { status });
+      await api.patch(`/submissions/${subId}/status`, { status: action, comment: reviewComment.trim() || undefined });
       setSubmissions(prev => ({
         ...prev,
-        [appId]: (prev[appId] || []).map(s => s.id === subId ? { ...s, status } : s),
+        [appId]: (prev[appId] || []).map(s => s.id === subId ? { ...s, status: action, comment: reviewComment.trim() || undefined } : s),
       }));
+      setReviewModal(null);
     } catch (err: any) {
       alert(err.response?.data?.error || 'Xatolik');
+    } finally {
+      setReviewLoading(false);
     }
   };
 
@@ -244,22 +270,29 @@ export default function Applications() {
                             {sub.status === 'PENDING' ? (
                               <div style={{ display: 'flex', gap: 6 }}>
                                 <button className="btn btn-success btn-sm" style={{ padding: '6px 14px', fontSize: 12 }}
-                                  onClick={() => handleSubStatus(sub.id, app.id, 'APPROVED')}>
+                                  onClick={() => openReviewModal(sub.id, app.id, 'APPROVED')}>
                                   <ThumbsUp size={13} /> Yoqdi
                                 </button>
                                 <button className="btn btn-danger btn-sm" style={{ padding: '6px 14px', fontSize: 12 }}
-                                  onClick={() => handleSubStatus(sub.id, app.id, 'REJECTED')}>
+                                  onClick={() => openReviewModal(sub.id, app.id, 'REJECTED')}>
                                   <ThumbsDown size={13} /> Yoqmadi
                                 </button>
                               </div>
                             ) : (
-                              <span style={{
-                                fontSize: 13, fontWeight: 600,
-                                color: sub.status === 'APPROVED' ? 'var(--secondary)' : 'var(--danger)',
-                                display: 'flex', alignItems: 'center', gap: 4,
-                              }}>
-                                {sub.status === 'APPROVED' ? <><CheckCircle2 size={13} /> Tasdiqlangan</> : <><XCircle size={13} /> Rad etilgan</>}
-                              </span>
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{
+                                  fontSize: 13, fontWeight: 600,
+                                  color: sub.status === 'APPROVED' ? 'var(--secondary)' : 'var(--danger)',
+                                  display: 'flex', alignItems: 'center', gap: 4,
+                                }}>
+                                  {sub.status === 'APPROVED' ? <><CheckCircle2 size={13} /> Tasdiqlangan</> : <><XCircle size={13} /> Rad etilgan</>}
+                                </span>
+                                {sub.comment && (
+                                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
+                                    <MessageSquare size={10} /> {sub.comment}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -271,6 +304,109 @@ export default function Applications() {
             </div>
           );
         })
+      )}
+
+      {/* Review modal */}
+      {reviewModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        }} onClick={() => !reviewLoading && setReviewModal(null)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 480,
+              background: 'var(--bg-card)', borderRadius: '20px 20px 0 0',
+              padding: '20px 20px 32px', maxHeight: '85vh', overflowY: 'auto',
+            }}
+          >
+            {/* Handle */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <div style={{ width: 36, height: 4, borderRadius: 100, background: 'var(--border-strong)' }} />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: reviewModal.action === 'APPROVED' ? 'var(--secondary-bg)' : 'var(--danger-bg)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {reviewModal.action === 'APPROVED'
+                  ? <ThumbsUp size={20} style={{ color: 'var(--secondary)' }} />
+                  : <ThumbsDown size={20} style={{ color: 'var(--danger)' }} />
+                }
+              </div>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 700 }}>
+                  {reviewModal.action === 'APPROVED' ? 'Videoni tasdiqlash' : 'Videoni rad etish'}
+                </h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+                  {reviewModal.action === 'APPROVED' ? 'Izoh qoldiring (ixtiyoriy)' : 'Sababini ko\'rsating'}
+                </p>
+              </div>
+            </div>
+
+            {/* Reject reasons */}
+            {reviewModal.action === 'REJECTED' && (
+              <div style={{ marginBottom: 14 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>Tez tanlash:</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {REJECT_REASONS.map((reason) => {
+                    const selected = reviewComment === reason;
+                    return (
+                      <button key={reason} onClick={() => setReviewComment(selected ? '' : reason)} style={{
+                        padding: '7px 12px', borderRadius: 100, fontSize: 12.5, fontWeight: 600,
+                        border: `1.5px solid ${selected ? 'var(--danger)' : 'var(--border-strong)'}`,
+                        background: selected ? 'var(--danger-bg)' : 'var(--bg)',
+                        color: selected ? 'var(--danger)' : 'var(--text-secondary)',
+                        cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                      }}>
+                        {reason}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Comment textarea */}
+            <div style={{ marginBottom: 16 }}>
+              <textarea
+                className="form-textarea"
+                rows={3}
+                placeholder={reviewModal.action === 'APPROVED' ? 'Izoh yozing... (ixtiyoriy)' : 'Batafsil izoh yozing...'}
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                style={{ resize: 'none' }}
+              />
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                className="btn btn-secondary"
+                style={{ flex: 1 }}
+                disabled={reviewLoading}
+                onClick={() => setReviewModal(null)}
+              >
+                Bekor qilish
+              </button>
+              <button
+                className={`btn ${reviewModal.action === 'APPROVED' ? 'btn-success' : 'btn-danger'}`}
+                style={{ flex: 1 }}
+                disabled={reviewLoading || (reviewModal.action === 'REJECTED' && !reviewComment.trim())}
+                onClick={handleSubStatus}
+              >
+                {reviewLoading ? '...' : reviewModal.action === 'APPROVED' ? (
+                  <><CheckCircle2 size={16} /> Tasdiqlash</>
+                ) : (
+                  <><XCircle size={16} /> Rad etish</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

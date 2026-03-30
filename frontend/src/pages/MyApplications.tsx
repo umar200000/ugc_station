@@ -13,6 +13,7 @@ interface Submission {
   applicationId: string;
   videoUrl: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  comment?: string;
   createdAt: string;
 }
 
@@ -329,6 +330,11 @@ export default function MyApplications() {
                               <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 13, fontWeight: 600, color: st.color }}>
                                 {st.icon} {st.label}
                               </div>
+                              {sub.comment && (
+                                <p style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3, lineHeight: 1.4 }}>
+                                  💬 {sub.comment}
+                                </p>
+                              )}
                             </div>
                           </div>
                         );

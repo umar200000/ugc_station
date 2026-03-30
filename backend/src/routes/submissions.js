@@ -181,7 +181,7 @@ router.get('/application/:applicationId', authMiddleware, async (req, res) => {
 // Kompaniya video ni tasdiqlash / rad etish
 router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, comment } = req.body;
 
     if (!['APPROVED', 'REJECTED'].includes(status)) {
       return res.status(400).json({ error: 'Noto\'g\'ri status' });
@@ -214,26 +214,28 @@ router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
 
     const updated = await req.prisma.submission.update({
       where: { id: req.params.id },
-      data: { status },
+      data: { status, comment: comment || null },
     });
 
     // Influenserga notification
     if (submission.application.influencer?.userId) {
+      const commentLine = comment ? `\n💬 Izoh: ${comment}` : '';
+      const commentHtml = comment ? `\n💬 Izoh: <b>${comment}</b>` : '';
       if (status === 'APPROVED') {
         notify(submission.application.influencer.userId, {
           title: 'Video tasdiqlandi!',
-          message: `"${submission.application.ad.title}" uchun videongiz tasdiqlandi. Ajoyib ish!`,
+          message: `"${submission.application.ad.title}" uchun videongiz tasdiqlandi.${commentLine}`,
           type: 'approved',
           link: '/my-applications',
-          telegramMsg: `✅ <b>Videongiz tasdiqlandi!</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>\n\nAjoyib ish! Video yoqdi! 🎉`,
+          telegramMsg: `✅ <b>Videongiz tasdiqlandi!</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>${commentHtml}\n\nAjoyib ish! 🎉`,
         });
       } else {
         notify(submission.application.influencer.userId, {
           title: 'Video rad etildi',
-          message: `"${submission.application.ad.title}" uchun video rad etildi. Yangi video yuklashingiz mumkin.`,
+          message: `"${submission.application.ad.title}" uchun video rad etildi.${commentLine}`,
           type: 'rejected',
           link: '/my-applications',
-          telegramMsg: `❌ <b>Video rad etildi</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>\n\nYangi video yuklashingiz mumkin.`,
+          telegramMsg: `❌ <b>Video rad etildi</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>${commentHtml}\n\nYangi video yuklashingiz mumkin.`,
         });
       }
     }
