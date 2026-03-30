@@ -1,5 +1,6 @@
 const express = require('express');
 const { authMiddleware, companyOnly } = require('../middleware/auth');
+const { notify } = require('../utils/notify');
 
 const router = express.Router();
 
@@ -156,6 +157,25 @@ router.post('/', authMiddleware, companyOnly, async (req, res) => {
     });
 
     res.status(201).json(formatAd(ad));
+
+    // Barcha influenserlarga yangi e'lon haqida xabar
+    try {
+      const influencers = await req.prisma.influencer.findMany({
+        include: { user: { select: { id: true, telegramId: true } } },
+      });
+      const paymentText = adType === 'PAID' ? `💰 ${Number(payment).toLocaleString()} so'm` : `🔄 Barter: ${barterItem || ''}`;
+      for (const inf of influencers) {
+        notify(inf.user.id, {
+          title: 'Yangi e\'lon!',
+          message: `"${title}" — ${company.name}. ${paymentText}`,
+          type: 'info',
+          link: `/ad/${ad.id}`,
+          telegramMsg: `📢 <b>Yangi e'lon!</b>\n\n📌 <b>${title}</b>\n🏢 ${company.name}\n${paymentText}\n\nBatafsil ko'rish uchun mini app ni oching!`,
+        });
+      }
+    } catch (notifyErr) {
+      console.error('Broadcast notify error:', notifyErr.message);
+    }
   } catch (err) {
     console.error('Create ad error:', err);
     res.status(500).json({ error: "E'lon yaratishda xatolik" });
