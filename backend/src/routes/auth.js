@@ -90,6 +90,7 @@ router.post('/telegram', async (req, res) => {
           lastName: telegramUser.last_name || '',
           username: telegramUser.username || '',
           photoUrl,
+          phone: telegramUser.phone || null,
           role: isAdmin ? 'ADMIN' : null,
           onboarded: isAdmin ? true : false,
         },
