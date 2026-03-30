@@ -14,6 +14,7 @@ interface Submission {
   videoUrl: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   comment?: string;
+  reviewedBy?: string;
   createdAt: string;
 }
 
@@ -150,7 +151,7 @@ export default function MyApplications() {
   };
 
   const subStatusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-    PENDING: { label: 'Tekshirilmoqda', color: 'var(--warning-text)', icon: <Clock size={12} /> },
+    PENDING: { label: 'Admin tekshirmoqda', color: 'var(--warning-text)', icon: <Clock size={12} /> },
     APPROVED: { label: 'Tasdiqlandi', color: 'var(--secondary)', icon: <Check size={12} /> },
     REJECTED: { label: 'Rad etildi', color: 'var(--danger)', icon: <X size={12} /> },
   };
@@ -335,17 +336,19 @@ export default function MyApplications() {
                                 </div>
                               </div>
                             </div>
-                            {sub.comment && sub.status === 'REJECTED' && (
+                            {sub.status === 'REJECTED' && (
                               <div style={{
                                 margin: '0 10px 10px', padding: '10px 12px', borderRadius: 10,
                                 background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.12)',
                               }}>
                                 <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--danger)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                                  Rad etish sababi
+                                  {sub.reviewedBy === 'ADMIN' ? '❌ Admin tomonidan rad etildi' : 'Rad etish sababi'}
                                 </p>
-                                <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                  {sub.comment}
-                                </p>
+                                {sub.comment && (
+                                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                    {sub.comment}
+                                  </p>
+                                )}
                               </div>
                             )}
                             {sub.comment && sub.status === 'APPROVED' && (
@@ -354,7 +357,7 @@ export default function MyApplications() {
                                 background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.12)',
                               }}>
                                 <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                                  Kompaniya izohi
+                                  {sub.reviewedBy === 'ADMIN' ? '✅ Admin tasdiqladi' : 'Izoh'}
                                 </p>
                                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                                   {sub.comment}

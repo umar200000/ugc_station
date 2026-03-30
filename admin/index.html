@@ -90,6 +90,17 @@
     .modal-acts .btn{flex:1}
 
     .video-thumb{width:60px;height:60px;border-radius:8px;object-fit:cover;background:#000}
+    .review-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;padding:0}
+    .review-modal.open{display:flex}
+    .review-sheet{background:var(--card);border-radius:20px 20px 0 0;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto}
+    .review-sheet h3{font-size:18px;font-weight:700;margin-bottom:4px}
+    .review-sheet .subtitle{font-size:13px;color:var(--t2);margin-bottom:16px}
+    .reason-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+    .reason-chip{padding:7px 14px;border-radius:100px;font-size:12.5px;font-weight:600;border:1.5px solid var(--bs);background:var(--bg);color:var(--t2);cursor:pointer;transition:.2s;font-family:inherit}
+    .reason-chip.on{border-color:var(--r);background:var(--r-bg);color:var(--r)}
+    .review-textarea{width:100%;padding:10px 14px;border:2px solid var(--b);border-radius:12px;font-size:13px;font-family:inherit;outline:none;resize:none;min-height:70px;transition:.2s}
+    .review-textarea:focus{border-color:var(--p);box-shadow:0 0 0 4px var(--p-bg)}
+    .review-actions{display:flex;gap:8px;margin-top:14px}
     @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.tbl th,.tbl td{padding:10px 12px;font-size:12px}.tabs{gap:4px}.dash{padding:12px}}
   </style>
 </head>
@@ -125,6 +136,24 @@
 
   <div class="table-wrap">
     <table class="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- Video review modal -->
+<div class="review-modal" id="reviewModal">
+  <div class="review-sheet">
+    <div style="display:flex;justify-content:center;margin-bottom:14px"><div style="width:36px;height:4px;border-radius:100px;background:var(--bs)"></div></div>
+    <h3 id="reviewTitle">Videoni tekshirish</h3>
+    <p class="subtitle" id="reviewSubtitle"></p>
+    <div id="reviewReasons" style="display:none">
+      <p style="font-size:13px;font-weight:600;color:var(--t3);margin-bottom:8px">Sabablarni tanlang:</p>
+      <div class="reason-chips" id="reasonChips"></div>
+    </div>
+    <textarea class="review-textarea" id="reviewComment" placeholder="Izoh yozing..."></textarea>
+    <div class="review-actions">
+      <button class="btn btn-s" style="flex:1" onclick="closeReview()">Bekor</button>
+      <button class="btn" id="reviewSubmitBtn" style="flex:1" onclick="submitReview()">Tasdiqlash</button>
+    </div>
   </div>
 </div>
 
@@ -191,6 +220,7 @@ function renderStats(s){
     {l:'Arizalar',v:s.applications,c:'var(--p-bg)',ic:'&#128203;'},
     {l:'Kutilmoqda',v:s.pendingApps,c:'var(--w-bg)',ic:'&#9200;'},
     {l:'Videolar',v:s.submissions,c:'#FEE2E2',ic:'&#127909;'},
+    {l:'Tekshiruv kutmoqda',v:s.pendingVideos,c:'var(--w-bg)',ic:'&#9203;'},
   ];
   document.getElementById('statsGrid').innerHTML=items.map(i=>`<div class="stat"><div class="stat-icon" style="background:${i.c}">${i.ic}</div><div class="stat-val">${i.v}</div><div class="stat-lbl">${i.l}</div></div>`).join('');
 }
@@ -261,10 +291,11 @@ function renderTable(){
     }).join('');
   }
   else if(currentTab==='submissions'){
-    h='<tr><th>Video</th><th>Influenser</th><th>E\'lon</th><th>Holati</th><th>Sana</th></tr>';
+    h='<tr><th>Video</th><th>Influenser</th><th>E\'lon</th><th>Holati</th><th>Sana</th><th>Amal</th></tr>';
     rows=data.map(s=>{
       const inf=s.application?.influencer;const ad=s.application?.ad;
-      return`<tr data-s="${inf?.name||''} ${ad?.title||''}"><td><video src="${s.videoUrl}#t=0.5" class="video-thumb" preload="auto" onclick="this.paused?this.play():this.pause()"></video></td><td><div class="row">${avatarHtml(inf?.user?.photoUrl,inf?.name)}<div><div class="name">${inf?.name||'—'}</div></div></div></td><td>${ad?.title||'—'}<div class="meta">${ad?.company?.name||''}</div></td><td>${statusBadge(s.status)} ${s.status==='PENDING'?`<button class="btn btn-sm btn-g" onclick="setSubStatus('${s.id}','APPROVED')">&#128077;</button><button class="btn btn-sm btn-r" onclick="setSubStatus('${s.id}','REJECTED')" style="margin-left:4px">&#128078;</button>`:''}</td><td>${fmtDate(s.createdAt)}</td></tr>`;
+      const commentInfo=s.comment?`<div class="meta" style="margin-top:4px">💬 ${s.comment}</div>`:'';
+      return`<tr data-s="${inf?.name||''} ${ad?.title||''}"><td><video src="${s.videoUrl}#t=0.5" class="video-thumb" preload="auto" onclick="this.paused?this.play():this.pause()"></video></td><td><div class="row">${avatarHtml(inf?.user?.photoUrl,inf?.name)}<div><div class="name">${inf?.name||'—'}</div></div></div></td><td>${ad?.title||'—'}<div class="meta">${ad?.company?.name||''}</div></td><td>${statusBadge(s.status)}${commentInfo}</td><td>${fmtDate(s.createdAt)}</td><td>${s.status==='PENDING'?`<button class="btn btn-sm btn-g" onclick="openReview('${s.id}','APPROVED')">✅ Tasdiqlash</button> <button class="btn btn-sm btn-r" onclick="openReview('${s.id}','REJECTED')">❌ Rad etish</button>`:s.reviewedBy==='ADMIN'?'<span class="meta">Admin tekshirgan</span>':''}</td></tr>`;
     }).join('');
   }
 
@@ -289,9 +320,47 @@ async function setAppStatus(id,status){
   await api(`/application/${id}/status`,{method:'PATCH',body:JSON.stringify({status})});
   await loadAll();
 }
-async function setSubStatus(id,status){
-  await api(`/submission/${id}/status`,{method:'PATCH',body:JSON.stringify({status})});
-  await loadAll();
+const REJECT_REASONS=['Video sifati past','Mahsulot to\'g\'ri ko\'rsatilmagan','Ovoz yozuvi sifatsiz','Video formati noto\'g\'ri','Kontent mos emas','Montaj sifatsiz','Video juda qisqa','Video juda uzun'];
+let reviewState={id:null,action:null,selectedReasons:[]};
+
+function openReview(id,action){
+  reviewState={id,action,selectedReasons:[]};
+  document.getElementById('reviewComment').value='';
+  document.getElementById('reviewTitle').textContent=action==='APPROVED'?'Videoni tasdiqlash':'Videoni rad etish';
+  document.getElementById('reviewSubtitle').textContent=action==='APPROVED'?'Izoh qoldiring (ixtiyoriy)':'Sababini ko\'rsating';
+  const reasonsDiv=document.getElementById('reviewReasons');
+  const btn=document.getElementById('reviewSubmitBtn');
+  if(action==='REJECTED'){
+    reasonsDiv.style.display='block';
+    document.getElementById('reasonChips').innerHTML=REJECT_REASONS.map((r,i)=>`<button class="reason-chip" data-idx="${i}" onclick="toggleChip(this,${i})">${r}</button>`).join('');
+    btn.className='btn btn-r';btn.textContent='Rad etish';
+  }else{
+    reasonsDiv.style.display='none';
+    btn.className='btn btn-g';btn.textContent='Tasdiqlash';
+  }
+  document.getElementById('reviewModal').classList.add('open');
+}
+function closeReview(){document.getElementById('reviewModal').classList.remove('open');reviewState={id:null,action:null,selectedReasons:[]}}
+function toggleChip(el,idx){
+  const r=REJECT_REASONS[idx];
+  const i=reviewState.selectedReasons.indexOf(r);
+  if(i>=0){reviewState.selectedReasons.splice(i,1);el.classList.remove('on')}
+  else{reviewState.selectedReasons.push(r);el.classList.add('on')}
+}
+async function submitReview(){
+  if(!reviewState.id)return;
+  const parts=[];
+  if(reviewState.selectedReasons.length>0)parts.push(reviewState.selectedReasons.join(', '));
+  const extra=document.getElementById('reviewComment').value.trim();
+  if(extra)parts.push(extra);
+  const comment=parts.join('. ');
+  if(reviewState.action==='REJECTED'&&!comment){alert('Rad etish uchun sabab yozing');return}
+  const btn=document.getElementById('reviewSubmitBtn');btn.disabled=true;btn.textContent='...';
+  try{
+    await api(`/submission/${reviewState.id}/status`,{method:'PATCH',body:JSON.stringify({status:reviewState.action,comment:comment||undefined})});
+    closeReview();await loadAll();
+  }catch(e){alert('Xatolik')}
+  finally{btn.disabled=false}
 }
 
 function openModal(type,id,name){

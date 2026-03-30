@@ -30,7 +30,7 @@ const upload = multer({
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
 });
 
-// Influenser video yuklash
+// Influenser video yuklash — admin tekshiruviga ketadi
 router.post('/', authMiddleware, influencerOnly, upload.single('video'), async (req, res) => {
   try {
     const { applicationId } = req.body;
@@ -39,7 +39,6 @@ router.post('/', authMiddleware, influencerOnly, upload.single('video'), async (
       return res.status(400).json({ error: 'Video yuklanmadi' });
     }
 
-    // Application ni tekshirish
     const influencer = await req.prisma.influencer.findUnique({
       where: { userId: req.user.userId },
     });
@@ -69,16 +68,14 @@ router.post('/', authMiddleware, influencerOnly, upload.single('video'), async (
       },
     });
 
-    // Kompaniyaga notification
-    if (application.ad?.company?.userId) {
-      notify(application.ad.company.userId, {
-        title: 'Yangi video keldi!',
-        message: `${application.influencer.name} "${application.ad.title}" uchun video yukladi`,
-        type: 'video',
-        link: `/ad/${application.adId}/applications`,
-        telegramMsg: `🎬 <b>Yangi video keldi!</b>\n\n📢 E'lon: <b>${application.ad.title}</b>\n👤 Influenser: <b>${application.influencer.name}</b>\n\nMini App ni ochib videoni ko'ring!`,
-      });
-    }
+    // Influenserga tasdiq — video admin tekshiruviga yuborildi
+    notify(application.influencer.userId, {
+      title: 'Video yuborildi!',
+      message: `"${application.ad.title}" uchun videongiz admin tekshiruviga yuborildi.`,
+      type: 'video',
+      link: '/my-applications',
+      telegramMsg: `📤 <b>Video yuborildi!</b>\n\n📢 E'lon: <b>${application.ad.title}</b>\n\nVideongiz admin tekshiruvida. Natija tez orada ma'lum bo'ladi.`,
+    });
 
     res.status(201).json(submission);
   } catch (err) {
@@ -87,7 +84,7 @@ router.post('/', authMiddleware, influencerOnly, upload.single('video'), async (
   }
 });
 
-// Barcha videolar (feed uchun)
+// Barcha tasdiqlangan videolar (feed uchun)
 router.get('/feed', async (req, res) => {
   try {
     const submissions = await req.prisma.submission.findMany({
@@ -111,7 +108,7 @@ router.get('/feed', async (req, res) => {
   }
 });
 
-// Kompaniyaning tasdiqlagan videolari
+// Kompaniyaning tasdiqlagan videolari (faqat admin tasdiqlagan)
 router.get('/company/approved', authMiddleware, async (req, res) => {
   try {
     const company = await req.prisma.company.findUnique({ where: { userId: req.user.userId } });
@@ -174,75 +171,6 @@ router.get('/application/:applicationId', authMiddleware, async (req, res) => {
     res.json(submissions);
   } catch (err) {
     console.error('Get submissions error:', err);
-    res.status(500).json({ error: 'Xatolik' });
-  }
-});
-
-// Kompaniya video ni tasdiqlash / rad etish
-router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
-  try {
-    const { status, comment } = req.body;
-
-    if (!['APPROVED', 'REJECTED'].includes(status)) {
-      return res.status(400).json({ error: 'Noto\'g\'ri status' });
-    }
-
-    const submission = await req.prisma.submission.findUnique({
-      where: { id: req.params.id },
-      include: {
-        application: {
-          include: {
-            ad: { include: { company: true } },
-            influencer: { include: { user: true } },
-          },
-        },
-      },
-    });
-
-    if (!submission) {
-      return res.status(404).json({ error: 'Video topilmadi' });
-    }
-
-    // Kompaniya ekanligini tekshirish
-    const company = await req.prisma.company.findUnique({
-      where: { userId: req.user.userId },
-    });
-
-    if (submission.application.ad.companyId !== company.id) {
-      return res.status(403).json({ error: 'Ruxsat yo\'q' });
-    }
-
-    const updated = await req.prisma.submission.update({
-      where: { id: req.params.id },
-      data: { status, comment: comment || null },
-    });
-
-    // Influenserga notification
-    if (submission.application.influencer?.userId) {
-      const commentLine = comment ? `\n💬 Izoh: ${comment}` : '';
-      const commentHtml = comment ? `\n💬 Izoh: <b>${comment}</b>` : '';
-      if (status === 'APPROVED') {
-        notify(submission.application.influencer.userId, {
-          title: 'Video tasdiqlandi!',
-          message: `"${submission.application.ad.title}" uchun videongiz tasdiqlandi.${commentLine}`,
-          type: 'approved',
-          link: '/my-applications',
-          telegramMsg: `✅ <b>Videongiz tasdiqlandi!</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>${commentHtml}\n\nAjoyib ish! 🎉`,
-        });
-      } else {
-        notify(submission.application.influencer.userId, {
-          title: 'Video rad etildi',
-          message: `"${submission.application.ad.title}" uchun video rad etildi.${commentLine}`,
-          type: 'rejected',
-          link: '/my-applications',
-          telegramMsg: `❌ <b>Video rad etildi</b>\n\n📢 E'lon: <b>${submission.application.ad.title}</b>\n🏢 Kompaniya: <b>${submission.application.ad.company.name}</b>${commentHtml}\n\nYangi video yuklashingiz mumkin.`,
-        });
-      }
-    }
-
-    res.json(updated);
-  } catch (err) {
-    console.error('Update submission error:', err);
     res.status(500).json({ error: 'Xatolik' });
   }
 });

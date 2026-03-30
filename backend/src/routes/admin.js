@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { authMiddleware, adminOnly } = require('../middleware/auth');
+const { notify } = require('../utils/notify');
 
 const router = express.Router();
 
@@ -46,8 +47,9 @@ router.get('/stats', async (req, res) => {
     const acceptedApps = await req.prisma.application.count({ where: { status: 'ACCEPTED' } });
     const approvedVideos = await req.prisma.submission.count({ where: { status: 'APPROVED' } });
     const pendingApps = await req.prisma.application.count({ where: { status: 'PENDING' } });
+    const pendingVideos = await req.prisma.submission.count({ where: { status: 'PENDING' } });
 
-    res.json({ users, companies, influencers, ads, activeAds, applications, acceptedApps, submissions, approvedVideos, pendingApps });
+    res.json({ users, companies, influencers, ads, activeAds, applications, acceptedApps, submissions, approvedVideos, pendingApps, pendingVideos });
   } catch (err) {
     console.error('Admin stats error:', err);
     res.status(500).json({ error: 'Xatolik' });
@@ -188,14 +190,70 @@ router.patch('/application/:id/status', async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
 });
 
-// Video statusini o'zgartirish
+// Video statusini o'zgartirish (Admin tekshiruvi)
 router.patch('/submission/:id/status', async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, comment } = req.body;
     if (!['PENDING', 'APPROVED', 'REJECTED'].includes(status)) return res.status(400).json({ error: 'Noto\'g\'ri status' });
-    const sub = await req.prisma.submission.update({ where: { id: req.params.id }, data: { status } });
-    res.json(sub);
-  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+
+    const submission = await req.prisma.submission.findUnique({
+      where: { id: req.params.id },
+      include: {
+        application: {
+          include: {
+            influencer: { include: { user: true } },
+            ad: { include: { company: { include: { user: true } } } },
+          },
+        },
+      },
+    });
+    if (!submission) return res.status(404).json({ error: 'Topilmadi' });
+
+    const updated = await req.prisma.submission.update({
+      where: { id: req.params.id },
+      data: { status, comment: comment || null, reviewedBy: 'ADMIN' },
+    });
+
+    const adTitle = submission.application.ad.title;
+    const companyName = submission.application.ad.company.name;
+    const influencerName = submission.application.influencer.name;
+    const commentLine = comment ? `\n💬 Izoh: ${comment}` : '';
+    const commentHtml = comment ? `\n💬 Izoh: <b>${comment}</b>` : '';
+
+    if (status === 'APPROVED') {
+      // Kompaniyaga xabar — yangi video tayyor
+      notify(submission.application.ad.company.userId, {
+        title: 'Yangi video tayyor!',
+        message: `"${adTitle}" uchun ${influencerName} dan video tasdiqlandi va ko'rishingiz mumkin.`,
+        type: 'video',
+        link: `/ad/${submission.application.adId}/applications`,
+        telegramMsg: `🎬 <b>Yangi video tayyor!</b>\n\n📢 E'lon: <b>${adTitle}</b>\n👤 Influenser: <b>${influencerName}</b>\n\nAdmin tomonidan tasdiqlangan video ko'rishingiz mumkin.`,
+      }, req.prisma);
+
+      // Influenserga xabar — video tasdiqlandi
+      notify(submission.application.influencer.userId, {
+        title: 'Video tasdiqlandi!',
+        message: `"${adTitle}" uchun videongiz admin tomonidan tasdiqlandi.${commentLine}`,
+        type: 'approved',
+        link: '/my-applications',
+        telegramMsg: `✅ <b>Videongiz tasdiqlandi!</b>\n\n📢 E'lon: <b>${adTitle}</b>\n🏢 Kompaniya: <b>${companyName}</b>${commentHtml}\n\nAdmin tomonidan tasdiqlandi! 🎉`,
+      }, req.prisma);
+    } else if (status === 'REJECTED') {
+      // Influenserga xabar — admin rad etdi
+      notify(submission.application.influencer.userId, {
+        title: 'Video rad etildi (Admin)',
+        message: `"${adTitle}" uchun video admin tomonidan rad etildi.${commentLine}`,
+        type: 'rejected',
+        link: '/my-applications',
+        telegramMsg: `❌ <b>Video rad etildi (Admin)</b>\n\n📢 E'lon: <b>${adTitle}</b>\n🏢 Kompaniya: <b>${companyName}</b>${commentHtml}\n\nYangi video yuklashingiz mumkin.`,
+      }, req.prisma);
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error('Admin submission status error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
 });
 
 // E'lon statusini o'zgartirish
