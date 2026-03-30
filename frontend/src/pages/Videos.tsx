@@ -67,7 +67,7 @@ function VideoCard({ video }: { video: VideoItem }) {
       </div>
 
       {/* Video */}
-      <div style={{ position: 'relative', background: '#000', height: 220, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', background: '#000', aspectRatio: '9/12', overflow: 'hidden' }}>
         {!playing ? (
           <div
             onClick={() => setPlaying(true)}
@@ -77,25 +77,52 @@ function VideoCard({ video }: { video: VideoItem }) {
               <div className="shimmer" style={{ position: 'absolute', inset: 0, borderRadius: 0 }} />
             )}
             <video
-              src={video.videoUrl + '#t=0.1'}
+              src={video.videoUrl + '#t=0.5'}
               preload="metadata"
               muted
               playsInline
               onLoadedData={() => setThumbLoaded(true)}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: thumbLoaded ? 0.8 : 0 }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: thumbLoaded ? 1 : 0, transition: 'opacity 0.3s' }}
             />
+            {/* Bottom gradient overlay */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
+              pointerEvents: 'none',
+            }} />
+            {/* Top gradient overlay */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: '30%',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), transparent)',
+              pointerEvents: 'none',
+            }} />
+            {/* Play button */}
             <div style={{
               position: 'absolute', inset: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <div style={{
-                width: 60, height: 60, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.95)',
+                width: 64, height: 64, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                border: '2px solid rgba(255,255,255,0.4)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                transition: 'transform 0.2s',
               }}>
-                <Play size={28} fill="var(--primary)" stroke="var(--primary)" style={{ marginLeft: 3 }} />
+                <Play size={28} fill="#fff" stroke="#fff" style={{ marginLeft: 3 }} />
               </div>
+            </div>
+            {/* Bottom info overlay */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              padding: '14px 14px', display: 'flex', flexDirection: 'column', gap: 6,
+            }}>
+              <p style={{ fontSize: 15, fontWeight: 700, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+                {ad.title}
+              </p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>
+                {ad.company.name} · {inf.category?.split(',')[0]?.trim()}
+              </p>
             </div>
           </div>
         ) : (
@@ -107,14 +134,6 @@ function VideoCard({ video }: { video: VideoItem }) {
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         )}
-      </div>
-
-      {/* Bottom info */}
-      <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          <span style={{ fontWeight: 600 }}>{ad.title}</span>
-          <span style={{ color: 'var(--text-muted)' }}> · {ad.company.name}</span>
-        </div>
       </div>
     </div>
   );
