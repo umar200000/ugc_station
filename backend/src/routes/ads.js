@@ -159,14 +159,18 @@ router.post('/', authMiddleware, companyOnly, async (req, res) => {
     res.status(201).json(formatAd(ad));
 
     // Barcha userlarga yangi e'lon haqida xabar (Telegram + in-app)
-    const paymentText = adType === 'PAID' ? `💰 ${Number(payment).toLocaleString()} so'm` : `🔄 Barter: ${barterItem || ''}`;
-    broadcastAll({
-      title: 'Yangi e\'lon!',
-      message: `"${title}" — ${company.name}. ${paymentText}`,
-      type: 'info',
-      link: `/ad/${ad.id}`,
-      telegramMsg: `📢 <b>Yangi e'lon!</b>\n\n📌 <b>${title}</b>\n🏢 ${company.name}\n${paymentText}\n\nBatafsil ko'rish uchun mini app ni oching!`,
-    });
+    try {
+      const paymentText = adType === 'PAID' ? `💰 ${Number(payment).toLocaleString()} so'm` : `🔄 Barter: ${barterItem || ''}`;
+      await broadcastAll({
+        title: 'Yangi e\'lon!',
+        message: `"${title}" — ${company.name}. ${paymentText}`,
+        type: 'info',
+        link: `/ad/${ad.id}`,
+        telegramMsg: `📢 <b>Yangi e'lon!</b>\n\n📌 <b>${title}</b>\n🏢 ${company.name}\n${paymentText}\n\nBatafsil ko'rish uchun mini app ni oching!`,
+      });
+    } catch (broadcastErr) {
+      console.error('Broadcast error:', broadcastErr);
+    }
   } catch (err) {
     console.error('Create ad error:', err);
     res.status(500).json({ error: "E'lon yaratishda xatolik" });
