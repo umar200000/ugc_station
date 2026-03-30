@@ -116,7 +116,7 @@ router.get('/company/approved', authMiddleware, async (req, res) => {
 
     const submissions = await req.prisma.submission.findMany({
       where: {
-        status: { in: ['APPROVED', 'HIDDEN'] },
+        status: 'APPROVED',
         application: { ad: { companyId: company.id } },
       },
       include: {
@@ -132,31 +132,6 @@ router.get('/company/approved', authMiddleware, async (req, res) => {
     res.json(submissions);
   } catch (err) {
     console.error('Company approved videos error:', err);
-    res.status(500).json({ error: 'Xatolik' });
-  }
-});
-
-// Video faolligini o'zgartirish (APPROVED <-> HIDDEN)
-router.patch('/:id/toggle', authMiddleware, async (req, res) => {
-  try {
-    const sub = await req.prisma.submission.findUnique({
-      where: { id: req.params.id },
-      include: { application: { include: { ad: true } } },
-    });
-    if (!sub) return res.status(404).json({ error: 'Topilmadi' });
-
-    const company = await req.prisma.company.findUnique({ where: { userId: req.user.userId } });
-    if (!company || sub.application.ad.companyId !== company.id) {
-      return res.status(403).json({ error: 'Ruxsat yo\'q' });
-    }
-
-    const newStatus = sub.status === 'APPROVED' ? 'HIDDEN' : 'APPROVED';
-    const updated = await req.prisma.submission.update({
-      where: { id: req.params.id },
-      data: { status: newStatus },
-    });
-    res.json(updated);
-  } catch (err) {
     res.status(500).json({ error: 'Xatolik' });
   }
 });

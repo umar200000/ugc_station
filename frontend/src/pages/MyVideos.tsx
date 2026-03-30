@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, Play, Clock } from 'lucide-react';
+import { ArrowLeft, Play, Clock } from 'lucide-react';
 import api from '../lib/api';
 
 interface VideoItem {
@@ -18,7 +18,6 @@ export default function MyVideos() {
   const navigate = useNavigate();
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [toggling, setToggling] = useState<string | null>(null);
 
   useEffect(() => {
     api.get('/submissions/company/approved')
@@ -27,24 +26,12 @@ export default function MyVideos() {
       .finally(() => setLoading(false));
   }, []);
 
-  const toggleVideo = async (id: string) => {
-    setToggling(id);
-    try {
-      const res = await api.patch(`/submissions/${id}/toggle`);
-      setVideos(prev => prev.map(v => v.id === id ? { ...v, status: res.data.status } : v));
-    } catch (err) { console.error(err); }
-    finally { setToggling(null); }
-  };
-
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const hours = Math.floor(diff / 3600000);
     if (hours < 24) return `${hours} soat oldin`;
     return new Date(date).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
   };
-
-  const activeCount = videos.filter(v => v.status === 'APPROVED').length;
-  const hiddenCount = videos.filter(v => v.status === 'HIDDEN').length;
 
   return (
     <div className="page">
@@ -53,9 +40,9 @@ export default function MyVideos() {
       </button>
 
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Tasdiqlangan videolar</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Videolar</h1>
         <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-          {activeCount} ta faol · {hiddenCount} ta yashirin
+          {videos.length} ta video
         </p>
       </div>
 
@@ -77,14 +64,12 @@ export default function MyVideos() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {videos.map(v => {
             const inf = v.application?.influencer;
-            const isActive = v.status === 'APPROVED';
             return (
               <div key={v.id} style={{
                 background: 'var(--bg-card)', borderRadius: 14, overflow: 'hidden',
-                border: '1px solid var(--border)', opacity: isActive ? 1 : 0.6,
+                border: '1px solid var(--border)',
               }}>
                 <div style={{ display: 'flex', gap: 12, padding: 12, alignItems: 'center' }}>
-                  {/* Video thumbnail */}
                   <div style={{ position: 'relative', width: 80, height: 80, flexShrink: 0, borderRadius: 10, overflow: 'hidden', background: '#000' }}>
                     <video src={v.videoUrl + '#t=0.1'} preload="metadata" muted playsInline
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -95,7 +80,6 @@ export default function MyVideos() {
                     </div>
                   </div>
 
-                  {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{
@@ -116,21 +100,6 @@ export default function MyVideos() {
                       <Clock size={10} /> {timeAgo(v.createdAt)}
                     </div>
                   </div>
-
-                  {/* Toggle */}
-                  <button
-                    onClick={() => toggleVideo(v.id)}
-                    disabled={toggling === v.id}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 4,
-                      padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                      border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                      background: isActive ? 'var(--g-bg, rgba(16,185,129,0.08))' : 'var(--r-bg, rgba(239,68,68,0.07))',
-                      color: isActive ? '#065F46' : '#991B1B',
-                    }}
-                  >
-                    {isActive ? <><Eye size={14} /> Faol</> : <><EyeOff size={14} /> Yashirin</>}
-                  </button>
                 </div>
               </div>
             );
