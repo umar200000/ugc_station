@@ -1,7 +1,20 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Telegram + In-app notification yuborish
+// Telegram xabar yuborish (telegramId bilan to'g'ridan-to'g'ri)
+async function sendTelegram(telegramId, text) {
+  try {
+    const botToken = process.env.BOT_TOKEN;
+    if (!botToken || !telegramId) return;
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: telegramId, text, parse_mode: 'HTML' }),
+    }).catch(() => {});
+  } catch {}
+}
+
+// Telegram + In-app notification yuborish (userId orqali)
 async function notify(userId, { title, message, type = 'info', link = '', telegramMsg = '' }) {
   try {
     // In-app notification
@@ -13,14 +26,7 @@ async function notify(userId, { title, message, type = 'info', link = '', telegr
     if (telegramMsg) {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (user?.telegramId) {
-        const botToken = process.env.BOT_TOKEN;
-        if (botToken) {
-          fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: user.telegramId, text: telegramMsg, parse_mode: 'HTML' }),
-          }).catch(() => {});
-        }
+        await sendTelegram(user.telegramId, telegramMsg);
       }
     }
   } catch (err) {
@@ -28,4 +34,28 @@ async function notify(userId, { title, message, type = 'info', link = '', telegr
   }
 }
 
-module.exports = { notify };
+// Barcha userlarga Telegram + in-app xabar yuborish
+async function broadcastAll({ title, message, type = 'info', link = '', telegramMsg = '' }) {
+  try {
+    const users = await prisma.user.findMany({
+      where: { onboarded: true },
+      select: { id: true, telegramId: true },
+    });
+    for (const user of users) {
+      try {
+        await prisma.notification.create({
+          data: { userId: user.id, title, message, type, link },
+        });
+        if (telegramMsg && user.telegramId) {
+          await sendTelegram(user.telegramId, telegramMsg);
+        }
+      } catch (e) {
+        console.error('Broadcast single error:', e.message);
+      }
+    }
+  } catch (err) {
+    console.error('Broadcast error:', err.message);
+  }
+}
+
+module.exports = { notify, sendTelegram, broadcastAll };

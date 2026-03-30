@@ -223,12 +223,12 @@ router.patch('/submission/:id/status', async (req, res) => {
     if (status === 'APPROVED') {
       // Kompaniyaga xabar — yangi video tayyor
       notify(submission.application.ad.company.userId, {
-        title: 'Yangi video tayyor!',
-        message: `"${adTitle}" uchun ${influencerName} dan video tasdiqlandi va ko'rishingiz mumkin.`,
+        title: 'Video tasdiqlandi (Admin)',
+        message: `"${adTitle}" uchun ${influencerName} dan video admin tomonidan tasdiqlandi.${commentLine}`,
         type: 'video',
         link: `/ad/${submission.application.adId}/applications`,
-        telegramMsg: `🎬 <b>Yangi video tayyor!</b>\n\n📢 E'lon: <b>${adTitle}</b>\n👤 Influenser: <b>${influencerName}</b>\n\nAdmin tomonidan tasdiqlangan video ko'rishingiz mumkin.`,
-      }, req.prisma);
+        telegramMsg: `✅ <b>Video tasdiqlandi — Admin</b>\n\n📢 E'lon: <b>${adTitle}</b>\n👤 Influenser: <b>${influencerName}</b>\n🏢 Kompaniya: <b>${companyName}</b>${commentHtml}\n\nAdmin tomonidan tasdiqlangan video mini app da ko'rishingiz mumkin.`,
+      });
 
       // Influenserga xabar — video tasdiqlandi
       notify(submission.application.influencer.userId, {
@@ -237,7 +237,7 @@ router.patch('/submission/:id/status', async (req, res) => {
         type: 'approved',
         link: '/my-applications',
         telegramMsg: `✅ <b>Videongiz tasdiqlandi!</b>\n\n📢 E'lon: <b>${adTitle}</b>\n🏢 Kompaniya: <b>${companyName}</b>${commentHtml}\n\nAdmin tomonidan tasdiqlandi! 🎉`,
-      }, req.prisma);
+      });
     } else if (status === 'REJECTED') {
       // Influenserga xabar — admin rad etdi
       notify(submission.application.influencer.userId, {
@@ -246,7 +246,7 @@ router.patch('/submission/:id/status', async (req, res) => {
         type: 'rejected',
         link: '/my-applications',
         telegramMsg: `❌ <b>Video rad etildi (Admin)</b>\n\n📢 E'lon: <b>${adTitle}</b>\n🏢 Kompaniya: <b>${companyName}</b>${commentHtml}\n\nYangi video yuklashingiz mumkin.`,
-      }, req.prisma);
+      });
     }
 
     res.json(updated);
