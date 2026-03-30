@@ -33,19 +33,21 @@ export default function BottomNav() {
         </NavLink>
 
         {/* Refresh button */}
-        <button onClick={handleRefresh} className="nav-refresh-btn" style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
-          width: 48, height: 48, borderRadius: '50%', border: 'none',
-          color: '#fff', cursor: 'pointer',
-          boxShadow: '0 4px 14px rgba(37,99,235,0.35)',
-          marginTop: -18, transition: 'transform 0.2s',
-        }}>
-          <RefreshCw size={22} strokeWidth={2.2} style={{
-            transition: 'transform 0.6s ease',
-            transform: spinning ? 'rotate(360deg)' : 'rotate(0deg)',
-          }} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 10px' }}>
+          <button onClick={handleRefresh} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+            width: 44, height: 44, borderRadius: '50%', border: 'none',
+            color: '#fff', cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(37,99,235,0.35)',
+            marginTop: -20, transition: 'transform 0.2s',
+          }}>
+            <RefreshCw size={20} strokeWidth={2.2} style={{
+              transition: 'transform 0.6s ease',
+              transform: spinning ? 'rotate(360deg)' : 'rotate(0deg)',
+            }} />
+          </button>
+        </div>
 
         {user?.role === 'COMPANY' ? (
           <NavLink to="/my-ads" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
