@@ -303,4 +303,15 @@ router.delete('/ad/:id', async (req, res) => {
   }
 });
 
+// Video o'chirish
+router.delete('/submission/:id', async (req, res) => {
+  try {
+    await req.prisma.submission.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Admin delete submission error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
 module.exports = router;
