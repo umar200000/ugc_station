@@ -33,7 +33,8 @@ export default function OnboardingInfluencer() {
   const [bio, setBio] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState('');
-  const [linkInputs, setLinkInputs] = useState<string[]>(['']);
+  const [socialLinks, setSocialLinks] = useState({ instagram: '', telegram: '', youtube: '', tiktok: '' });
+  const [extraLinks, setExtraLinks] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const toggleCategory = (cat: string) => {
@@ -50,22 +51,6 @@ export default function OnboardingInfluencer() {
     }
   };
 
-  const handleLinkChange = (index: number, value: string) => {
-    setLinkInputs(prev => {
-      const updated = [...prev];
-      updated[index] = value;
-      return updated;
-    });
-  };
-
-  const addLinkInput = () => {
-    setLinkInputs(prev => [...prev, '']);
-  };
-
-  const removeLinkInput = (index: number) => {
-    setLinkInputs(prev => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async () => {
     const finalCategory = categories.join(', ');
     if (!name.trim() || categories.length === 0) return;
@@ -73,17 +58,13 @@ export default function OnboardingInfluencer() {
     hapticFeedback('medium');
     try {
       const filteredLinks: Record<string, string> = {};
-      for (const url of linkInputs) {
-        if (!url.trim()) continue;
-        const lower = url.toLowerCase();
-        let key = `link_${Object.keys(filteredLinks).length}`;
-        if (lower.includes('instagram')) key = 'instagram';
-        else if (lower.includes('youtube') || lower.includes('youtu.be')) key = 'youtube';
-        else if (lower.includes('tiktok')) key = 'tiktok';
-        else if (lower.includes('t.me') || lower.includes('telegram')) key = 'telegram';
-        else if (lower.includes('facebook') || lower.includes('fb.com')) key = 'facebook';
-        filteredLinks[key] = url.trim();
-      }
+      if (socialLinks.instagram.trim()) filteredLinks.instagram = socialLinks.instagram.trim();
+      if (socialLinks.telegram.trim()) filteredLinks.telegram = socialLinks.telegram.trim();
+      if (socialLinks.youtube.trim()) filteredLinks.youtube = socialLinks.youtube.trim();
+      if (socialLinks.tiktok.trim()) filteredLinks.tiktok = socialLinks.tiktok.trim();
+      extraLinks.forEach((url, i) => {
+        if (url.trim()) filteredLinks[`link_${i}`] = url.trim();
+      });
       await onboardInfluencer({ name: name.trim(), bio, category: finalCategory, socialLinks: filteredLinks });
     } catch (err) {
       console.error(err);
@@ -201,36 +182,50 @@ export default function OnboardingInfluencer() {
               Profilingiz va kanalingizga havolalar qo'shing
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {linkInputs.map((link, index) => {
-                return (
-                  <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <div style={{ position: 'relative', flex: 1 }}>
-                      <input
-                        className="form-input"
-                        placeholder="https://instagram.com/username"
-                        value={link}
-                        onChange={(e) => handleLinkChange(index, e.target.value)}
-                      />
-                    </div>
-                    {linkInputs.length > 1 && (
-                      <button
-                        onClick={() => removeLinkInput(index)}
-                        style={{
-                          width: 40, height: 40, borderRadius: 12, border: '1px solid var(--border)',
-                          background: 'var(--bg-card)', display: 'flex', alignItems: 'center',
-                          justifyContent: 'center', cursor: 'pointer', color: 'var(--danger)',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+              {/* Instagram */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </div>
+                <input className="form-input" style={{ flex: 1 }} placeholder="instagram.com/username" value={socialLinks.instagram} onChange={(e) => setSocialLinks(p => ({ ...p, instagram: e.target.value }))} />
+              </div>
+              {/* Telegram */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#2AABEE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                </div>
+                <input className="form-input" style={{ flex: 1 }} placeholder="t.me/username" value={socialLinks.telegram} onChange={(e) => setSocialLinks(p => ({ ...p, telegram: e.target.value }))} />
+              </div>
+              {/* YouTube */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+                <input className="form-input" style={{ flex: 1 }} placeholder="youtube.com/@channel" value={socialLinks.youtube} onChange={(e) => setSocialLinks(p => ({ ...p, youtube: e.target.value }))} />
+              </div>
+              {/* TikTok */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#010101', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.82a8.21 8.21 0 0 0 4.76 1.52V6.89a4.85 4.85 0 0 1-1-.2z"/></svg>
+                </div>
+                <input className="form-input" style={{ flex: 1 }} placeholder="tiktok.com/@username" value={socialLinks.tiktok} onChange={(e) => setSocialLinks(p => ({ ...p, tiktok: e.target.value }))} />
+              </div>
+              {/* Extra links */}
+              {extraLinks.map((link, index) => (
+                <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input className="form-input" style={{ flex: 1 }} placeholder="https://example.com" value={link} onChange={(e) => setExtraLinks(prev => { const u = [...prev]; u[index] = e.target.value; return u; })} />
+                  <button onClick={() => setExtraLinks(prev => prev.filter((_, i) => i !== index))} style={{
+                    width: 40, height: 40, borderRadius: 12, border: '1px solid var(--border)',
+                    background: 'var(--bg-card)', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', cursor: 'pointer', color: 'var(--danger)', flexShrink: 0,
+                  }}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
             <button
-              onClick={addLinkInput}
+              onClick={() => setExtraLinks(prev => [...prev, ''])}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 width: '100%', padding: '10px 0', marginTop: 12, borderRadius: 12,
@@ -238,7 +233,7 @@ export default function OnboardingInfluencer() {
                 color: 'var(--primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}
             >
-              <Plus size={18} /> Havola qo'shish
+              <Plus size={18} /> Yana
             </button>
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
               <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setStep(1)}>Orqaga</button>
