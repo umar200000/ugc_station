@@ -12,11 +12,9 @@ export default function BottomNav() {
     if (spinning) return;
     setSpinning(true);
     try {
-      const cache = useCacheStore.getState();
-      cache.invalidateFeed();
-      cache.invalidateMyAds();
-      cache.setMyApplications(null as any);
+      useCacheStore.getState().invalidateAll();
       await refreshUser();
+      window.dispatchEvent(new CustomEvent('app-refresh'));
     } catch {}
     setTimeout(() => setSpinning(false), 800);
   };

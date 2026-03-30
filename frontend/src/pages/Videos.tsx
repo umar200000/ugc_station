@@ -156,6 +156,12 @@ export default function Videos() {
 
   useEffect(() => { fetchVideos(); }, []);
 
+  useEffect(() => {
+    const handler = () => { setLoading(true); fetchVideos(); };
+    window.addEventListener('app-refresh', handler);
+    return () => window.removeEventListener('app-refresh', handler);
+  }, []);
+
   const handleRefresh = async () => {
     setLoading(true);
     await fetchVideos();

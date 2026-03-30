@@ -156,6 +156,12 @@ export default function MyApplications() {
     REJECTED: { label: 'Rad etildi', color: 'var(--danger)', icon: <X size={12} /> },
   };
 
+  useEffect(() => {
+    const handler = () => { cache.setMyApplications(null as any); setSubmissions({}); };
+    window.addEventListener('app-refresh', handler);
+    return () => window.removeEventListener('app-refresh', handler);
+  }, []);
+
   const handleRefresh = async () => {
     cache.setMyApplications(null as any);
     setSubmissions({});

@@ -48,6 +48,12 @@ export default function MyAds() {
   const closedCount = ads.filter((a) => a.status === 'CLOSED').length;
   const totalApps = ads.reduce((sum, a) => sum + (a._count?.applications || 0), 0);
 
+  useEffect(() => {
+    const handler = () => { cache.invalidateMyAds(); };
+    window.addEventListener('app-refresh', handler);
+    return () => window.removeEventListener('app-refresh', handler);
+  }, []);
+
   const handleRefresh = async () => {
     cache.invalidateMyAds();
     setLoading(true);

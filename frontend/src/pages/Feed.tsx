@@ -78,6 +78,12 @@ export default function Feed() {
     if (cachedFeedAds !== null) feedLoadDone.current = true;
   }, [cachedFeedAds]);
 
+  useEffect(() => {
+    const handler = () => fetchAds(true);
+    window.addEventListener('app-refresh', handler);
+    return () => window.removeEventListener('app-refresh', handler);
+  }, []);
+
   const clearFilters = () => {
     setIndustry('');
     setAdType('');

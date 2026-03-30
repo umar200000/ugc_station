@@ -66,6 +66,12 @@ export default function Influencers() {
     if (cachedInfluencers !== null) infLoadDone.current = true;
   }, [cachedInfluencers]);
 
+  useEffect(() => {
+    const handler = () => fetchInfluencers(true);
+    window.addEventListener('app-refresh', handler);
+    return () => window.removeEventListener('app-refresh', handler);
+  }, []);
+
   const handleRefresh = async () => {
     cache.setInfluencers([], '');
     await fetchInfluencers(true);

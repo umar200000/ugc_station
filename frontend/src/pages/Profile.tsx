@@ -96,6 +96,12 @@ export default function Profile() {
     fetchStats();
   }, [isActive]);
 
+  useEffect(() => {
+    const handler = () => refreshUser();
+    window.addEventListener('app-refresh', handler);
+    return () => window.removeEventListener('app-refresh', handler);
+  }, []);
+
   let socialLinks: Record<string, string> = {};
   if (user?.influencer?.socialLinks) {
     try {
