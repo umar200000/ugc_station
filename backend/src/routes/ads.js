@@ -166,7 +166,7 @@ router.post('/', authMiddleware, companyOnly, async (req, res) => {
         message: `"${title}" — ${company.name}. ${paymentText}`,
         type: 'info',
         link: `/ad/${ad.id}`,
-        telegramMsg: `📢 <b>Yangi e'lon!</b>\n\n📌 <b>${title}</b>\n🏢 ${company.name}\n${paymentText}\n\nBatafsil ko'rish uchun mini app ni oching!`,
+        telegramMsg: `📢 <b>Yangi e'lon!</b>\n\n📌 E'lon nomi: <b>${title}</b>\n🏢 E'lon beruvchi: <b>${company.name}</b>\n${paymentText}\n\nBatafsil ko'rish uchun mini app ni oching!`,
       });
     } catch (broadcastErr) {
       console.error('Broadcast error:', broadcastErr);
