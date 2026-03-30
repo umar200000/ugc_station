@@ -19,6 +19,7 @@ export default function EditAd() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [customIndustry, setCustomIndustry] = useState(false);
 
   useEffect(() => {
     api.get(`/ads/${id}`)
@@ -37,6 +38,7 @@ export default function EditAd() {
           payment: ad.payment || 0,
         });
         setExistingImages(ad.images || []);
+        if (ad.industry && !INDUSTRIES.includes(ad.industry)) setCustomIndustry(true);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -122,10 +124,22 @@ export default function EditAd() {
 
         <div className="form-group">
           <label className="form-label">Kategoriya</label>
-          <select className="form-select" value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })}>
+          <select className="form-select" value={customIndustry ? '__custom__' : form.industry} onChange={(e) => {
+            if (e.target.value === '__custom__') {
+              setCustomIndustry(true);
+              setForm({ ...form, industry: '' });
+            } else {
+              setCustomIndustry(false);
+              setForm({ ...form, industry: e.target.value });
+            }
+          }}>
             <option value="">Kategoriya tanlang</option>
             {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
+            <option value="__custom__">Boshqa (o'zim yozaman)</option>
           </select>
+          {customIndustry && (
+            <input className="form-input" style={{ marginTop: 8 }} placeholder="Kategoriya nomini yozing..." value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} />
+          )}
         </div>
 
         <div className="form-group">
@@ -217,7 +231,7 @@ export default function EditAd() {
         {form.adType === 'PAID' && (
           <div className="form-group">
             <label className="form-label">To'lov (so'm)</label>
-            <input className="form-input" type="number" value={form.payment || ''} onChange={(e) => setForm({ ...form, payment: Number(e.target.value) })} />
+            <input className="form-input" type="text" inputMode="numeric" placeholder="100 000" value={form.payment ? String(form.payment).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''} onChange={(e) => { const num = Number(e.target.value.replace(/\s/g, '')); if (!isNaN(num)) setForm({ ...form, payment: num }); }} />
           </div>
         )}
 
