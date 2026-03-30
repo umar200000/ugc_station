@@ -13,21 +13,24 @@ async function downloadTelegramPhoto(telegramId) {
     const botToken = process.env.BOT_TOKEN;
     if (!botToken) return '';
 
+    const fetchWithTimeout = (url, ms = 5000) =>
+      fetch(url, { signal: AbortSignal.timeout(ms) });
+
     // Get user profile photos
-    const res = await fetch(`https://api.telegram.org/bot${botToken}/getUserProfilePhotos?user_id=${telegramId}&limit=1`);
+    const res = await fetchWithTimeout(`https://api.telegram.org/bot${botToken}/getUserProfilePhotos?user_id=${telegramId}&limit=1`);
     const data = await res.json();
     if (!data.ok || !data.result.photos?.length) return '';
 
     const fileId = data.result.photos[0][data.result.photos[0].length - 1].file_id;
 
     // Get file path
-    const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
+    const fileRes = await fetchWithTimeout(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
     const fileData = await fileRes.json();
     if (!fileData.ok) return '';
 
     // Download file
     const fileUrl = `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
-    const imgRes = await fetch(fileUrl);
+    const imgRes = await fetchWithTimeout(fileUrl, 10000);
     const buffer = Buffer.from(await imgRes.arrayBuffer());
 
     // Save to uploads
