@@ -89,7 +89,11 @@
     .modal-acts{display:flex;gap:8px}
     .modal-acts .btn{flex:1}
 
-    .video-thumb{width:60px;height:60px;border-radius:8px;object-fit:cover;background:#000}
+    .video-thumb{width:60px;height:60px;border-radius:8px;object-fit:cover;background:#000;cursor:pointer}
+    .video-player-bg{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;flex-direction:column}
+    .video-player-bg.open{display:flex}
+    .video-player-bg video{max-width:100%;max-height:80vh;border-radius:12px}
+    .video-player-bg .close-btn{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .review-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;padding:0}
     .review-modal.open{display:flex}
     .review-sheet{background:var(--card);border-radius:20px 20px 0 0;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto}
@@ -137,6 +141,12 @@
   <div class="table-wrap">
     <table class="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
   </div>
+</div>
+
+<!-- Video player modal -->
+<div class="video-player-bg" id="videoPlayer" onclick="closeVideoPlayer()">
+  <button class="close-btn" onclick="closeVideoPlayer()">✕</button>
+  <video id="videoPlayerSrc" controls autoplay playsinline onclick="event.stopPropagation()"></video>
 </div>
 
 <!-- Video review modal -->
@@ -295,7 +305,7 @@ function renderTable(){
     rows=data.map(s=>{
       const inf=s.application?.influencer;const ad=s.application?.ad;
       const commentInfo=s.comment?`<div class="meta" style="margin-top:4px">💬 ${s.comment}</div>`:'';
-      return`<tr data-s="${inf?.name||''} ${ad?.title||''}"><td><video src="${s.videoUrl}#t=0.5" class="video-thumb" preload="auto" onclick="this.paused?this.play():this.pause()"></video></td><td><div class="row">${avatarHtml(inf?.user?.photoUrl,inf?.name)}<div><div class="name">${inf?.name||'—'}</div></div></div></td><td>${ad?.title||'—'}<div class="meta">${ad?.company?.name||''}</div></td><td>${statusBadge(s.status)}${commentInfo}</td><td>${fmtDate(s.createdAt)}</td><td>${s.status==='PENDING'?`<button class="btn btn-sm btn-g" onclick="openReview('${s.id}','APPROVED')">✅ Tasdiqlash</button> <button class="btn btn-sm btn-r" onclick="openReview('${s.id}','REJECTED')">❌ Rad etish</button>`:s.reviewedBy==='ADMIN'?'<span class="meta">Admin tekshirgan</span>':''} <button class="del" onclick="openModal('submission','${s.id}','Video')">&#128465;</button></td></tr>`;
+      return`<tr data-s="${inf?.name||''} ${ad?.title||''}"><td><video src="${s.videoUrl}#t=0.5" class="video-thumb" preload="auto" onclick="event.preventDefault();openVideoPlayer('${s.videoUrl}')"></video></td><td><div class="row">${avatarHtml(inf?.user?.photoUrl,inf?.name)}<div><div class="name">${inf?.name||'—'}</div></div></div></td><td>${ad?.title||'—'}<div class="meta">${ad?.company?.name||''}</div></td><td>${statusBadge(s.status)}${commentInfo}</td><td>${fmtDate(s.createdAt)}</td><td>${s.status==='PENDING'?`<button class="btn btn-sm btn-g" onclick="openReview('${s.id}','APPROVED')">✅ Tasdiqlash</button> <button class="btn btn-sm btn-r" onclick="openReview('${s.id}','REJECTED')">❌ Rad etish</button>`:s.reviewedBy==='ADMIN'?'<span class="meta">Admin tekshirgan</span>':''} <button class="del" onclick="openModal('submission','${s.id}','Video')">&#128465;</button></td></tr>`;
     }).join('');
   }
 
@@ -376,6 +386,16 @@ async function confirmDelete(){
   catch(e){alert('Xatolik')}
   finally{btn.disabled=false;btn.textContent="O'chirish"}
 }
+
+function openVideoPlayer(url){
+  const v=document.getElementById('videoPlayerSrc');v.src=url;
+  document.getElementById('videoPlayer').classList.add('open');
+}
+function closeVideoPlayer(){
+  const v=document.getElementById('videoPlayerSrc');v.pause();v.src='';
+  document.getElementById('videoPlayer').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeVideoPlayer()});
 
 if(token)showDash();
 </script>
