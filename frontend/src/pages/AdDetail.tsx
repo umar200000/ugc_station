@@ -163,11 +163,16 @@ export default function AdDetail() {
           height: 320, marginBottom: -24,
         }}>
           {ad.images!.length === 1 ? (
-            <img src={ad.images![0]} alt="" style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              transform: `translateY(${parallaxY}px) scale(${imageScale})`,
-              filter: isClosed ? 'grayscale(0.5)' : 'none',
-            }} />
+            <img
+              src={ad.images![0]} alt=""
+              onClick={() => navigate('/image-viewer', { state: { images: ad.images, startIndex: 0 } })}
+              style={{
+                width: '100%', height: '100%', objectFit: 'cover',
+                transform: `translateY(${parallaxY}px) scale(${imageScale})`,
+                filter: isClosed ? 'grayscale(0.5)' : 'none',
+                cursor: 'pointer',
+              }}
+            />
           ) : (
             <div
               ref={scrollRef}
@@ -180,12 +185,17 @@ export default function AdDetail() {
               }}
             >
               {ad.images!.map((img, i) => (
-                <img key={i} src={img} alt="" style={{
-                  width: '100%', height: '100%', objectFit: 'cover',
-                  flexShrink: 0, scrollSnapAlign: 'start',
-                  transform: `translateY(${parallaxY}px) scale(${imageScale})`,
-                  filter: isClosed ? 'grayscale(0.5)' : 'none',
-                }} />
+                <img
+                  key={i} src={img} alt=""
+                  onClick={() => navigate('/image-viewer', { state: { images: ad.images, startIndex: i } })}
+                  style={{
+                    width: '100%', height: '100%', objectFit: 'cover',
+                    flexShrink: 0, scrollSnapAlign: 'start',
+                    transform: `translateY(${parallaxY}px) scale(${imageScale})`,
+                    filter: isClosed ? 'grayscale(0.5)' : 'none',
+                    cursor: 'pointer',
+                  }}
+                />
               ))}
             </div>
           )}
