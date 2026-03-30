@@ -55,6 +55,7 @@ export default function MyApplications() {
   const appsLoadDone = useRef(false);
   useEffect(() => {
     if (cachedMyApps === null && appsLoadDone.current) {
+      setSubmissions({});
       fetchMyApps();
     }
     if (cachedMyApps !== null) appsLoadDone.current = true;
@@ -156,6 +157,7 @@ export default function MyApplications() {
 
   const handleRefresh = async () => {
     cache.setMyApplications(null as any);
+    setSubmissions({});
     setLoading(true);
     try {
       const res = await api.get('/applications/my');
