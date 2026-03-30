@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Clock, CheckCircle2, XCircle, Phone, Video, Upload, Play, Check, X, Loader2 } from 'lucide-react';
+import { Send, Clock, CheckCircle2, XCircle, Phone, Video, Upload, Play, Check, X, Loader2, RotateCcw } from 'lucide-react';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
 import { MyAdCardShimmer } from '../components/Shimmer';
@@ -27,6 +27,8 @@ export default function MyApplications() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadAppId, setUploadAppId] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const cachedMyApps = useCacheStore(s => s.myApplications);
 
@@ -86,17 +88,41 @@ export default function MyApplications() {
     fileRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !uploadAppId) return;
     e.target.value = '';
+    setPreviewFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleCancelPreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewFile(null);
+    setPreviewUrl(null);
+    setUploadAppId(null);
+  };
+
+  const handleReselect = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewFile(null);
+    setPreviewUrl(null);
+    fileRef.current?.click();
+  };
+
+  const handleConfirmUpload = async () => {
+    if (!previewFile || !uploadAppId) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewFile(null);
 
     setUploading(uploadAppId);
     setUploadProgress(0);
+    const appId = uploadAppId;
     try {
       const formData = new FormData();
-      formData.append('video', file);
-      formData.append('applicationId', uploadAppId);
+      formData.append('video', previewFile);
+      formData.append('applicationId', appId);
       const res = await api.post('/submissions', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (e) => {
@@ -105,7 +131,7 @@ export default function MyApplications() {
       });
       setSubmissions(prev => ({
         ...prev,
-        [uploadAppId]: [res.data, ...(prev[uploadAppId] || [])],
+        [appId]: [res.data, ...(prev[appId] || [])],
       }));
     } catch (err: any) {
       alert(err.response?.data?.error || 'Video yuklashda xatolik');
@@ -142,6 +168,59 @@ export default function MyApplications() {
     <PullToRefresh onRefresh={handleRefresh}>
     <div className="page">
       <input ref={fileRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={handleFileChange} />
+
+      {/* Video preview modal */}
+      {previewUrl && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.95)',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px' }}>
+            <button onClick={handleCancelPreview} style={{
+              width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.15)',
+              border: 'none', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            }}>
+              <X size={20} />
+            </button>
+            <span style={{ color: '#fff', fontSize: 16, fontWeight: 600 }}>Videoni tekshiring</span>
+            <div style={{ width: 40 }} />
+          </div>
+
+          {/* Video */}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', overflow: 'hidden' }}>
+            <video
+              src={previewUrl}
+              controls
+              autoPlay
+              playsInline
+              style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 12, background: '#000' }}
+            />
+          </div>
+
+          {/* Bottom actions */}
+          <div style={{ padding: '16px 20px 32px', display: 'flex', gap: 10 }}>
+            <button onClick={handleReselect} style={{
+              flex: 1, padding: '14px 0', borderRadius: 14,
+              background: 'rgba(255,255,255,0.12)', border: 'none',
+              color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              fontFamily: 'inherit',
+            }}>
+              <RotateCcw size={18} /> Boshqa tanlash
+            </button>
+            <button onClick={handleConfirmUpload} style={{
+              flex: 1, padding: '14px 0', borderRadius: 14,
+              background: 'var(--primary)', border: 'none',
+              color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              fontFamily: 'inherit',
+            }}>
+              <Upload size={18} /> Yuklash
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="page-header">
         <h1 className="page-title">Arizalarim</h1>
