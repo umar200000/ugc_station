@@ -51,6 +51,7 @@ export default function Applications() {
   const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
   const [reviewModal, setReviewModal] = useState<{ subId: string; appId: string; action: 'APPROVED' | 'REJECTED' } | null>(null);
   const [reviewComment, setReviewComment] = useState('');
+  const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [reviewLoading, setReviewLoading] = useState(false);
 
   const loadSubmissions = async (appId: string) => {
@@ -63,18 +64,33 @@ export default function Applications() {
   const openReviewModal = (subId: string, appId: string, action: 'APPROVED' | 'REJECTED') => {
     setReviewModal({ subId, appId, action });
     setReviewComment('');
+    setSelectedReasons([]);
+  };
+
+  const toggleReason = (reason: string) => {
+    setSelectedReasons(prev =>
+      prev.includes(reason) ? prev.filter(r => r !== reason) : [...prev, reason]
+    );
+  };
+
+  const getFinalComment = () => {
+    const parts: string[] = [];
+    if (selectedReasons.length > 0) parts.push(selectedReasons.join(', '));
+    if (reviewComment.trim()) parts.push(reviewComment.trim());
+    return parts.join('. ');
   };
 
   const handleSubStatus = async () => {
     if (!reviewModal) return;
     const { subId, appId, action } = reviewModal;
+    const finalComment = getFinalComment();
     setReviewLoading(true);
     hapticFeedback('medium');
     try {
-      await api.patch(`/submissions/${subId}/status`, { status: action, comment: reviewComment.trim() || undefined });
+      await api.patch(`/submissions/${subId}/status`, { status: action, comment: finalComment || undefined });
       setSubmissions(prev => ({
         ...prev,
-        [appId]: (prev[appId] || []).map(s => s.id === subId ? { ...s, status: action, comment: reviewComment.trim() || undefined } : s),
+        [appId]: (prev[appId] || []).map(s => s.id === subId ? { ...s, status: action, comment: finalComment || undefined } : s),
       }));
       setReviewModal(null);
     } catch (err: any) {
@@ -347,21 +363,23 @@ export default function Applications() {
               </div>
             </div>
 
-            {/* Reject reasons */}
+            {/* Reject reasons — multi-select */}
             {reviewModal.action === 'REJECTED' && (
               <div style={{ marginBottom: 14 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>Tez tanlash:</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>Sabablarni tanlang:</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {REJECT_REASONS.map((reason) => {
-                    const selected = reviewComment === reason;
+                    const selected = selectedReasons.includes(reason);
                     return (
-                      <button key={reason} onClick={() => setReviewComment(selected ? '' : reason)} style={{
+                      <button key={reason} onClick={() => toggleReason(reason)} style={{
                         padding: '7px 12px', borderRadius: 100, fontSize: 12.5, fontWeight: 600,
                         border: `1.5px solid ${selected ? 'var(--danger)' : 'var(--border-strong)'}`,
                         background: selected ? 'var(--danger-bg)' : 'var(--bg)',
                         color: selected ? 'var(--danger)' : 'var(--text-secondary)',
                         cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                        display: 'flex', alignItems: 'center', gap: 4,
                       }}>
+                        {selected && <Check size={13} />}
                         {reason}
                       </button>
                     );
@@ -395,7 +413,7 @@ export default function Applications() {
               <button
                 className={`btn ${reviewModal.action === 'APPROVED' ? 'btn-success' : 'btn-danger'}`}
                 style={{ flex: 1 }}
-                disabled={reviewLoading || (reviewModal.action === 'REJECTED' && !reviewComment.trim())}
+                disabled={reviewLoading || (reviewModal.action === 'REJECTED' && selectedReasons.length === 0 && !reviewComment.trim())}
                 onClick={handleSubStatus}
               >
                 {reviewLoading ? '...' : reviewModal.action === 'APPROVED' ? (

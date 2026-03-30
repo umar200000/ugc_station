@@ -314,28 +314,51 @@ export default function MyApplications() {
                         const st = subStatusConfig[sub.status];
                         return (
                           <div key={sub.id} style={{
-                            display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '10px 12px', borderRadius: 10,
-                            background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                            borderRadius: 12, overflow: 'hidden',
+                            background: 'var(--bg-secondary)',
+                            border: `1px solid ${sub.status === 'REJECTED' ? 'rgba(239,68,68,0.2)' : sub.status === 'APPROVED' ? 'rgba(16,185,129,0.2)' : 'var(--border)'}`,
                           }}>
-                            <video
-                              src={sub.videoUrl + '#t=0.5'}
-                              preload="auto"
-                              style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', background: '#000' }}
-                            />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                {new Date(sub.createdAt).toLocaleDateString('uz')}
-                              </p>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 13, fontWeight: 600, color: st.color }}>
-                                {st.icon} {st.label}
-                              </div>
-                              {sub.comment && (
-                                <p style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3, lineHeight: 1.4 }}>
-                                  💬 {sub.comment}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
+                              <video
+                                src={sub.videoUrl + '#t=0.5'}
+                                preload="auto"
+                                style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', background: '#000', flexShrink: 0 }}
+                              />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                  {new Date(sub.createdAt).toLocaleDateString('uz')}
                                 </p>
-                              )}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 13, fontWeight: 600, color: st.color }}>
+                                  {st.icon} {st.label}
+                                </div>
+                              </div>
                             </div>
+                            {sub.comment && sub.status === 'REJECTED' && (
+                              <div style={{
+                                margin: '0 10px 10px', padding: '10px 12px', borderRadius: 10,
+                                background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.12)',
+                              }}>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--danger)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                                  Rad etish sababi
+                                </p>
+                                <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                  {sub.comment}
+                                </p>
+                              </div>
+                            )}
+                            {sub.comment && sub.status === 'APPROVED' && (
+                              <div style={{
+                                margin: '0 10px 10px', padding: '10px 12px', borderRadius: 10,
+                                background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.12)',
+                              }}>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                                  Kompaniya izohi
+                                </p>
+                                <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                  {sub.comment}
+                                </p>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
