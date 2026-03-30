@@ -41,6 +41,19 @@ const SUGGESTED_CATEGORIES = [
   'Moda va kiyim-kechak',
   'Uy xizmatlari va ustalar',
   'Sayohat va joylar',
+  'Ta\'lim va kurslar',
+  'Avtomobillar va transport',
+  'Bolalar va onalik',
+  'Tibbiyot va sog\'liq',
+  'Ko\'chmas mulk',
+  'Moliya va investitsiya',
+  'Sport va ommaviy tadbirlar',
+  'O\'yinlar va kibersport',
+  'Musiqa va san\'at',
+  'Kitoblar va adabiyot',
+  'Uy-joy va dizayn',
+  'Hayvonlar va tabiat',
+  'Biznes va tadbirkorlik',
 ];
 
 export default function Profile() {
@@ -268,24 +281,26 @@ export default function Profile() {
               </div>
               <div className="form-group">
                 <label className="form-label">Yo'nalishlar <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({editCategories.length})</span></label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-                  {SUGGESTED_CATEGORIES.map(cat => {
-                    const sel = editCategories.includes(cat);
-                    return (
-                      <button key={cat} type="button"
-                        onClick={() => setEditCategories(prev => sel ? prev.filter(c => c !== cat) : [...prev, cat])}
-                        style={{
-                          padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600,
-                          border: `1.5px solid ${sel ? 'var(--primary)' : 'var(--border-strong)'}`,
-                          background: sel ? 'var(--primary)' : 'var(--bg-card)',
-                          color: sel ? '#fff' : 'var(--text-secondary)',
-                          cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-                          display: 'flex', alignItems: 'center', gap: 4,
-                        }}>
-                        {sel && <Check size={12} />}{cat}
-                      </button>
-                    );
-                  })}
+                <div style={{ maxHeight: 180, overflowY: 'auto', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-elevated)', marginBottom: 10 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: 10 }}>
+                    {SUGGESTED_CATEGORIES.map(cat => {
+                      const sel = editCategories.includes(cat);
+                      return (
+                        <button key={cat} type="button"
+                          onClick={() => setEditCategories(prev => sel ? prev.filter(c => c !== cat) : [...prev, cat])}
+                          style={{
+                            padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600,
+                            border: `1.5px solid ${sel ? 'var(--primary)' : 'var(--border-strong)'}`,
+                            background: sel ? 'var(--primary)' : 'var(--bg-card)',
+                            color: sel ? '#fff' : 'var(--text-secondary)',
+                            cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                            display: 'flex', alignItems: 'center', gap: 4,
+                          }}>
+                          {sel && <Check size={12} />}{cat}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 {editCategories.filter(c => !SUGGESTED_CATEGORIES.includes(c)).map(cat => (
                   <span key={cat} style={{

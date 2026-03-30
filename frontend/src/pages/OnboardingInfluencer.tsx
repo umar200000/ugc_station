@@ -11,6 +11,19 @@ const SUGGESTED_CATEGORIES = [
   'Moda va kiyim-kechak',
   'Uy xizmatlari va ustalar',
   'Sayohat va joylar',
+  'Ta\'lim va kurslar',
+  'Avtomobillar va transport',
+  'Bolalar va onalik',
+  'Tibbiyot va sog\'liq',
+  'Ko\'chmas mulk',
+  'Moliya va investitsiya',
+  'Sport va ommaviy tadbirlar',
+  'O\'yinlar va kibersport',
+  'Musiqa va san\'at',
+  'Kitoblar va adabiyot',
+  'Uy-joy va dizayn',
+  'Hayvonlar va tabiat',
+  'Biznes va tadbirkorlik',
 ];
 
 export default function OnboardingInfluencer() {
@@ -119,24 +132,26 @@ export default function OnboardingInfluencer() {
             </div>
             <div className="form-group">
               <label className="form-label">Yo'nalishlar <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({categories.length} tanlandi)</span></label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-                {SUGGESTED_CATEGORIES.map((cat) => {
-                  const selected = categories.includes(cat);
-                  return (
-                    <button key={cat} type="button" onClick={() => toggleCategory(cat)}
-                      style={{
-                        padding: '8px 14px', borderRadius: 100, fontSize: 13, fontWeight: 600,
-                        border: `1.5px solid ${selected ? 'var(--primary)' : 'var(--border-strong)'}`,
-                        background: selected ? 'var(--primary)' : 'var(--bg-card)',
-                        color: selected ? '#fff' : 'var(--text-secondary)',
-                        cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-                        display: 'flex', alignItems: 'center', gap: 5,
-                      }}>
-                      {selected && <Check size={14} />}
-                      {cat}
-                    </button>
-                  );
-                })}
+              <div style={{ maxHeight: 200, overflowY: 'auto', padding: '2px 0', marginBottom: 12, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: 10 }}>
+                  {SUGGESTED_CATEGORIES.map((cat) => {
+                    const selected = categories.includes(cat);
+                    return (
+                      <button key={cat} type="button" onClick={() => toggleCategory(cat)}
+                        style={{
+                          padding: '7px 12px', borderRadius: 100, fontSize: 12.5, fontWeight: 600,
+                          border: `1.5px solid ${selected ? 'var(--primary)' : 'var(--border-strong)'}`,
+                          background: selected ? 'var(--primary)' : 'var(--bg-card)',
+                          color: selected ? '#fff' : 'var(--text-secondary)',
+                          cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                          display: 'flex', alignItems: 'center', gap: 4,
+                        }}>
+                        {selected && <Check size={13} />}
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               {/* Tanlangan custom yo'nalishlar */}
               {categories.filter(c => !SUGGESTED_CATEGORIES.includes(c)).length > 0 && (
