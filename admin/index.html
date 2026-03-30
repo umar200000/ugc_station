@@ -244,7 +244,7 @@
 const API=(location.hostname==='localhost'?'http://localhost:3000':'')+'/api/admin';
 let token=localStorage.getItem('admin_token');
 let delTarget=null;
-let currentTab='users';
+let currentTab='dashboard';
 let allData={};
 
 async function doLogin(){
@@ -277,7 +277,7 @@ async function loadAll(){
     allData.ads=(await ar.json()).ads||[];
     allData.applications=(await apr.json()).applications||[];
     allData.submissions=(await subr.json()).submissions||[];
-    renderStats(stats);renderSidebar();renderTable();
+    renderStats(stats);switchTab(currentTab);
   }catch(e){console.error(e)}
 }
 
@@ -296,6 +296,7 @@ function renderStats(s){
 }
 
 const tabConfig=[
+  {key:'dashboard',label:'Dashboard',ic:'&#128202;'},
   {key:'users',label:'Foydalanuvchilar',ic:'&#128101;'},
   {key:'companies',label:'Kompaniyalar',ic:'&#127970;'},
   {key:'influencers',label:'Influenserlar',ic:'&#128100;'},
@@ -306,18 +307,27 @@ const tabConfig=[
 
 function renderSidebar(){
   document.getElementById('sidebarNav').innerHTML=tabConfig.map(t=>{
-    const count=(allData[t.key]||[]).length;
-    return`<button class="sidebar-item ${currentTab===t.key?'on':''}" onclick="switchTab('${t.key}')"><span class="ic">${t.ic}</span><span>${t.label}</span><span class="cnt">${count}</span></button>`;
+    const count=t.key==='dashboard'?'':((allData[t.key]||[]).length);
+    return`<button class="sidebar-item ${currentTab===t.key?'on':''}" onclick="switchTab('${t.key}')"><span class="ic">${t.ic}</span><span>${t.label}</span>${count!==''?`<span class="cnt">${count}</span>`:''}</button>`;
   }).join('');
 }
 
 function switchTab(t){
   currentTab=t;
-  renderSidebar();renderTable();
+  renderSidebar();
   document.getElementById('searchInput').value='';
   const cfg=tabConfig.find(x=>x.key===t);
   document.getElementById('pageTitle').innerHTML=cfg?cfg.ic+' '+cfg.label:'Dashboard';
-  document.getElementById('pageSubtitle').textContent=`${(allData[t]||[]).length} ta yozuv`;
+  const isDash=t==='dashboard';
+  document.getElementById('statsGrid').style.display=isDash?'grid':'none';
+  document.getElementById('searchInput').parentElement.style.display=isDash?'none':'flex';
+  document.querySelector('.table-wrap').style.display=isDash?'none':'block';
+  if(isDash){
+    document.getElementById('pageSubtitle').textContent='Umumiy statistika';
+  }else{
+    document.getElementById('pageSubtitle').textContent=`${(allData[t]||[]).length} ta yozuv`;
+    renderTable();
+  }
 }
 
 function fmtDate(d){if(!d)return'—';const dt=new Date(d);const m=['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];return`${dt.getDate()} ${m[dt.getMonth()]} ${dt.getFullYear()}`}
