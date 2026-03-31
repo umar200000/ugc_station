@@ -14,7 +14,7 @@ bot.start(async (ctx) => {
   const user = await prisma.user.findUnique({ where: { telegramId } });
 
   if (user && user.phone) {
-    // Telefon bor — to'g'ridan-to'g'ri Mini App ko'rsatish
+    // Telefon bor — Mini App ko'rsatish
     ctx.reply(
       `Salom, ${ctx.from.first_name}! 🎬\n\nUGC Marketplace ga xush kelibsiz!`,
       Markup.inlineKeyboard([
@@ -22,8 +22,8 @@ bot.start(async (ctx) => {
       ])
     );
   } else {
-    // Birinchi marta — telefon raqamni so'rash
-    ctx.reply(
+    // Telefon yo'q — doim majburiy so'rash
+    await ctx.reply(
       `Salom, ${ctx.from.first_name}! 🎬\n\nUGC Marketplace ga xush kelibsiz!\n\nDavom etish uchun telefon raqamingizni yuboring 👇`,
       Markup.keyboard([
         [Markup.button.contactRequest('📞 Telefon raqamni yuborish')],
@@ -76,13 +76,45 @@ bot.on('contact', async (ctx) => {
   }
 });
 
-bot.command('app', (ctx) => {
+bot.command('app', async (ctx) => {
+  const telegramId = String(ctx.from.id);
+  const user = await prisma.user.findUnique({ where: { telegramId } });
+
+  if (!user || !user.phone) {
+    return ctx.reply(
+      'Avval telefon raqamingizni yuboring 👇',
+      Markup.keyboard([
+        [Markup.button.contactRequest('📞 Telefon raqamni yuborish')],
+      ]).resize()
+    );
+  }
+
   ctx.reply(
     'Mini App ni ochish:',
     Markup.inlineKeyboard([
       [Markup.button.webApp('📱 Ochish', WEB_APP_URL)],
     ])
   );
+});
+
+// Phone yo'q userlar boshqa xabar yozsa ham — contact so'rash
+bot.on('message', async (ctx, next) => {
+  // Contact xabarini o'tkazib yuborish (contact handler o'zi ishlaydi)
+  if (ctx.message.contact) return next();
+
+  const telegramId = String(ctx.from.id);
+  const user = await prisma.user.findUnique({ where: { telegramId } });
+
+  if (!user || !user.phone) {
+    return ctx.reply(
+      'Davom etish uchun telefon raqamingizni yuboring 👇',
+      Markup.keyboard([
+        [Markup.button.contactRequest('📞 Telefon raqamni yuborish')],
+      ]).resize()
+    );
+  }
+
+  return next();
 });
 
 bot.launch()

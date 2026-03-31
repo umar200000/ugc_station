@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api from '../lib/api';
-import { getInitData, getTelegramUser, expandApp } from '../lib/telegram';
+import { getInitData, getTelegramUser, expandApp, requestContact } from '../lib/telegram';
 
 function getTokenKey() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -19,6 +19,7 @@ interface User {
   lastName: string;
   username: string;
   photoUrl: string;
+  phone: string | null;
   role: 'COMPANY' | 'INFLUENCER' | 'ADMIN' | null;
   onboarded: boolean;
   createdAt?: string;
@@ -31,7 +32,9 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   contactRequired: boolean;
+  phoneLoading: boolean;
   login: () => Promise<void>;
+  sharePhone: () => Promise<boolean>;
   selectRole: (role: 'COMPANY' | 'INFLUENCER') => Promise<void>;
   onboardCompany: (data: { name: string; industry: string }) => Promise<void>;
   onboardInfluencer: (data: { name: string; bio: string; category: string; socialLinks: any }) => Promise<void>;
@@ -45,6 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   token: localStorage.getItem(getTokenKey()),
   isLoading: true,
   contactRequired: false,
+  phoneLoading: false,
 
   login: async () => {
     try {
@@ -56,7 +60,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (existingToken) {
         try {
           const res = await api.get('/auth/me');
-          set({ user: res.data.user, isLoading: false });
+          const user = res.data.user;
+          set({
+            user,
+            isLoading: false,
+            contactRequired: !user.phone && user.role !== 'ADMIN',
+          });
           return;
         } catch {
           localStorage.removeItem(tokenKey);
@@ -89,15 +98,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         devUser: !initData ? selectedDev || devUser || { id: 10001, first_name: 'Kompaniya', username: 'company_user' } : undefined,
       });
 
+      const user = res.data.user;
       localStorage.setItem(tokenKey, res.data.token);
-      set({ user: res.data.user, token: res.data.token, isLoading: false });
+      set({
+        user,
+        token: res.data.token,
+        isLoading: false,
+        contactRequired: !user.phone && user.role !== 'ADMIN',
+      });
     } catch (err: any) {
-      if (err.response?.data?.error === 'contact_required') {
-        set({ isLoading: false, contactRequired: true });
-        return;
-      }
       console.error('Login error:', err);
       set({ isLoading: false });
+    }
+  },
+
+  sharePhone: async () => {
+    set({ phoneLoading: true });
+    try {
+      const phone = await requestContact();
+      if (!phone) {
+        set({ phoneLoading: false });
+        return false;
+      }
+      const res = await api.post('/auth/save-phone', { phone });
+      set({ user: res.data.user, contactRequired: false, phoneLoading: false });
+      return true;
+    } catch (err) {
+      console.error('Share phone error:', err);
+      set({ phoneLoading: false });
+      return false;
     }
   },
 

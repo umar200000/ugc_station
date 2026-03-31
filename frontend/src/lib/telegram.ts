@@ -38,3 +38,21 @@ export function setBackButton(visible: boolean, callback?: () => void) {
     tg.BackButton.hide();
   }
 }
+
+// Telegram WebApp requestContact — foydalanuvchidan telefon raqam so'rash
+export function requestContact(): Promise<string | null> {
+  return new Promise((resolve) => {
+    if (!tg?.requestContact) {
+      resolve(null);
+      return;
+    }
+    tg.requestContact((sent: boolean, event?: any) => {
+      if (sent && event?.responseUnsafe?.contact?.phone_number) {
+        const phone = event.responseUnsafe.contact.phone_number;
+        resolve(phone.startsWith('+') ? phone : `+${phone}`);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}

@@ -120,12 +120,7 @@ router.post('/telegram', async (req, res) => {
       });
     }
 
-    // Telefon raqam tekshirish — bot orqali contact bermagan bo'lsa
-    if (!user.phone && !isAdmin && !req.body.devUser) {
-      return res.status(403).json({ error: 'contact_required', message: 'Avval bot orqali telefon raqamingizni yuboring' });
-    }
-
-    // JWT token yaratish
+    // JWT token yaratish (telefonsiz ham login qiladi — mini app ichida so'raladi)
     const token = jwt.sign(
       {
         userId: user.id,

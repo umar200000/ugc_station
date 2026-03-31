@@ -44,7 +44,7 @@ function TabPage({ path, children }: { path: string; children: React.ReactNode }
 }
 
 function App() {
-  const { user, isLoading, contactRequired, login } = useAuthStore();
+  const { user, isLoading, contactRequired, phoneLoading, login, sharePhone } = useAuthStore();
 
   useEffect(() => {
     login();
@@ -59,7 +59,7 @@ function App() {
     );
   }
 
-  // Telefon raqam bermagan — bot orqali contact so'rash
+  // Telefon raqam bermagan — mini app ichida so'rash
   if (contactRequired) {
     return (
       <div style={{
@@ -77,11 +77,29 @@ function App() {
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Telefon raqam kerak</h1>
         <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 24 }}>
-          Davom etish uchun bot ga qaytib, telefon raqamingizni yuboring.
+          Davom etish uchun telefon raqamingizni ulashing.
           Pastdagi tugmani bosing 👇
         </p>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-          Bot da "📞 Telefon raqamni yuborish" tugmasini bosing
+        <button
+          onClick={sharePhone}
+          disabled={phoneLoading}
+          style={{
+            width: '100%', maxWidth: 320, padding: '16px 24px',
+            borderRadius: 16, border: 'none', cursor: 'pointer',
+            background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+            color: '#fff', fontSize: 16, fontWeight: 600,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            opacity: phoneLoading ? 0.7 : 1,
+          }}
+        >
+          {phoneLoading ? (
+            <div className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }} />
+          ) : (
+            <>📞 Telefon raqamni ulashish</>
+          )}
+        </button>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16 }}>
+          Sizning raqamingiz faqat xizmat ko'rsatish uchun ishlatiladi
         </p>
       </div>
     );
