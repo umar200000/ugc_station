@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useCacheStore } from '../store/cache';
@@ -7,6 +7,19 @@ import { Home, Play, ClipboardList, Send, User, RefreshCw } from 'lucide-react';
 export default function BottomNav() {
   const { user, refreshUser } = useAuthStore();
   const [spinning, setSpinning] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Hide bottom nav when virtual keyboard opens
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      setHidden(vv.height < window.innerHeight * 0.75);
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
 
   const handleRefresh = async () => {
     if (spinning) return;
@@ -20,7 +33,7 @@ export default function BottomNav() {
   };
 
   return (
-    <div className="bottom-nav-wrap">
+    <div className="bottom-nav-wrap" ref={wrapRef} style={{ display: hidden ? 'none' : undefined }}>
       <nav className="bottom-nav">
         <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end>
           <Home size={22} strokeWidth={1.8} />
