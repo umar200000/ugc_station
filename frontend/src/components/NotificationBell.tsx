@@ -23,9 +23,9 @@ export default function NotificationBell() {
     }}>
       <Bell
         size={22}
-        fill="#000"
+        fill="#1B3B51"
         style={{
-          color: '#000',
+          color: '#1B3B51',
           transition: 'all 0.3s ease',
           animation: unreadCount > 0 ? 'bellShake 2s ease-in-out infinite' : 'none',
         }}

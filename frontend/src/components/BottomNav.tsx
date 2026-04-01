@@ -36,7 +36,7 @@ export default function BottomNav() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 10px' }}>
           <button onClick={handleRefresh} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#000',
+            background: '#1B3B51',
             width: 44, height: 44, borderRadius: '50%', border: 'none',
             color: '#fff', cursor: 'pointer',
             boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
