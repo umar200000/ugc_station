@@ -801,22 +801,21 @@ body {
   position: relative;
   overflow: hidden;
   background: #F2F2F7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* Company avatar — centered */
+/* Company avatar — top left */
 .ios-card-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   overflow: hidden;
   background: #E5E5EA;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
 }
 .ios-card-avatar img {
   width: 100%;
@@ -824,7 +823,7 @@ body {
   object-fit: cover;
 }
 .ios-card-avatar span {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: #1B3B51;
 }
