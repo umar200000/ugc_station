@@ -7,6 +7,187 @@ import { PLATFORMS, INDUSTRIES } from '../types';
 import { hapticFeedback } from '../lib/telegram';
 import { useCacheStore } from '../store/cache';
 
+const ios = {
+  page: {
+    minHeight: '100vh',
+    background: '#F2F2F7',
+    padding: '16px 16px 32px',
+  } as React.CSSProperties,
+  backBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    background: '#fff',
+    border: '1px solid #E5E5EA',
+    borderRadius: '50px',
+    padding: '8px 16px',
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#1B3B51',
+    cursor: 'pointer',
+    marginBottom: 16,
+  } as React.CSSProperties,
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: 700,
+    color: '#1B3B51',
+    margin: 0,
+  } as React.CSSProperties,
+  pageSubtitle: {
+    fontSize: 14,
+    color: '#8E8E93',
+    margin: '4px 0 0',
+  } as React.CSSProperties,
+  card: {
+    background: '#fff',
+    border: '1px solid #E5E5EA',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  } as React.CSSProperties,
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: 700,
+    color: '#1B3B51',
+    margin: '0 0 16px',
+  } as React.CSSProperties,
+  formGroup: {
+    marginBottom: 16,
+  } as React.CSSProperties,
+  label: {
+    display: 'block',
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#1B3B51',
+    marginBottom: 6,
+  } as React.CSSProperties,
+  input: {
+    width: '100%',
+    background: '#fff',
+    border: '1px solid #E5E5EA',
+    borderRadius: 12,
+    padding: '12px 14px',
+    fontSize: 15,
+    color: '#1B3B51',
+    outline: 'none',
+    boxSizing: 'border-box',
+  } as React.CSSProperties,
+  textarea: {
+    width: '100%',
+    background: '#fff',
+    border: '1px solid #E5E5EA',
+    borderRadius: 12,
+    padding: '12px 14px',
+    fontSize: 15,
+    color: '#1B3B51',
+    outline: 'none',
+    minHeight: 100,
+    resize: 'vertical' as const,
+    boxSizing: 'border-box',
+  } as React.CSSProperties,
+  select: {
+    width: '100%',
+    background: '#fff',
+    border: '1px solid #E5E5EA',
+    borderRadius: 12,
+    padding: '12px 14px',
+    fontSize: 15,
+    color: '#1B3B51',
+    outline: 'none',
+    boxSizing: 'border-box',
+    appearance: 'none' as const,
+  } as React.CSSProperties,
+  btnPrimary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    background: '#1B3B51',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 14,
+    padding: '14px 20px',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  btnSecondary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    background: '#F2F2F7',
+    color: '#1B3B51',
+    border: '1px solid #E5E5EA',
+    borderRadius: 14,
+    padding: '14px 20px',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  btnSmPrimary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    flex: 1,
+    background: '#1B3B51',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 14,
+    padding: '10px 14px',
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  btnSmSecondary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    flex: 1,
+    background: '#F2F2F7',
+    color: '#1B3B51',
+    border: '1px solid #E5E5EA',
+    borderRadius: 14,
+    padding: '10px 14px',
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  chip: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '8px 14px',
+    borderRadius: 12,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: '1px solid #E5E5EA',
+    background: '#fff',
+    color: '#1B3B51',
+  } as React.CSSProperties,
+  chipActive: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '8px 14px',
+    borderRadius: 12,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: '1px solid #1B3B51',
+    background: '#1B3B51',
+    color: '#fff',
+  } as React.CSSProperties,
+  hint: {
+    fontSize: 12,
+    color: '#8E8E93',
+    marginTop: 6,
+  } as React.CSSProperties,
+};
+
 export default function CreateAd() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -67,39 +248,45 @@ export default function CreateAd() {
     }
   };
 
+  const isStep1Valid = form.title.trim() && form.description.trim() && form.industry && images.length > 0;
+
   return (
-    <div className="page">
-      <button className="back-btn" onClick={() => navigate(-1)}>
+    <div style={ios.page}>
+      <button style={ios.backBtn} onClick={() => navigate(-1)}>
         <ArrowLeft size={18} /> Orqaga
       </button>
 
-      <div className="page-header">
-        <h1 className="page-title">Yangi e'lon</h1>
-        <p className="page-subtitle">E'loningizni yarating va influenserlarni toping</p>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={ios.pageTitle}>Yangi e'lon</h1>
+        <p style={ios.pageSubtitle}>E'loningizni yarating va influenserlarni toping</p>
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 28 }}>
-        <div style={{ flex: 1, height: 4, borderRadius: 100, background: 'var(--primary)' }} />
-        <div style={{ flex: 1, height: 4, borderRadius: 100, background: step >= 2 ? 'var(--primary)' : 'var(--border)' }} />
+        <div style={{ flex: 1, height: 4, borderRadius: 100, background: '#1B3B51' }} />
+        <div style={{ flex: 1, height: 4, borderRadius: 100, background: step >= 2 ? '#1B3B51' : '#E5E5EA' }} />
       </div>
 
       {step === 1 && (
-        <div className="fade-in">
-          <p className="section-title" style={{ marginTop: 0 }}>Kontent ma'lumotlari</p>
+        <div style={ios.card}>
+          <p style={ios.sectionTitle}>Kontent ma'lumotlari</p>
 
-          <div className="form-group">
-            <label className="form-label">Sarlavha</label>
-            <input className="form-input" placeholder="E'lon nomi" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Sarlavha</label>
+            <input style={ios.input} placeholder="E'lon nomi" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Tavsif</label>
-            <textarea className="form-textarea" placeholder="Reklama haqida batafsil yozing..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Tavsif</label>
+            <textarea style={ios.textarea} placeholder="Reklama haqida batafsil yozing..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Kategoriya</label>
-            <select className="form-select" value={customIndustry ? '__custom__' : form.industry} onChange={(e) => {
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Kategoriya</label>
+            <select style={ios.select} value={customIndustry ? '__custom__' : form.industry} onChange={(e) => {
               if (e.target.value === '__custom__') {
                 setCustomIndustry(true);
                 setForm({ ...form, industry: '' });
@@ -107,26 +294,30 @@ export default function CreateAd() {
                 setCustomIndustry(false);
                 setForm({ ...form, industry: e.target.value });
               }
-            }}>
+            }}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'}>
               <option value="">Kategoriya tanlang</option>
               {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
               <option value="__custom__">Boshqa (o'zim yozaman)</option>
             </select>
             {customIndustry && (
-              <input className="form-input" style={{ marginTop: 8 }} placeholder="Kategoriya nomini yozing..." value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} />
+              <input style={{ ...ios.input, marginTop: 8 }} placeholder="Kategoriya nomini yozing..." value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
             )}
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Rasmlar ({images.length}/5)</label>
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Rasmlar ({images.length}/5)</label>
             {previews.length > 0 && (
               <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
                 {previews.map((src, i) => (
                   <div key={i} style={{ position: 'relative', width: 80, height: 80 }}>
-                    <img src={src} alt="" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-xs)' }} />
+                    <img src={src} alt="" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 10 }} />
                     <button onClick={() => removeImage(i)} style={{
                       position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: '50%',
-                      background: 'var(--danger)', color: '#fff', border: 'none', cursor: 'pointer',
+                      background: '#FF3B30', color: '#fff', border: 'none', cursor: 'pointer',
                       fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>×</button>
                   </div>
@@ -134,94 +325,103 @@ export default function CreateAd() {
               </div>
             )}
             {images.length < 5 && (
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed var(--border-strong)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: 'var(--bg)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, border: '2px dashed #E5E5EA', borderRadius: 12, cursor: 'pointer', background: '#F2F2F7' }}>
                 <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleImageChange} style={{ display: 'none' }} />
-                <ImagePlus size={20} style={{ color: 'var(--text-muted)' }} />
-                <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>Rasm qo'shish</span>
+                <ImagePlus size={20} style={{ color: '#8E8E93' }} />
+                <span style={{ color: '#8E8E93', fontSize: 14 }}>Rasm qo'shish</span>
               </label>
             )}
           </div>
 
           {images.length === 0 && form.title.trim() && form.description.trim() && (
-            <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 8 }}>Kamida 1 ta rasm qo'shing</p>
+            <p style={{ fontSize: 13, color: '#FF3B30', marginBottom: 8 }}>Kamida 1 ta rasm qo'shing</p>
           )}
-          <button className="btn btn-primary" disabled={!form.title.trim() || !form.description.trim() || !form.industry || images.length === 0} onClick={() => setStep(2)}>
+          <button style={{ ...ios.btnPrimary, opacity: isStep1Valid ? 1 : 0.5 }} disabled={!isStep1Valid} onClick={() => setStep(2)}>
             Davom etish <ArrowRight size={18} />
           </button>
         </div>
       )}
 
       {step === 2 && (
-        <div className="fade-in">
-          <p className="section-title" style={{ marginTop: 0 }}>Influenserdan talablar</p>
+        <div style={ios.card}>
+          <p style={ios.sectionTitle}>Influenserdan talablar</p>
 
-          <div className="form-group">
-            <label className="form-label">Video formati</label>
-            <select className="form-select" value={form.videoFormat} onChange={(e) => setForm({ ...form, videoFormat: e.target.value })}>
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Video formati</label>
+            <select style={ios.select} value={form.videoFormat} onChange={(e) => setForm({ ...form, videoFormat: e.target.value })}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'}>
               <option value="ANY">Farqi yo'q</option>
               <option value="ONLINE">Online</option>
               <option value="OFFLINE">Offline</option>
             </select>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Yuz ko'rinishi</label>
-            <select className="form-select" value={form.faceType} onChange={(e) => setForm({ ...form, faceType: e.target.value })}>
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Yuz ko'rinishi</label>
+            <select style={ios.select} value={form.faceType} onChange={(e) => setForm({ ...form, faceType: e.target.value })}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'}>
               <option value="ANY">Farqi yo'q</option>
               <option value="FACE">Face</option>
               <option value="FACELESS">Faceless</option>
             </select>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Platformalar</label>
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Platformalar</label>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {PLATFORMS.map((p) => (
-                <span key={p} className={`chip ${form.platforms.includes(p) ? 'active' : ''}`} onClick={() => togglePlatform(p)}>{p}</span>
+                <span key={p} style={form.platforms.includes(p) ? ios.chipActive : ios.chip} onClick={() => togglePlatform(p)}>{p}</span>
               ))}
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Influenser soni</label>
-            <input className="form-input" type="number" min={1} value={form.influencerCount || ''}
+          <div style={ios.formGroup}>
+            <label style={ios.label}>Influenser soni</label>
+            <input style={{ ...ios.input, borderColor: form.influencerCount > 0 && form.influencerCount < 3 ? '#FF3B30' : '#E5E5EA' }} type="number" min={1} value={form.influencerCount || ''}
               onChange={(e) => setForm({ ...form, influencerCount: Number(e.target.value) || 0 })}
-              style={{ borderColor: form.influencerCount > 0 && form.influencerCount < 3 ? 'var(--danger)' : undefined }} />
+              onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+              onBlur={(e) => e.currentTarget.style.borderColor = form.influencerCount > 0 && form.influencerCount < 3 ? '#FF3B30' : '#E5E5EA'} />
             {form.influencerCount > 0 && form.influencerCount < 3 ? (
-              <p style={{ fontSize: 12, color: 'var(--danger)', fontWeight: 600, marginTop: 6 }}>Kamida 3 ta influenser bo'lishi kerak</p>
+              <p style={{ fontSize: 12, color: '#FF3B30', fontWeight: 600, marginTop: 6 }}>Kamida 3 ta influenser bo'lishi kerak</p>
             ) : (
-              <p className="form-hint">Minimum 3 ta influenser</p>
+              <p style={ios.hint}>Minimum 3 ta influenser</p>
             )}
           </div>
 
-          <div className="form-group">
-            <label className="form-label">To'lov turi</label>
+          <div style={ios.formGroup}>
+            <label style={ios.label}>To'lov turi</label>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className={`btn btn-sm ${form.adType === 'BARTER' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1 }} onClick={() => setForm({ ...form, adType: 'BARTER' })}>Barter</button>
-              <button className={`btn btn-sm ${form.adType === 'PAID' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1 }} onClick={() => setForm({ ...form, adType: 'PAID' })}>Pullik</button>
+              <button style={form.adType === 'BARTER' ? ios.btnSmPrimary : ios.btnSmSecondary}
+                onClick={() => setForm({ ...form, adType: 'BARTER' })}>Barter</button>
+              <button style={form.adType === 'PAID' ? ios.btnSmPrimary : ios.btnSmSecondary}
+                onClick={() => setForm({ ...form, adType: 'PAID' })}>Pullik</button>
             </div>
           </div>
 
           {form.adType === 'BARTER' && (
-            <div className="form-group">
-              <label className="form-label">Barter narsasi</label>
-              <input className="form-input" placeholder="Nima berasiz?" value={form.barterItem} onChange={(e) => setForm({ ...form, barterItem: e.target.value })} />
+            <div style={ios.formGroup}>
+              <label style={ios.label}>Barter narsasi</label>
+              <input style={ios.input} placeholder="Nima berasiz?" value={form.barterItem} onChange={(e) => setForm({ ...form, barterItem: e.target.value })}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
             </div>
           )}
           {form.adType === 'PAID' && (
-            <div className="form-group">
-              <label className="form-label">To'lov (so'm)</label>
-              <input className="form-input" type="text" inputMode="numeric" placeholder="100 000" value={form.payment ? String(form.payment).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''} onChange={(e) => { const num = Number(e.target.value.replace(/\s/g, '')); if (!isNaN(num)) setForm({ ...form, payment: num }); }} />
+            <div style={ios.formGroup}>
+              <label style={ios.label}>To'lov (so'm)</label>
+              <input style={ios.input} type="text" inputMode="numeric" placeholder="100 000" value={form.payment ? String(form.payment).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''} onChange={(e) => { const num = Number(e.target.value.replace(/\s/g, '')); if (!isNaN(num)) setForm({ ...form, payment: num }); }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
             </div>
           )}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setStep(1)}>
+            <button style={{ ...ios.btnSecondary, flex: 1 }} onClick={() => setStep(1)}>
               <ArrowLeft size={18} /> Orqaga
             </button>
-            <button className="btn btn-primary" style={{ flex: 2 }} disabled={loading || form.influencerCount < 3} onClick={handleSubmit}>
+            <button style={{ ...ios.btnPrimary, flex: 2, opacity: loading || form.influencerCount < 3 ? 0.5 : 1 }} disabled={loading || form.influencerCount < 3} onClick={handleSubmit}>
               {loading ? <><Loader2 size={18} className="spin" /> Yaratilmoqda...</> : <><Rocket size={18} /> E'lon yaratish</>}
             </button>
           </div>
