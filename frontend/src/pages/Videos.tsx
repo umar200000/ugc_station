@@ -42,25 +42,25 @@ function VideoCard({ video }: { video: VideoItem }) {
 
   return (
     <div style={{
-      background: 'var(--bg-card)', borderRadius: 16, overflow: 'hidden',
-      border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+      background: '#FFFFFF', borderRadius: 16, overflow: 'hidden',
+      border: '1px solid #E5E5EA',
       marginBottom: 16,
     }}>
       {/* Influencer info */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px' }}>
         <div style={{
           width: 38, height: 38, borderRadius: 12, overflow: 'hidden',
-          background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+          background: '#E5E5EA',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0, fontSize: 16, fontWeight: 700, color: '#fff',
+          flexShrink: 0, fontSize: 16, fontWeight: 700, color: '#1B3B51',
         }}>
           {inf.user?.photoUrl
             ? <img src={inf.user.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : inf.name?.[0] || '?'}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{inf.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#1B3B51' }}>{inf.name}</div>
+          <div style={{ fontSize: 12, color: '#8E8E93', display: 'flex', alignItems: 'center', gap: 4 }}>
             <Clock size={11} /> {timeAgo(video.createdAt)}
           </div>
         </div>
@@ -169,11 +169,11 @@ export default function Videos() {
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-      <div className="page">
+      <div className="page" style={{ background: '#F2F2F7' }}>
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: -0.3 }}>Videolar</h1>
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: -0.3, color: '#1B3B51' }}>Videolar</h1>
+          <p style={{ fontSize: 14, color: '#8E8E93', marginTop: 4 }}>
             Influenserlar tomonidan yaratilgan videolar
           </p>
         </div>
@@ -181,7 +181,7 @@ export default function Videos() {
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[1, 2, 3].map(i => (
-              <div key={i} className="shimmer-card" style={{ height: 300, borderRadius: 16 }}>
+              <div key={i} style={{ height: 300, borderRadius: 16, background: '#FFFFFF', border: '1px solid #E5E5EA', padding: 14 }}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 12 }}>
                   <div className="shimmer" style={{ width: 38, height: 38, borderRadius: 12 }} />
                   <div style={{ flex: 1 }}>
@@ -194,16 +194,19 @@ export default function Videos() {
             ))}
           </div>
         ) : videos.length === 0 ? (
-          <div className="empty-state">
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', padding: '48px 20px', textAlign: 'center',
+          }}>
             <div style={{
               width: 80, height: 80, borderRadius: 24,
-              background: 'var(--primary-bg)', display: 'flex',
+              background: '#E5E5EA', display: 'flex',
               alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
             }}>
-              <Play size={36} style={{ color: 'var(--primary)', opacity: 0.5 }} />
+              <Play size={36} style={{ color: '#8E8E93', opacity: 0.5 }} />
             </div>
-            <p style={{ fontWeight: 600, fontSize: 16 }}>Hali videolar yo'q</p>
-            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
+            <p style={{ fontWeight: 600, fontSize: 16, color: '#1B3B51' }}>Hali videolar yo'q</p>
+            <p style={{ fontSize: 14, color: '#8E8E93', marginTop: 4 }}>
               Influenserlar video joylashi bilan bu yerda ko'rinadi
             </p>
           </div>

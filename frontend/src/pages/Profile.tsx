@@ -206,7 +206,7 @@ export default function Profile() {
     if (p.includes('youtube')) return 'linear-gradient(135deg, #FF0000, #CC0000)';
     if (p.includes('telegram')) return 'linear-gradient(135deg, #0088CC, #0066AA)';
     if (p.includes('tiktok')) return 'linear-gradient(135deg, #000000, #333333)';
-    return 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+    return 'linear-gradient(135deg, #1B3B51, #1B3B51)';
   };
 
   const memberSince = (() => {
@@ -218,19 +218,19 @@ export default function Profile() {
 
   if (editing) {
     return (
-      <div className="page">
+      <div className="page" style={{ background: '#F2F2F7' }}>
         {/* Edit header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <button onClick={() => setEditing(false)} style={{
-            background: 'var(--bg-card)', border: '1.5px solid var(--border-strong)', borderRadius: 'var(--radius-sm)',
+            background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12,
             padding: '10px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 600,
-            color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6,
+            color: '#1B3B51', display: 'flex', alignItems: 'center', gap: 6,
           }}>
             <X size={16} /> Bekor
           </button>
-          <h2 style={{ fontSize: 18, fontWeight: 700 }}>Profilni tahrirlash</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1B3B51' }}>Profilni tahrirlash</h2>
           <button onClick={handleSave} disabled={loading} style={{
-            background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', border: 'none', borderRadius: 'var(--radius-sm)',
+            background: '#1B3B51', border: 'none', borderRadius: 12,
             padding: '10px 16px', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 600,
             color: '#fff', display: 'flex', alignItems: 'center', gap: 6, opacity: loading ? 0.6 : 1,
           }}>
@@ -251,43 +251,43 @@ export default function Profile() {
             </div>
             <div style={{
               position: 'absolute', bottom: 0, right: 0, width: 30, height: 30, borderRadius: '50%',
-              background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '3px solid var(--bg)', cursor: 'pointer',
+              background: '#1B3B51', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '3px solid #F2F2F7', cursor: 'pointer',
             }}>
               <Camera size={14} color="#fff" />
             </div>
           </div>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>Rasmni o'zgartirish uchun bosing</p>
+          <p style={{ fontSize: 12, color: '#8E8E93', marginTop: 8 }}>Rasmni o'zgartirish uchun bosing</p>
         </div>
 
         <div className="fade-in">
           {isCompany ? (
             <>
               <div className="form-group">
-                <label className="form-label">Kompaniya nomi</label>
-                <input className="form-input" value={form.name || ''} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <label className="form-label" style={{ color: '#1B3B51' }}>Kompaniya nomi</label>
+                <input className="form-input" style={{ background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12, color: '#1B3B51' }} value={form.name || ''} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="form-group">
-                <label className="form-label">Soha</label>
-                <select className="form-select" value={form.industry || ''} onChange={(e) => setForm({ ...form, industry: e.target.value })}>
+                <label className="form-label" style={{ color: '#1B3B51' }}>Soha</label>
+                <select className="form-select" style={{ background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12, color: '#1B3B51' }} value={form.industry || ''} onChange={(e) => setForm({ ...form, industry: e.target.value })}>
                   <option value="">Soha tanlang</option>
                   {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Tavsif</label>
-                <textarea className="form-textarea" rows={4} placeholder="Kompaniya haqida..." value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <label className="form-label" style={{ color: '#1B3B51' }}>Tavsif</label>
+                <textarea className="form-textarea" style={{ background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12, color: '#1B3B51' }} rows={4} placeholder="Kompaniya haqida..." value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
             </>
           ) : (
             <>
               <div className="form-group">
-                <label className="form-label">Ism</label>
-                <input className="form-input" value={form.name || ''} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <label className="form-label" style={{ color: '#1B3B51' }}>Ism</label>
+                <input className="form-input" style={{ background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12, color: '#1B3B51' }} value={form.name || ''} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </div>
               <div className="form-group">
-                <label className="form-label">Yo'nalishlar <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({editCategories.length})</span></label>
-                <div style={{ maxHeight: 180, overflowY: 'auto', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-elevated)', marginBottom: 10 }}>
+                <label className="form-label" style={{ color: '#1B3B51' }}>Yo'nalishlar <span style={{ color: '#8E8E93', fontWeight: 400 }}>({editCategories.length})</span></label>
+                <div style={{ maxHeight: 180, overflowY: 'auto', borderRadius: 12, border: '1px solid #E5E5EA', background: '#fff', marginBottom: 10 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: 10 }}>
                     {SUGGESTED_CATEGORIES.map(cat => {
                       const sel = editCategories.includes(cat);
@@ -296,9 +296,9 @@ export default function Profile() {
                           onClick={() => setEditCategories(prev => sel ? prev.filter(c => c !== cat) : [...prev, cat])}
                           style={{
                             padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600,
-                            border: `1.5px solid ${sel ? 'var(--primary)' : 'var(--border-strong)'}`,
-                            background: sel ? 'var(--primary)' : 'var(--bg-card)',
-                            color: sel ? '#fff' : 'var(--text-secondary)',
+                            border: `1.5px solid ${sel ? '#1B3B51' : '#E5E5EA'}`,
+                            background: sel ? '#1B3B51' : '#fff',
+                            color: sel ? '#fff' : '#8E8E93',
                             cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
                             display: 'flex', alignItems: 'center', gap: 4,
                           }}>
@@ -312,37 +312,37 @@ export default function Profile() {
                   <span key={cat} style={{
                     display: 'inline-flex', alignItems: 'center', gap: 4, marginRight: 6, marginBottom: 6,
                     padding: '5px 10px', borderRadius: 100, fontSize: 12, fontWeight: 600,
-                    background: 'var(--primary)', color: '#fff',
+                    background: '#1B3B51', color: '#fff',
                   }}>
                     {cat} <X size={12} style={{ cursor: 'pointer' }} onClick={() => setEditCategories(prev => prev.filter(c => c !== cat))} />
                   </span>
                 ))}
                 <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                  <input className="form-input" style={{ flex: 1 }} placeholder="Boshqa yo'nalish..."
+                  <input className="form-input" style={{ flex: 1, background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12, color: '#1B3B51' }} placeholder="Boshqa yo'nalish..."
                     value={customCatInput} onChange={(e) => setCustomCatInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const v = customCatInput.trim(); if (v && !editCategories.includes(v)) { setEditCategories(p => [...p, v]); setCustomCatInput(''); } } }}
                   />
                   <button type="button" onClick={() => { const v = customCatInput.trim(); if (v && !editCategories.includes(v)) { setEditCategories(p => [...p, v]); setCustomCatInput(''); } }}
                     disabled={!customCatInput.trim()} style={{
                       width: 40, height: 40, borderRadius: 12, border: 'none', flexShrink: 0,
-                      background: customCatInput.trim() ? 'var(--primary)' : 'var(--border)',
+                      background: customCatInput.trim() ? '#1B3B51' : '#E5E5EA',
                       color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: customCatInput.trim() ? 'pointer' : 'not-allowed',
                     }}><Plus size={18} /></button>
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Bio</label>
-                <textarea className="form-textarea" rows={3} placeholder="O'zingiz haqingizda..." value={form.bio || ''} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                <label className="form-label" style={{ color: '#1B3B51' }}>Bio</label>
+                <textarea className="form-textarea" style={{ background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12, color: '#1B3B51' }} rows={3} placeholder="O'zingiz haqingizda..." value={form.bio || ''} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
               </div>
               {/* Social links */}
               <div className="form-group">
-                <label className="form-label">Ijtimoiy tarmoqlar</label>
+                <label className="form-label" style={{ color: '#1B3B51' }}>Ijtimoiy tarmoqlar</label>
                 {(form.socialLinks || ['']).map((link: string, i: number) => (
                   <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
                     <input
                       className="form-input"
-                      style={{ flex: 1 }}
+                      style={{ flex: 1, background: '#fff', border: '1px solid #E5E5EA', borderRadius: 12, color: '#1B3B51' }}
                       placeholder="https://instagram.com/username"
                       value={link}
                       onChange={(e) => {
@@ -356,9 +356,9 @@ export default function Profile() {
                         const updated = (form.socialLinks || []).filter((_: any, idx: number) => idx !== i);
                         setForm({ ...form, socialLinks: updated });
                       }} style={{
-                        width: 40, height: 40, borderRadius: 12, border: '1px solid var(--border)',
-                        background: 'var(--bg-card)', display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', cursor: 'pointer', color: 'var(--danger)', flexShrink: 0,
+                        width: 40, height: 40, borderRadius: 12, border: '1px solid #E5E5EA',
+                        background: '#fff', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', cursor: 'pointer', color: '#FF3B30', flexShrink: 0,
                       }}>
                         <Trash2 size={16} />
                       </button>
@@ -369,8 +369,8 @@ export default function Profile() {
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     width: '100%', padding: '10px 0', borderRadius: 12,
-                    border: '1.5px dashed var(--border-strong)', background: 'transparent',
-                    color: 'var(--primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    border: '1.5px dashed #E5E5EA', background: 'transparent',
+                    color: '#1B3B51', fontSize: 14, fontWeight: 600, cursor: 'pointer',
                     fontFamily: 'inherit',
                   }}>
                   <Plus size={18} /> Havola qo'shish
@@ -386,30 +386,27 @@ export default function Profile() {
   }
 
   return (
-    <div className="page" style={{ paddingTop: 0 }}>
+    <div className="page" style={{ paddingTop: 0, background: '#F2F2F7' }}>
 
       {/* Hero banner */}
       <div className="slide-up" style={{
-        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, #1E3A8A 100%)',
+        background: '#fff',
         borderRadius: '0 0 28px 28px',
         padding: '40px 20px 52px',
         marginLeft: -16, marginRight: -16,
         position: 'relative', overflow: 'hidden',
+        borderBottom: '1px solid #E5E5EA',
       }}>
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-        <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <div style={{ position: 'absolute', top: 20, left: 30, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           {/* Top bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>Profil</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#1B3B51' }}>Profil</h1>
             <button onClick={startEdit} style={{
-              background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.25)', borderRadius: 12,
+              background: 'rgba(27,59,81,0.08)',
+              border: '1px solid #E5E5EA', borderRadius: 12,
               padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit',
-              fontSize: 13, fontWeight: 600, color: '#fff',
+              fontSize: 13, fontWeight: 600, color: '#1B3B51',
               display: 'flex', alignItems: 'center', gap: 6,
             }}>
               <Pencil size={14} /> Tahrirlash
@@ -420,20 +417,19 @@ export default function Profile() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{
               width: 76, height: 76, borderRadius: 22, overflow: 'hidden',
-              border: '3px solid rgba(255,255,255,0.3)', flexShrink: 0,
-              background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 30, fontWeight: 700, color: '#fff',
+              border: '3px solid #E5E5EA', flexShrink: 0,
+              background: '#F2F2F7', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 30, fontWeight: 700, color: '#1B3B51',
             }}>
               {(user?.company?.logo || user?.photoUrl) ? <img src={user?.company?.logo || user?.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : profile?.name?.[0] || user?.firstName?.[0] || '?'}
             </div>
             <div>
-              <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: -0.3 }}>{profile?.name || user?.firstName}</h2>
-              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 2 }}>@{user?.username || 'user'}</p>
+              <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1B3B51', letterSpacing: -0.3 }}>{profile?.name || user?.firstName}</h2>
+              <p style={{ fontSize: 14, color: '#8E8E93', marginTop: 2 }}>@{user?.username || 'user'}</p>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8,
-                background: 'rgba(255,255,255,0.18)', borderRadius: 100,
-                padding: '4px 12px', fontSize: 12, fontWeight: 600, color: '#fff',
-                backdropFilter: 'blur(10px)',
+                background: 'rgba(27,59,81,0.08)', borderRadius: 100,
+                padding: '4px 12px', fontSize: 12, fontWeight: 600, color: '#1B3B51',
               }}>
                 {isCompany ? <Building2 size={13} /> : <Megaphone size={13} />}
                 {isCompany ? 'Kompaniya' : 'Influenser'}
@@ -446,49 +442,49 @@ export default function Profile() {
       {/* Stats cards - overlapping banner */}
       <div className="slide-up" style={{ marginTop: -28, padding: '0 4px', marginBottom: 20 }}>
         <div style={{
-          background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 16,
-          boxShadow: '0 8px 30px rgba(15,23,42,0.1)', border: '1px solid var(--border)',
+          background: '#fff', borderRadius: 16, padding: 16,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #E5E5EA',
           display: 'flex', gap: 8,
         }}>
           {isCompany ? (
             <>
               <div style={{ flex: 1, textAlign: 'center', padding: '8px 0', cursor: 'pointer' }} onClick={() => navigate('/my-ads')}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)' }}>{stats.ads}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>E'lonlar</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#1B3B51' }}>{stats.ads}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93', marginTop: 2 }}>E'lonlar</div>
               </div>
-              <div style={{ width: 1, background: 'var(--border)' }} />
+              <div style={{ width: 1, background: '#E5E5EA' }} />
               <div style={{ flex: 1, textAlign: 'center', padding: '8px 0', cursor: 'pointer' }} onClick={() => navigate('/my-ads')}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)' }}>{stats.applications}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Arizalar</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#1B3B51' }}>{stats.applications}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93', marginTop: 2 }}>Arizalar</div>
               </div>
-              <div style={{ width: 1, background: 'var(--border)' }} />
+              <div style={{ width: 1, background: '#E5E5EA' }} />
               <div style={{ flex: 1, textAlign: 'center', padding: '8px 0', cursor: 'pointer' }} onClick={() => navigate('/my-videos')}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>{stats.approvedVideos}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Videolar</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#1B3B51' }}>{stats.approvedVideos}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93', marginTop: 2 }}>Videolar</div>
               </div>
             </>
           ) : (
             <>
               <div style={{ flex: 1, textAlign: 'center', padding: '8px 0' }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)' }}>{stats.applications}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Arizalar</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#1B3B51' }}>{stats.applications}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93', marginTop: 2 }}>Arizalar</div>
               </div>
-              <div style={{ width: 1, background: 'var(--border)' }} />
+              <div style={{ width: 1, background: '#E5E5EA' }} />
               <div style={{ flex: 1, textAlign: 'center', padding: '8px 0' }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>{stats.accepted}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Qabul</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#1B3B51' }}>{stats.accepted}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93', marginTop: 2 }}>Qabul</div>
               </div>
-              <div style={{ width: 1, background: 'var(--border)' }} />
+              <div style={{ width: 1, background: '#E5E5EA' }} />
               <div style={{ flex: 1, textAlign: 'center', padding: '8px 0' }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--warning)' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#F5A623' }}>
                   {user?.influencer?.avgRating ? (
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
-                      <Star size={16} fill="var(--warning)" stroke="var(--warning)" />
+                      <Star size={16} fill="#F5A623" stroke="#F5A623" />
                       {Number(user.influencer.avgRating).toFixed(1)}
                     </span>
                   ) : '—'}
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginTop: 2 }}>Reyting</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93', marginTop: 2 }}>Reyting</div>
               </div>
             </>
           )}
@@ -498,33 +494,33 @@ export default function Profile() {
       {/* About section */}
       <div className="fade-in" style={{ marginBottom: 16 }}>
         <div style={{
-          background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 18,
-          border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+          background: '#fff', borderRadius: 16, padding: 18,
+          border: '1px solid #E5E5EA',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <div style={{
               width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'var(--primary-bg)', color: 'var(--primary)',
+              background: 'rgba(27,59,81,0.08)', color: '#1B3B51',
             }}>
               <Briefcase size={14} />
             </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Ma'lumotlar</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#1B3B51' }}>Ma'lumotlar</span>
           </div>
 
           {isCompany && user?.company && (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Kompaniya</span>
-                <span style={{ fontSize: 14, fontWeight: 600 }}>{user.company.name}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
+                <span style={{ fontSize: 14, color: '#8E8E93' }}>Kompaniya</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{user.company.name}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Soha</span>
-                <span style={{ fontSize: 14, fontWeight: 600 }}>{user.company.industry}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
+                <span style={{ fontSize: 14, color: '#8E8E93' }}>Soha</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{user.company.industry}</span>
               </div>
               {user.company.description && (
                 <div style={{ paddingTop: 12 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Tavsif</span>
-                  <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text-secondary)', marginTop: 6 }}>{user.company.description}</p>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#8E8E93', textTransform: 'uppercase', letterSpacing: 0.5 }}>Tavsif</span>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#8E8E93', marginTop: 6 }}>{user.company.description}</p>
                 </div>
               )}
             </>
@@ -532,25 +528,25 @@ export default function Profile() {
 
           {!isCompany && user?.influencer && (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Ism</span>
-                <span style={{ fontSize: 14, fontWeight: 600 }}>{user.influencer.name}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
+                <span style={{ fontSize: 14, color: '#8E8E93' }}>Ism</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{user.influencer.name}</span>
               </div>
-              <div style={{ padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Yo'nalishlar</span>
+              <div style={{ padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
+                <span style={{ fontSize: 14, color: '#8E8E93', display: 'block', marginBottom: 8 }}>Yo'nalishlar</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {user.influencer.category.split(',').map((cat: string) => cat.trim()).filter(Boolean).map((cat: string) => (
                     <span key={cat} style={{
                       fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
-                      background: 'var(--primary-bg)', color: 'var(--primary)',
+                      background: 'rgba(27,59,81,0.08)', color: '#1B3B51',
                     }}>{cat}</span>
                   ))}
                 </div>
               </div>
               {user.influencer.bio && (
                 <div style={{ paddingTop: 12 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Bio</span>
-                  <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text-secondary)', marginTop: 6 }}>{user.influencer.bio}</p>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#8E8E93', textTransform: 'uppercase', letterSpacing: 0.5 }}>Bio</span>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#8E8E93', marginTop: 6 }}>{user.influencer.bio}</p>
                 </div>
               )}
             </>
@@ -562,17 +558,17 @@ export default function Profile() {
       {!isCompany && Object.keys(socialLinks).length > 0 && (
         <div className="fade-in" style={{ marginBottom: 16 }}>
           <div style={{
-            background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 18,
-            border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+            background: '#fff', borderRadius: 16, padding: 18,
+            border: '1px solid #E5E5EA',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
               <div style={{
                 width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'var(--primary-bg)', color: 'var(--primary)',
+                background: 'rgba(27,59,81,0.08)', color: '#1B3B51',
               }}>
                 <Globe size={14} />
               </div>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Ijtimoiy tarmoqlar</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#1B3B51' }}>Ijtimoiy tarmoqlar</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -584,7 +580,7 @@ export default function Profile() {
                   rel="noopener noreferrer"
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-                    background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
+                    background: '#F2F2F7', borderRadius: 12,
                     textDecoration: 'none', transition: 'all 0.2s ease',
                   }}
                 >
@@ -595,10 +591,10 @@ export default function Profile() {
                     {getPlatformIcon(platform)}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', display: 'block' }}>{platform}</span>
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{link}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51', display: 'block' }}>{platform}</span>
+                    <span style={{ fontSize: 12, color: '#8E8E93' }}>{link}</span>
                   </div>
-                  <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+                  <ChevronRight size={16} style={{ color: '#8E8E93' }} />
                 </a>
               ))}
             </div>
@@ -609,42 +605,42 @@ export default function Profile() {
       {/* Account info */}
       <div className="fade-in" style={{ marginBottom: 16 }}>
         <div style={{
-          background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 18,
-          border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+          background: '#fff', borderRadius: 16, padding: 18,
+          border: '1px solid #E5E5EA',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <div style={{
               width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'var(--primary-bg)', color: 'var(--primary)',
+              background: 'rgba(27,59,81,0.08)', color: '#1B3B51',
             }}>
               <Shield size={14} />
             </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Hisob ma'lumotlari</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#1B3B51' }}>Hisob ma'lumotlari</span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Telegram</span>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)' }}>@{user?.username || '—'}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
+            <span style={{ fontSize: 14, color: '#8E8E93' }}>Telegram</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>@{user?.username || '—'}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Ism</span>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>{user?.firstName} {user?.lastName}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
+            <span style={{ fontSize: 14, color: '#8E8E93' }}>Ism</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{user?.firstName} {user?.lastName}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Rol</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
+            <span style={{ fontSize: 14, color: '#8E8E93' }}>Rol</span>
             <span style={{
               fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 100,
-              background: 'var(--primary-bg)',
-              color: 'var(--primary)',
+              background: 'rgba(27,59,81,0.08)',
+              color: '#1B3B51',
             }}>
               {isCompany ? 'Kompaniya' : 'Influenser'}
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-            <span style={{ fontSize: 14, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 14, color: '#8E8E93', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Calendar size={14} /> A'zo bo'lgan
             </span>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>{memberSince || "2024"}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{memberSince || "2024"}</span>
           </div>
         </div>
       </div>

@@ -151,9 +151,27 @@ export default function MyApplications() {
   };
 
   const subStatusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-    PENDING: { label: 'Admin tekshirmoqda', color: 'var(--warning-text)', icon: <Clock size={12} /> },
-    APPROVED: { label: 'Tasdiqlandi', color: 'var(--secondary)', icon: <Check size={12} /> },
-    REJECTED: { label: 'Rad etildi', color: 'var(--danger)', icon: <X size={12} /> },
+    PENDING: { label: 'Admin tekshirmoqda', color: '#8E8E93', icon: <Clock size={12} /> },
+    APPROVED: { label: 'Tasdiqlandi', color: '#34C759', icon: <Check size={12} /> },
+    REJECTED: { label: 'Rad etildi', color: '#FF3B30', icon: <X size={12} /> },
+  };
+
+  const badgeStyle: Record<string, React.CSSProperties> = {
+    pending: {
+      background: '#8E8E93', color: '#fff',
+      fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
+      display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, marginLeft: 8,
+    },
+    accepted: {
+      background: '#34C759', color: '#fff',
+      fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
+      display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, marginLeft: 8,
+    },
+    rejected: {
+      background: '#FF3B30', color: '#fff',
+      fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
+      display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, marginLeft: 8,
+    },
   };
 
   useEffect(() => {
@@ -176,7 +194,7 @@ export default function MyApplications() {
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-    <div className="page">
+    <div style={{ background: '#F2F2F7', minHeight: '100vh', paddingBottom: 100 }}>
       <input ref={fileRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={handleFileChange} />
 
       {/* Video preview modal */}
@@ -221,7 +239,7 @@ export default function MyApplications() {
             </button>
             <button onClick={handleConfirmUpload} style={{
               flex: 1, padding: '14px 0', borderRadius: 14,
-              background: 'var(--primary)', border: 'none',
+              background: '#1B3B51', border: 'none',
               color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               fontFamily: 'inherit',
@@ -232,155 +250,178 @@ export default function MyApplications() {
         </div>
       )}
 
-      <div className="page-header">
-        <h1 className="page-title">Arizalarim</h1>
-        <p className="page-subtitle">Yuborgan arizalaringiz holati</p>
+      {/* Page header */}
+      <div style={{
+        background: '#fff', padding: '20px 20px 16px', borderBottom: '1px solid #E5E5EA',
+      }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1B3B51', margin: 0 }}>Arizalarim</h1>
+        <p style={{ fontSize: 14, color: '#8E8E93', margin: '4px 0 0' }}>Yuborgan arizalaringiz holati</p>
       </div>
 
-      {loading ? (
-        <><MyAdCardShimmer /><MyAdCardShimmer /><MyAdCardShimmer /></>
-      ) : applications.length === 0 ? (
-        <div className="empty-state">
-          <Send size={40} style={{ color: 'var(--text-muted)', opacity: 0.4, marginBottom: 12 }} />
-          <p>Hali ariza bermadingiz</p>
-          <button className="btn btn-primary" style={{ marginTop: 20, maxWidth: 220 }} onClick={() => navigate('/')}>
-            E'lonlarni ko'rish
-          </button>
-        </div>
-      ) : (
-        applications.map((app) => {
-          const companyPhone = (app.ad?.company as any)?.user?.phone;
-          const isExpanded = expandedId === app.id;
-          const appSubs = submissions[app.id] || [];
-          const isUploading = uploading === app.id;
+      <div style={{ padding: '16px 16px 0' }}>
+        {loading ? (
+          <><MyAdCardShimmer /><MyAdCardShimmer /><MyAdCardShimmer /></>
+        ) : applications.length === 0 ? (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: '60px 20px', textAlign: 'center',
+          }}>
+            <Send size={40} style={{ color: '#8E8E93', opacity: 0.4, marginBottom: 12 }} />
+            <p style={{ color: '#8E8E93', fontSize: 15 }}>Hali ariza bermadingiz</p>
+            <button style={{
+              marginTop: 20, maxWidth: 220, width: '100%', padding: '14px 24px', borderRadius: 14,
+              background: '#1B3B51', color: '#fff', border: 'none', fontSize: 15, fontWeight: 600,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }} onClick={() => navigate('/')}>
+              E'lonlarni ko'rish
+            </button>
+          </div>
+        ) : (
+          applications.map((app) => {
+            const companyPhone = (app.ad?.company as any)?.user?.phone;
+            const isExpanded = expandedId === app.id;
+            const appSubs = submissions[app.id] || [];
+            const isUploading = uploading === app.id;
 
-          return (
-            <div key={app.id} className="card fade-in" style={{ cursor: 'default' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, cursor: 'pointer' }}
-                onClick={() => navigate(`/ad/${app.adId}`)}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {app.ad?.title}
-                  </h3>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {app.ad?.company?.name} · {new Date(app.createdAt).toLocaleDateString('uz')}
-                  </p>
-                </div>
-                <span className={`badge badge-${app.status.toLowerCase()}`} style={{ flexShrink: 0, marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  {statusConfig[app.status]?.icon} {statusConfig[app.status]?.label}
-                </span>
-              </div>
-
-              {/* Qabul qilingan — telefon va video tugmalari */}
-              {app.status === 'ACCEPTED' && (
-                <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 8 }}>
-                  {/* Action buttons */}
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                    {companyPhone && (
-                      <a href={`tel:${companyPhone}`} className="btn btn-success btn-sm" style={{ flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                        <Phone size={15} /> Qo'ng'iroq
-                      </a>
-                    )}
-                    <button
-                      className="btn btn-primary btn-sm"
-                      style={{ flex: 1 }}
-                      disabled={isUploading}
-                      onClick={() => handleVideoSelect(app.id)}
-                    >
-                      {isUploading ? <><Loader2 size={15} className="spin" /> {uploadProgress}%</> : <><Video size={15} /> Video joylash {appSubs.length > 0 ? `(${appSubs.length})` : ''}</>}
-                    </button>
+            return (
+              <div key={app.id} style={{
+                background: '#fff', border: '1px solid #E5E5EA', borderRadius: 16,
+                padding: 16, marginBottom: 12, cursor: 'default',
+              }} className="fade-in">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, cursor: 'pointer' }}
+                  onClick={() => navigate(`/ad/${app.adId}`)}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1B3B51', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+                      {app.ad?.title}
+                    </h3>
+                    <p style={{ fontSize: 13, color: '#8E8E93', marginTop: 2, margin: '2px 0 0' }}>
+                      {app.ad?.company?.name} · {new Date(app.createdAt).toLocaleDateString('uz')}
+                    </p>
                   </div>
+                  <span style={badgeStyle[app.status.toLowerCase()]}>
+                    {statusConfig[app.status]?.icon} {statusConfig[app.status]?.label}
+                  </span>
+                </div>
 
-                  {/* Upload progress bar */}
-                  {isUploading && (
-                    <div style={{ height: 4, borderRadius: 100, background: 'var(--border)', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', borderRadius: 100, transition: 'width 0.3s',
-                        background: 'linear-gradient(90deg, var(--primary), var(--primary-light))',
-                        width: `${uploadProgress}%`,
-                      }} />
+                {/* Qabul qilingan — telefon va video tugmalari */}
+                {app.status === 'ACCEPTED' && (
+                  <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 8 }}>
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                      {companyPhone && (
+                        <a href={`tel:${companyPhone}`} style={{
+                          flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                          padding: '10px 16px', borderRadius: 12, background: '#34C759', color: '#fff',
+                          fontSize: 14, fontWeight: 600, border: 'none', fontFamily: 'inherit',
+                        }}>
+                          <Phone size={15} /> Qo'ng'iroq
+                        </a>
+                      )}
+                      <button
+                        style={{
+                          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                          padding: '10px 16px', borderRadius: 12, background: '#1B3B51', color: '#fff',
+                          fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                          opacity: isUploading ? 0.7 : 1,
+                        }}
+                        disabled={isUploading}
+                        onClick={() => handleVideoSelect(app.id)}
+                      >
+                        {isUploading ? <><Loader2 size={15} className="spin" /> {uploadProgress}%</> : <><Video size={15} /> Video joylash {appSubs.length > 0 ? `(${appSubs.length})` : ''}</>}
+                      </button>
                     </div>
-                  )}
 
-                  {/* Videos toggle */}
-                  {(appSubs.length > 0 || isExpanded) && (
-                    <button
-                      onClick={() => handleExpand(app.id)}
-                      style={{
-                        background: 'none', border: 'none', padding: '4px 0', cursor: 'pointer',
-                        fontSize: 13, fontWeight: 600, color: 'var(--primary)', fontFamily: 'inherit',
-                        display: 'flex', alignItems: 'center', gap: 4,
-                      }}
-                    >
-                      <Play size={13} /> {appSubs.length > 0 ? `${appSubs.length} ta video` : 'Videolarni ko\'rish'}
-                    </button>
-                  )}
+                    {/* Upload progress bar */}
+                    {isUploading && (
+                      <div style={{ height: 4, borderRadius: 100, background: '#E5E5EA', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%', borderRadius: 100, transition: 'width 0.3s',
+                          background: '#1B3B51',
+                          width: `${uploadProgress}%`,
+                        }} />
+                      </div>
+                    )}
 
-                  {/* Videos list */}
-                  {isExpanded && appSubs.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-                      {appSubs.map((sub) => {
-                        const st = subStatusConfig[sub.status];
-                        return (
-                          <div key={sub.id} style={{
-                            borderRadius: 12, overflow: 'hidden',
-                            background: 'var(--bg-secondary)',
-                            border: `1px solid ${sub.status === 'REJECTED' ? 'rgba(239,68,68,0.2)' : sub.status === 'APPROVED' ? 'rgba(16,185,129,0.2)' : 'var(--border)'}`,
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
-                              <video
-                                src={sub.videoUrl + '#t=0.5'}
-                                preload="auto"
-                                style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', background: '#000', flexShrink: 0 }}
-                              />
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                  {new Date(sub.createdAt).toLocaleDateString('uz')}
-                                </p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 13, fontWeight: 600, color: st.color }}>
-                                  {st.icon} {st.label}
+                    {/* Videos toggle */}
+                    {(appSubs.length > 0 || isExpanded) && (
+                      <button
+                        onClick={() => handleExpand(app.id)}
+                        style={{
+                          background: 'none', border: 'none', padding: '4px 0', cursor: 'pointer',
+                          fontSize: 13, fontWeight: 600, color: '#1B3B51', fontFamily: 'inherit',
+                          display: 'flex', alignItems: 'center', gap: 4,
+                        }}
+                      >
+                        <Play size={13} /> {appSubs.length > 0 ? `${appSubs.length} ta video` : 'Videolarni ko\'rish'}
+                      </button>
+                    )}
+
+                    {/* Videos list */}
+                    {isExpanded && appSubs.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                        {appSubs.map((sub) => {
+                          const st = subStatusConfig[sub.status];
+                          return (
+                            <div key={sub.id} style={{
+                              borderRadius: 12, overflow: 'hidden',
+                              background: '#F2F2F7',
+                              border: `1px solid ${sub.status === 'REJECTED' ? 'rgba(255,59,48,0.2)' : sub.status === 'APPROVED' ? 'rgba(52,199,89,0.2)' : '#E5E5EA'}`,
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
+                                <video
+                                  src={sub.videoUrl + '#t=0.5'}
+                                  preload="auto"
+                                  style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', background: '#000', flexShrink: 0 }}
+                                />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ fontSize: 12, color: '#8E8E93', margin: 0 }}>
+                                    {new Date(sub.createdAt).toLocaleDateString('uz')}
+                                  </p>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 13, fontWeight: 600, color: st.color }}>
+                                    {st.icon} {st.label}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            {sub.status === 'REJECTED' && (
-                              <div style={{
-                                margin: '0 10px 10px', padding: '10px 12px', borderRadius: 10,
-                                background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.12)',
-                              }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--danger)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                                  {sub.reviewedBy === 'ADMIN' ? '❌ Admin tomonidan rad etildi' : 'Rad etish sababi'}
-                                </p>
-                                {sub.comment && (
-                                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                              {sub.status === 'REJECTED' && (
+                                <div style={{
+                                  margin: '0 10px 10px', padding: '10px 12px', borderRadius: 10,
+                                  background: 'rgba(255,59,48,0.06)', border: '1px solid rgba(255,59,48,0.12)',
+                                }}>
+                                  <p style={{ fontSize: 11, fontWeight: 700, color: '#FF3B30', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3, margin: '0 0 4px' }}>
+                                    {sub.reviewedBy === 'ADMIN' ? '❌ Admin tomonidan rad etildi' : 'Rad etish sababi'}
+                                  </p>
+                                  {sub.comment && (
+                                    <p style={{ fontSize: 13, color: '#1B3B51', lineHeight: 1.5, margin: 0 }}>
+                                      {sub.comment}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                              {sub.comment && sub.status === 'APPROVED' && (
+                                <div style={{
+                                  margin: '0 10px 10px', padding: '10px 12px', borderRadius: 10,
+                                  background: 'rgba(52,199,89,0.06)', border: '1px solid rgba(52,199,89,0.12)',
+                                }}>
+                                  <p style={{ fontSize: 11, fontWeight: 700, color: '#34C759', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3, margin: '0 0 4px' }}>
+                                    {sub.reviewedBy === 'ADMIN' ? '✅ Admin tasdiqladi' : 'Izoh'}
+                                  </p>
+                                  <p style={{ fontSize: 13, color: '#1B3B51', lineHeight: 1.5, margin: 0 }}>
                                     {sub.comment}
                                   </p>
-                                )}
-                              </div>
-                            )}
-                            {sub.comment && sub.status === 'APPROVED' && (
-                              <div style={{
-                                margin: '0 10px 10px', padding: '10px 12px', borderRadius: 10,
-                                background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.12)',
-                              }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                                  {sub.reviewedBy === 'ADMIN' ? '✅ Admin tasdiqladi' : 'Izoh'}
-                                </p>
-                                <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                  {sub.comment}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })
-      )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
 
       <BottomNav />
     </div>
