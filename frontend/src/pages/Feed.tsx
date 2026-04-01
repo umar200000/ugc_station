@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, SlidersHorizontal, X, Bell } from 'lucide-react';
+import { Search } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 import api from '../lib/api';
 import AdCard from '../components/AdCard';
@@ -9,7 +9,6 @@ import PullToRefresh from '../components/PullToRefresh';
 import { useAuthStore } from '../store/auth';
 import { useCacheStore } from '../store/cache';
 import type { Ad } from '../types';
-import { INDUSTRIES } from '../types';
 
 type FeedTab = 'all' | 'paid' | 'barter';
 
@@ -18,13 +17,9 @@ export default function Feed() {
   const cache = useCacheStore();
   const [ads, setAds] = useState<Ad[]>(cache.feedAds || []);
   const [loading, setLoading] = useState(!cache.feedAds);
-  const [industry, setIndustry] = useState('');
   const [adType, setAdType] = useState('');
   const [search, setSearch] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
-
-  const activeFilterCount = (industry ? 1 : 0);
 
   useEffect(() => {
     if (activeTab === 'paid') setAdType('PAID');
@@ -33,7 +28,7 @@ export default function Feed() {
   }, [activeTab]);
 
   const fetchAds = async (force = false) => {
-    const paramKey = `${industry}|${adType}|${search}`;
+    const paramKey = `${adType}|${search}`;
     const cacheState = useCacheStore.getState();
     if (!force && cacheState.feedAds && cacheState.feedParams === paramKey) {
       setAds(cacheState.feedAds);
@@ -43,7 +38,6 @@ export default function Feed() {
     setLoading(true);
     try {
       const params: any = {};
-      if (industry) params.industry = industry;
       if (adType) params.adType = adType;
       if (search) params.search = search;
       const res = await api.get('/ads', { params });
@@ -63,7 +57,7 @@ export default function Feed() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  useEffect(() => { fetchAds(); }, [industry, adType]);
+  useEffect(() => { fetchAds(); }, [adType]);
 
   const feedLoadDone = useRef(false);
   useEffect(() => {
@@ -85,7 +79,6 @@ export default function Feed() {
   };
 
   const activeAds = ads.filter(a => a.status === 'ACTIVE');
-  const totalSlots = ads.reduce((sum, a) => sum + (a.influencerCount || 0), 0);
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
@@ -114,13 +107,13 @@ export default function Feed() {
           </div>
           <div className="ios-feed-mini-stat-divider" />
           <div className="ios-feed-mini-stat">
-            <span className="ios-feed-mini-stat-value">{totalSlots}</span>
-            <span className="ios-feed-mini-stat-label">Joylar</span>
+            <span className="ios-feed-mini-stat-value">{ads.filter(a => a.adType === 'PAID').length}</span>
+            <span className="ios-feed-mini-stat-label">Pullik</span>
           </div>
           <div className="ios-feed-mini-stat-divider" />
           <div className="ios-feed-mini-stat">
-            <span className="ios-feed-mini-stat-value">{ads.filter(a => a.adType === 'PAID').length}</span>
-            <span className="ios-feed-mini-stat-label">Pullik</span>
+            <span className="ios-feed-mini-stat-value">{ads.filter(a => a.adType === 'BARTER').length}</span>
+            <span className="ios-feed-mini-stat-label">Barter</span>
           </div>
         </div>
       </div>
@@ -158,31 +151,8 @@ export default function Feed() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        {activeFilterCount > 0 && (
-          <button onClick={() => { setIndustry(''); }} className="ios-filter-clear-btn">
-            <X size={14} /> Filtr
-          </button>
-        )}
       </div>
 
-      {/* Industry filter chips */}
-      <div className="ios-feed-chips">
-        <button
-          className={`ios-chip ${!industry ? 'active' : ''}`}
-          onClick={() => setIndustry('')}
-        >
-          Barchasi
-        </button>
-        {INDUSTRIES.slice(0, 6).map((ind) => (
-          <button
-            key={ind}
-            className={`ios-chip ${industry === ind ? 'active' : ''}`}
-            onClick={() => setIndustry(ind)}
-          >
-            {ind}
-          </button>
-        ))}
-      </div>
 
       {/* Ads list */}
       {loading ? (
