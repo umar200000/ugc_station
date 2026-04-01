@@ -788,6 +788,7 @@ body {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
+  border: 1px solid #E5E5EA;
 }
 .ios-card:active {
   transform: scale(0.97);
