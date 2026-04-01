@@ -36,10 +36,10 @@ export default function BottomNav() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 10px' }}>
           <button onClick={handleRefresh} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+            background: '#000',
             width: 44, height: 44, borderRadius: '50%', border: 'none',
             color: '#fff', cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(37,99,235,0.35)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
             marginTop: -20, transition: 'transform 0.2s',
           }}>
             <RefreshCw size={20} strokeWidth={2.2} style={{
