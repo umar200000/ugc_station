@@ -791,33 +791,32 @@ body {
   color: #fff;
 }
 
-/* Feed list */
+/* Feed list — 2 column grid */
 .ios-feed-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-/* ===== iOS AD CARD — Methods Style ===== */
+/* ===== iOS AD CARD — Grid Style ===== */
 .ios-card {
   display: flex;
+  flex-direction: column;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  min-height: 100px;
 }
 .ios-card:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 /* Thumbnail */
 .ios-card-thumb {
-  width: 100px;
-  min-height: 100px;
-  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 1;
   position: relative;
   overflow: hidden;
   background: #E5E5EA;
@@ -835,7 +834,7 @@ body {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #1B3B51 0%, #2A6F97 100%);
-  font-size: 24px;
+  font-size: 28px;
 }
 .ios-card-closed-overlay {
   position: absolute;
@@ -850,88 +849,52 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.ios-card-people {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 11px;
+  font-weight: 600;
+  color: #1B3B51;
+}
 
 /* Card body */
 .ios-card-body {
-  flex: 1;
-  padding: 10px 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-width: 0;
-}
-
-/* Brand row */
-.ios-card-brand {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.ios-card-brand-avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-.ios-card-brand-letter {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: rgba(27,59,81,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: #1B3B51;
-}
-.ios-card-brand-name {
-  font-size: 12px;
-  font-weight: 500;
-  color: #8E8E93;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding: 10px 10px 12px;
 }
 
 /* Title */
 .ios-card-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   color: #1B3B51;
   line-height: 1.35;
-  margin: 4px 0;
+  margin-bottom: 4px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Bottom row */
-.ios-card-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
+/* Price */
 .ios-card-price {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
 }
 .ios-card-price.paid {
   color: #2A6F97;
 }
 .ios-card-price.barter {
   color: #3D8B7A;
-}
-.ios-card-slots {
-  font-size: 11px;
-  font-weight: 600;
-  color: #1B3B51;
-  background: rgba(27,59,81,0.06);
-  padding: 3px 8px;
-  border-radius: 6px;
 }
 
 /* Empty state */
