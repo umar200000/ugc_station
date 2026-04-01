@@ -10,7 +10,7 @@ interface Props {
 export default function AdCard({ ad, index = 0 }: Props) {
   const navigate = useNavigate();
   const isClosed = ad.status === 'CLOSED';
-  const hasImage = ad.images?.length > 0;
+  const hasAvatar = !!ad.company?.user?.photoUrl;
 
   return (
     <div
@@ -18,16 +18,19 @@ export default function AdCard({ ad, index = 0 }: Props) {
       onClick={() => navigate(`/ad/${ad.id}`)}
       style={{ opacity: isClosed ? 0.6 : 1 }}
     >
-      {/* Image */}
+      {/* Image area */}
       <div className="ios-card-thumb">
-        {hasImage ? (
-          <img src={ad.images[0]} alt="" className="ios-card-img" />
-        ) : (
-          <div className="ios-card-no-img">
-            {ad.adType === 'PAID' ? '💰' : <Repeat2 size={24} color="#fff" />}
-          </div>
-        )}
+        {/* Company avatar top-left */}
+        <div className="ios-card-avatar">
+          {hasAvatar ? (
+            <img src={ad.company.user.photoUrl} alt="" />
+          ) : (
+            <span>{ad.company?.name?.[0] || '?'}</span>
+          )}
+        </div>
+
         {isClosed && <div className="ios-card-closed-overlay">Yopilgan</div>}
+
         <div className="ios-card-people">
           <Users size={12} />
           <span>{ad.acceptedCount || 0}/{ad.influencerCount}</span>

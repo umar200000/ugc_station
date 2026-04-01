@@ -813,29 +813,41 @@ body {
   transform: scale(0.97);
 }
 
-/* Thumbnail */
+/* Thumbnail area */
 .ios-card-thumb {
   width: 100%;
   aspect-ratio: 1;
   position: relative;
   overflow: hidden;
+  background: #F2F2F7;
+}
+
+/* Company avatar — top left */
+.ios-card-avatar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  overflow: hidden;
   background: #E5E5EA;
-}
-.ios-card-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.ios-card-no-img {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1B3B51 0%, #2A6F97 100%);
-  font-size: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+.ios-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ios-card-avatar span {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1B3B51;
+}
+
 .ios-card-closed-overlay {
   position: absolute;
   inset: 0;
