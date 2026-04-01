@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 import api from '../lib/api';
@@ -21,6 +21,7 @@ export default function Feed() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
   const [totalUsers, setTotalUsers] = useState(0);
+  const barHeights = useMemo(() => Array.from({ length: 28 }, () => 20 + Math.random() * 80), []);
 
   useEffect(() => {
     if (activeTab === 'paid') setAdType('PAID');
@@ -103,11 +104,11 @@ export default function Feed() {
           </span>
           <span className="ios-feed-total-number">{totalUsers.toLocaleString()}</span>
           <div className="ios-feed-bar-chart">
-            {Array.from({ length: 28 }, (_, i) => (
+            {barHeights.map((h, i) => (
               <div
                 key={i}
                 className="ios-feed-bar"
-                style={{ height: `${20 + Math.random() * 80}%` }}
+                style={{ height: `${h}%` }}
               />
             ))}
           </div>

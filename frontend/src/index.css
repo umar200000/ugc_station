@@ -661,7 +661,7 @@ body {
 .ios-feed-bar {
   flex: 1;
   border-radius: 2px;
-  background: linear-gradient(to top, #C8A2D0, #D4B0DC);
+  background: linear-gradient(to top, #1B3B51, #3A6B85);
   min-height: 6px;
 }
 
@@ -844,8 +844,8 @@ body {
 }
 .ios-card-people {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 10px;
+  right: 10px;
   display: flex;
   align-items: center;
   gap: 3px;
