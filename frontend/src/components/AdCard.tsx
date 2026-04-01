@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { XCircle, Users, Eye, Zap, Clock, Repeat2 } from 'lucide-react';
+import { XCircle, Users, Zap, Clock, Repeat2 } from 'lucide-react';
 import type { Ad } from '../types';
 
 interface Props {
@@ -65,12 +65,6 @@ export default function AdCard({ ad, index = 0 }: Props) {
             </div>
           )}
 
-          {/* Image count indicator */}
-          {ad.images.length > 1 && (
-            <div className="ad-card-img-count">
-              <Eye size={11} /> {ad.images.length}
-            </div>
-          )}
         </div>
       ) : (
         /* No image - colorful header */
