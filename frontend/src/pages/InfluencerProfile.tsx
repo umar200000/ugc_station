@@ -72,6 +72,20 @@ export default function InfluencerProfile() {
     return 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
   };
 
+  const getSocialUrl = (platform: string, link: string) => {
+    const val = String(link).trim();
+    if (val.startsWith('http://') || val.startsWith('https://')) return val;
+    const p = platform.toLowerCase();
+    const clean = val.replace(/^@/, '');
+    if (p.includes('instagram')) return `https://instagram.com/${clean}`;
+    if (p.includes('telegram')) return `https://t.me/${clean}`;
+    if (p.includes('tiktok')) return `https://tiktok.com/@${clean}`;
+    if (p.includes('youtube')) return `https://youtube.com/${clean}`;
+    if (p.includes('facebook')) return `https://facebook.com/${clean}`;
+    if (val.includes('.')) return `https://${val}`;
+    return `https://${val}`;
+  };
+
   const rating = influencer.avgRating ? Number(influencer.avgRating).toFixed(1) : null;
 
   return (
@@ -163,9 +177,10 @@ export default function InfluencerProfile() {
               {Object.entries(socialLinks).map(([platform, link]) => (
                 <a
                   key={platform}
-                  href={String(link).startsWith('http') ? link : '#'}
+                  href={getSocialUrl(platform, link)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
                   className="infp-social-item"
                 >
                   <div className="infp-social-icon" style={{ background: getPlatformGradient(platform) }}>
