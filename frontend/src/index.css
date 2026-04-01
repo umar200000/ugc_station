@@ -628,60 +628,41 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* Big hero stat */
-.ios-feed-stat-hero {
+/* Total users — Methods style */
+.ios-feed-total {
   text-align: center;
-  padding: 20px 0 16px;
+  padding: 16px 0 8px;
 }
-.ios-feed-stat-number {
+.ios-feed-total-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #8E8E93;
+}
+.ios-feed-total-number {
   display: block;
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 700;
   color: #1B3B51;
   letter-spacing: -2px;
   line-height: 1;
-}
-.ios-feed-stat-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #8E8E93;
   margin-top: 4px;
 }
-
-/* Mini stats row */
-.ios-feed-mini-stats {
+.ios-feed-bar-chart {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  background: #fff;
-  border-radius: 16px;
-  padding: 14px 0;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  align-items: flex-end;
+  gap: 3px;
+  height: 36px;
+  margin-top: 16px;
+  padding: 0 4px;
 }
-.ios-feed-mini-stat {
+.ios-feed-bar {
   flex: 1;
-  text-align: center;
-}
-.ios-feed-mini-stat-value {
-  display: block;
-  font-size: 20px;
-  font-weight: 700;
-  color: #1B3B51;
-}
-.ios-feed-mini-stat-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: #8E8E93;
-  margin-top: 2px;
-}
-.ios-feed-mini-stat-divider {
-  width: 1px;
-  height: 28px;
-  background: #E5E5EA;
+  border-radius: 2px;
+  background: linear-gradient(to top, #C8A2D0, #D4B0DC);
+  min-height: 6px;
 }
 
 /* iOS Segmented Control */

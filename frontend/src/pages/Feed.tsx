@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 import api from '../lib/api';
 import AdCard from '../components/AdCard';
@@ -20,12 +20,17 @@ export default function Feed() {
   const [adType, setAdType] = useState('');
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
+  const [totalUsers, setTotalUsers] = useState(0);
 
   useEffect(() => {
     if (activeTab === 'paid') setAdType('PAID');
     else if (activeTab === 'barter') setAdType('BARTER');
     else setAdType('');
   }, [activeTab]);
+
+  useEffect(() => {
+    api.get('/ads/public-stats').then(res => setTotalUsers(res.data.users)).catch(() => {});
+  }, []);
 
   const fetchAds = async (force = false) => {
     const paramKey = `${adType}|${search}`;
@@ -78,8 +83,6 @@ export default function Feed() {
     await fetchAds(true);
   };
 
-  const activeAds = ads.filter(a => a.status === 'ACTIVE');
-
   return (
     <PullToRefresh onRefresh={handleRefresh}>
     <div className="page ios-feed">
@@ -93,27 +96,20 @@ export default function Feed() {
           <NotificationBell />
         </div>
 
-        {/* Big stat number */}
-        <div className="ios-feed-stat-hero">
-          <span className="ios-feed-stat-number">{activeAds.length}</span>
-          <span className="ios-feed-stat-label">faol e'lonlar</span>
-        </div>
-
-        {/* Mini stats row */}
-        <div className="ios-feed-mini-stats">
-          <div className="ios-feed-mini-stat">
-            <span className="ios-feed-mini-stat-value">{ads.length}</span>
-            <span className="ios-feed-mini-stat-label">Jami</span>
-          </div>
-          <div className="ios-feed-mini-stat-divider" />
-          <div className="ios-feed-mini-stat">
-            <span className="ios-feed-mini-stat-value">{ads.filter(a => a.adType === 'PAID').length}</span>
-            <span className="ios-feed-mini-stat-label">Pullik</span>
-          </div>
-          <div className="ios-feed-mini-stat-divider" />
-          <div className="ios-feed-mini-stat">
-            <span className="ios-feed-mini-stat-value">{ads.filter(a => a.adType === 'BARTER').length}</span>
-            <span className="ios-feed-mini-stat-label">Barter</span>
+        {/* Total users — Methods style */}
+        <div className="ios-feed-total">
+          <span className="ios-feed-total-label">
+            Foydalanuvchilar <ChevronDown size={14} />
+          </span>
+          <span className="ios-feed-total-number">{totalUsers.toLocaleString()}</span>
+          <div className="ios-feed-bar-chart">
+            {Array.from({ length: 28 }, (_, i) => (
+              <div
+                key={i}
+                className="ios-feed-bar"
+                style={{ height: `${20 + Math.random() * 80}%` }}
+              />
+            ))}
           </div>
         </div>
       </div>

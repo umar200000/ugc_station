@@ -21,6 +21,16 @@ function formatAd(ad) {
   };
 }
 
+// Public stats — user count for feed header
+router.get('/public-stats', async (req, res) => {
+  try {
+    const users = await req.prisma.user.count();
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
 // Barcha faol e'lonlar (influenserlar uchun lenta)
 router.get('/', async (req, res) => {
   try {
