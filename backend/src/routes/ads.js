@@ -125,9 +125,24 @@ router.get('/:id', async (req, res) => {
       ? ad.company.reviews.reduce((sum, r) => sum + r.rating, 0) / ad.company.reviews.length
       : 0;
 
+    // Influencer ariza holatini tekshirish
+    let myApplication = null;
+    if (req.query.userId) {
+      const influencer = await req.prisma.influencer.findUnique({
+        where: { userId: req.query.userId },
+      });
+      if (influencer) {
+        myApplication = await req.prisma.application.findFirst({
+          where: { adId: ad.id, influencerId: influencer.id },
+          select: { id: true, status: true },
+        });
+      }
+    }
+
     res.json({
       ...formatAd(ad),
       companyRating: Math.round(avgRating * 10) / 10,
+      myApplication,
     });
   } catch (err) {
     console.error('Get ad error:', err);

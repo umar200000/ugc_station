@@ -36,8 +36,13 @@ export default function AdDetail() {
   }, []);
 
   useEffect(() => {
-    api.get(`/ads/${id}`)
-      .then((res) => setAd(res.data))
+    const params: any = {};
+    if (user?.id) params.userId = user.id;
+    api.get(`/ads/${id}`, { params })
+      .then((res) => {
+        setAd(res.data);
+        if (res.data.myApplication) setApplied(true);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
