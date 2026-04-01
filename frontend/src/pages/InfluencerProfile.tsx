@@ -45,7 +45,7 @@ export default function InfluencerProfile() {
   }, [id]);
 
   if (loading) return <InfluencerProfileShimmer />;
-  if (!influencer) return <div className="page"><div className="empty-state"><p>Influenser topilmadi</p></div></div>;
+  if (!influencer) return <div style={{ minHeight: '100vh', background: '#F2F2F7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ textAlign: 'center', color: '#8E8E93', fontSize: 15 }}><p>Influenser topilmadi</p></div></div>;
 
   let socialLinks: Record<string, string> = {};
   try {
@@ -69,7 +69,7 @@ export default function InfluencerProfile() {
     if (p.includes('youtube')) return 'linear-gradient(135deg, #FF0000, #CC0000)';
     if (p.includes('telegram')) return 'linear-gradient(135deg, #0088CC, #00AAEE)';
     if (p.includes('tiktok')) return 'linear-gradient(135deg, #000000, #333333)';
-    return 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+    return 'linear-gradient(135deg, #1B3B51, #2A5570)';
   };
 
   const getSocialUrl = (platform: string, link: string) => {
@@ -89,108 +89,271 @@ export default function InfluencerProfile() {
   const rating = influencer.avgRating ? Number(influencer.avgRating).toFixed(1) : null;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ minHeight: '100vh', background: '#F2F2F7' }}>
 
       {/* Hero banner */}
-      <div className="infp-hero slide-up">
-        <div className="infp-hero-bg" />
+      <div style={{
+        position: 'relative',
+        padding: '56px 20px 40px',
+        background: '#fff',
+        textAlign: 'center' as const,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      }}>
 
         {/* Back button */}
-        <button onClick={() => navigate(-1)} className="infp-back">
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            background: '#fff',
+            border: '1px solid #E5E5EA',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 10,
+            color: '#1B3B51',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          }}
+        >
           <ArrowLeft size={20} />
         </button>
 
-        <div className="infp-hero-content">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
           {/* Avatar */}
-          <div className="infp-avatar-wrap">
-            <div className="infp-avatar">
+          <div style={{ position: 'relative', marginBottom: 4 }}>
+            <div style={{
+              width: 88,
+              height: 88,
+              borderRadius: '50%',
+              border: '3px solid #E5E5EA',
+              overflow: 'hidden',
+              background: '#F2F2F7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 32,
+              fontWeight: 700,
+              color: '#1B3B51',
+            }}>
               {influencer.user?.photoUrl
-                ? <img src={influencer.user.photoUrl} alt="" />
+                ? <img src={influencer.user.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : <span>{influencer.name?.[0] || '?'}</span>}
             </div>
             {rating && Number(rating) >= 4.5 && (
-              <div className="infp-verified"><Award size={14} /></div>
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                right: -2,
+                width: 26,
+                height: 26,
+                borderRadius: '50%',
+                background: '#fff',
+                border: '2px solid #E5E5EA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#1B3B51',
+              }}>
+                <Award size={14} />
+              </div>
             )}
           </div>
 
-          <h1 className="infp-name">{influencer.name}</h1>
-          <div className="infp-meta">
-            <span className="infp-category-badge">{influencer.category}</span>
+          <h1 style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: '#1B3B51',
+            margin: 0,
+            letterSpacing: -0.3,
+          }}>{influencer.name}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <span style={{
+              display: 'inline-block',
+              padding: '4px 12px',
+              borderRadius: 20,
+              background: 'rgba(27,59,81,0.08)',
+              color: '#1B3B51',
+              fontSize: 13,
+              fontWeight: 600,
+            }}>{influencer.category}</span>
             {influencer.user?.username && (
-              <span className="infp-username">@{influencer.user.username}</span>
+              <span style={{ fontSize: 14, color: '#8E8E93' }}>@{influencer.user.username}</span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Stats cards — overlap */}
-      <div className="infp-stats-wrap slide-up">
-        <div className="infp-stats">
-          <div className="infp-stat">
-            <div className="infp-stat-icon" style={{ background: 'rgba(245,158,11,0.12)', color: 'var(--warning)' }}>
-              <Star size={18} fill="var(--warning)" stroke="var(--warning)" />
+      {/* Stats cards */}
+      <div style={{ padding: '0 16px', maxWidth: 480, margin: '-20px auto 0' }}>
+        <div style={{
+          display: 'flex',
+          background: '#fff',
+          border: '1px solid #E5E5EA',
+          borderRadius: 16,
+          padding: '16px 0',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        }}>
+          <div style={{ flex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: 'rgba(245,158,11,0.12)',
+              color: '#F59E0B',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Star size={18} fill="#F59E0B" stroke="#F59E0B" />
             </div>
-            <div className="infp-stat-value">{rating || '—'}</div>
-            <div className="infp-stat-label">Reyting</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#1B3B51' }}>{rating || '—'}</div>
+            <div style={{ fontSize: 12, color: '#8E8E93', fontWeight: 500 }}>Reyting</div>
           </div>
-          <div className="infp-stats-divider" />
-          <div className="infp-stat">
-            <div className="infp-stat-icon" style={{ background: 'rgba(16,185,129,0.12)', color: 'var(--secondary)' }}>
+          <div style={{ width: 1, background: '#E5E5EA', margin: '8px 0' }} />
+          <div style={{ flex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: 'rgba(16,185,129,0.12)',
+              color: '#10B981',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
               <TrendingUp size={18} />
             </div>
-            <div className="infp-stat-value">{influencer.completedCollabs || 0}</div>
-            <div className="infp-stat-label">Hamkorlik</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#1B3B51' }}>{influencer.completedCollabs || 0}</div>
+            <div style={{ fontSize: 12, color: '#8E8E93', fontWeight: 500 }}>Hamkorlik</div>
           </div>
-          <div className="infp-stats-divider" />
-          <div className="infp-stat">
-            <div className="infp-stat-icon" style={{ background: 'var(--primary-bg)', color: 'var(--primary)' }}>
+          <div style={{ width: 1, background: '#E5E5EA', margin: '8px 0' }} />
+          <div style={{ flex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: 'rgba(27,59,81,0.08)',
+              color: '#1B3B51',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
               <Briefcase size={18} />
             </div>
-            <div className="infp-stat-value">{influencer.reviews?.length || 0}</div>
-            <div className="infp-stat-label">Sharh</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#1B3B51' }}>{influencer.reviews?.length || 0}</div>
+            <div style={{ fontSize: 12, color: '#8E8E93', fontWeight: 500 }}>Sharh</div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ padding: '0 16px 40px', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ padding: '20px 16px 40px', maxWidth: 480, margin: '0 auto' }}>
 
         {/* Bio */}
         {influencer.bio && (
-          <div className="infp-section fade-in">
-            <div className="infp-section-header">
-              <Quote size={14} />
+          <div style={{ marginBottom: 20 }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 12,
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#1B3B51',
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: 8,
+                background: 'rgba(27,59,81,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#1B3B51',
+              }}>
+                <Quote size={14} />
+              </div>
               <span>Bio</span>
             </div>
-            <p style={{ fontSize: 15, lineHeight: 1.75, color: 'var(--text-secondary)' }}>{influencer.bio}</p>
+            <p style={{ fontSize: 15, lineHeight: 1.75, color: '#8E8E93', margin: 0 }}>{influencer.bio}</p>
           </div>
         )}
 
         {/* Social links */}
         {Object.keys(socialLinks).length > 0 && (
-          <div className="infp-section fade-in">
-            <div className="infp-section-header">
-              <Globe size={14} />
+          <div style={{ marginBottom: 20 }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 12,
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#1B3B51',
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: 8,
+                background: 'rgba(27,59,81,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#1B3B51',
+              }}>
+                <Globe size={14} />
+              </div>
               <span>Ijtimoiy tarmoqlar</span>
             </div>
-            <div className="infp-socials">
-              {Object.entries(socialLinks).map(([platform, link]) => (
+            <div style={{
+              background: '#fff',
+              borderRadius: 12,
+              border: '1px solid #E5E5EA',
+              overflow: 'hidden',
+            }}>
+              {Object.entries(socialLinks).map(([platform, link], idx) => (
                 <a
                   key={platform}
                   href={getSocialUrl(platform, link)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="infp-social-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '12px 14px',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    borderBottom: idx < Object.entries(socialLinks).length - 1 ? '1px solid #E5E5EA' : 'none',
+                  }}
                 >
-                  <div className="infp-social-icon" style={{ background: getPlatformGradient(platform) }}>
+                  <div style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 8,
+                    background: getPlatformGradient(platform),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    flexShrink: 0,
+                  }}>
                     {getPlatformIcon(platform)}
                   </div>
-                  <div className="infp-social-info">
-                    <span className="infp-social-name">{platform}</span>
-                    <span className="infp-social-link">{link}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#1B3B51' }}>{platform}</div>
+                    <div style={{ fontSize: 13, color: '#8E8E93', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link}</div>
                   </div>
-                  <ExternalLink size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                  <ExternalLink size={15} style={{ color: '#8E8E93', flexShrink: 0 }} />
                 </a>
               ))}
             </div>
@@ -199,34 +362,74 @@ export default function InfluencerProfile() {
 
         {/* Reviews */}
         {influencer.reviews?.length > 0 && (
-          <div className="infp-section fade-in">
-            <div className="infp-section-header">
-              <Star size={14} />
+          <div style={{ marginBottom: 20 }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 12,
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#1B3B51',
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: 8,
+                background: 'rgba(27,59,81,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#1B3B51',
+              }}>
+                <Star size={14} />
+              </div>
               <span>Sharhlar ({influencer.reviews.length})</span>
             </div>
-            <div className="infp-reviews">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {influencer.reviews.map((r: any) => (
-                <div key={r.id} className="infp-review">
-                  <div className="infp-review-header">
-                    <div className="infp-review-company">
-                      <div className="infp-review-avatar">
+                <div key={r.id} style={{
+                  background: '#fff',
+                  borderRadius: 12,
+                  border: '1px solid #E5E5EA',
+                  padding: 14,
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: r.comment ? 10 : 0,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: 'rgba(27,59,81,0.08)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: '#1B3B51',
+                      }}>
                         {r.company?.name?.[0] || '?'}
                       </div>
-                      <span>{r.company?.name}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{r.company?.name}</span>
                     </div>
-                    <div className="infp-review-stars">
+                    <div style={{ display: 'flex', gap: 2 }}>
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
                           size={14}
-                          fill={i < r.rating ? 'var(--warning)' : 'none'}
-                          stroke={i < r.rating ? 'var(--warning)' : 'var(--border-strong)'}
+                          fill={i < r.rating ? '#F59E0B' : 'none'}
+                          stroke={i < r.rating ? '#F59E0B' : '#E5E5EA'}
                         />
                       ))}
                     </div>
                   </div>
                   {r.comment && (
-                    <p className="infp-review-text">{r.comment}</p>
+                    <p style={{ fontSize: 14, lineHeight: 1.6, color: '#8E8E93', margin: 0 }}>{r.comment}</p>
                   )}
                 </div>
               ))}

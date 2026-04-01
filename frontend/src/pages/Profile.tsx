@@ -535,12 +535,29 @@ export default function Profile() {
               <div style={{ padding: '12px 0', borderBottom: '1px solid #E5E5EA' }}>
                 <span style={{ fontSize: 14, color: '#8E8E93', display: 'block', marginBottom: 8 }}>Yo'nalishlar</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {user.influencer.category.split(',').map((cat: string) => cat.trim()).filter(Boolean).map((cat: string) => (
-                    <span key={cat} style={{
-                      fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
-                      background: 'rgba(27,59,81,0.08)', color: '#1B3B51',
-                    }}>{cat}</span>
-                  ))}
+                  {(() => {
+                    const cats = user.influencer.category.split(',').map((cat: string) => cat.trim()).filter(Boolean);
+                    const visible = cats.slice(0, 6);
+                    const remaining = cats.length - 6;
+                    return (
+                      <>
+                        {visible.map((cat: string) => (
+                          <span key={cat} style={{
+                            background: 'rgba(27,59,81,0.08)', color: '#1B3B51',
+                            fontSize: 12, fontWeight: 600, padding: '5px 12px',
+                            borderRadius: 20, whiteSpace: 'nowrap',
+                          }}>{cat}</span>
+                        ))}
+                        {remaining > 0 && (
+                          <span style={{
+                            background: 'rgba(27,59,81,0.08)', color: '#1B3B51',
+                            fontSize: 12, fontWeight: 600, padding: '5px 12px',
+                            borderRadius: 20, whiteSpace: 'nowrap',
+                          }}>+{remaining} more</span>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
               {user.influencer.bio && (
