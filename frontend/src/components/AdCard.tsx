@@ -23,7 +23,7 @@ export default function AdCard({ ad, index = 0 }: Props) {
         {/* Company avatar top-left */}
         <div className="ios-card-avatar">
           {hasAvatar ? (
-            <img src={ad.company.user.photoUrl} alt="" />
+            <img src={ad.company!.user!.photoUrl} alt="" />
           ) : (
             <span>{ad.company?.name?.[0] || '?'}</span>
           )}
