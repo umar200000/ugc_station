@@ -6,6 +6,7 @@ import { PLATFORMS, INDUSTRIES } from '../types';
 import { hapticFeedback } from '../lib/telegram';
 import { AdDetailShimmer } from '../components/Shimmer';
 import { useCacheStore } from '../store/cache';
+import { useAuthStore } from '../store/auth';
 
 const ios = {
   page: {
@@ -222,8 +223,12 @@ export default function EditAd() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: '', description: '', industry: '', videoFormat: 'ANY', faceType: 'ANY',
-    platforms: [] as string[], influencerCount: 3,
+    platforms: [] as string[], influencerCount: 1,
   });
+  const [adType, setAdType] = useState('PAID');
+  const [extraInfluencers, setExtraInfluencers] = useState(0);
+  const { user } = useAuthStore();
+  const tokens = user?.company?.tokens ?? 0;
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
@@ -243,6 +248,7 @@ export default function EditAd() {
           influencerCount: ad.influencerCount || 3,
         });
         setExistingImages(ad.images || []);
+        setAdType(ad.adType || 'PAID');
         if (ad.industry && !INDUSTRIES.includes(ad.industry)) setCustomIndustry(true);
       })
       .catch(console.error)
@@ -291,9 +297,14 @@ export default function EditAd() {
         const uploadRes = await api.post('/upload/images', formData);
         imageUrls = [...imageUrls, ...uploadRes.data.urls];
       }
-      await api.put(`/ads/${id}`, { ...form, images: imageUrls });
+      await api.put(`/ads/${id}`, {
+        ...form,
+        images: imageUrls,
+        extraInfluencers: extraInfluencers > 0 ? extraInfluencers : undefined,
+      });
       useCacheStore.getState().invalidateMyAds();
       useCacheStore.getState().invalidateFeed();
+      useAuthStore.getState().refreshUser();
       navigate(`/ad/${id}`, { replace: true });
     } catch (err: any) {
       alert(err.response?.data?.error || 'Xatolik');
@@ -304,7 +315,12 @@ export default function EditAd() {
 
   if (loading) return <AdDetailShimmer />;
 
-  const isDisabled = saving || !form.title.trim() || !form.description.trim();
+  const extraTokenCost = extraInfluencers > 0
+    ? (adType === 'BARTER'
+      ? Math.ceil((form.influencerCount + extraInfluencers) / 3) - Math.ceil(form.influencerCount / 3)
+      : extraInfluencers)
+    : 0;
+  const isDisabled = saving || !form.title.trim() || !form.description.trim() || extraTokenCost > tokens;
 
   return (
     <div style={ios.page}>
@@ -407,15 +423,38 @@ export default function EditAd() {
           </div>
 
           <div style={{ ...ios.formGroup, marginBottom: 0 }}>
-            <label style={ios.formLabel}>Influenser soni</label>
-            <input style={ios.formInput} type="number" min={3} value={form.influencerCount}
-              onChange={(e) => setForm({ ...form, influencerCount: Math.max(3, Number(e.target.value)) })} />
+            <label style={ios.formLabel}>Hozirgi influenser soni</label>
+            <input style={{ ...ios.formInput, background: '#F2F2F7', color: '#8E8E93' }} type="number" value={form.influencerCount} disabled />
           </div>
-        </div>
 
-        <p style={ios.sectionTitle}>To'lov</p>
-
-        <div style={ios.card}>
+          <div style={{ ...ios.formGroup, marginTop: 14, marginBottom: 0 }}>
+            <label style={ios.formLabel}>Qo'shimcha influenser qo'shish</label>
+            <input style={ios.formInput} type="number" min={0} placeholder="0" value={extraInfluencers || ''}
+              onChange={(e) => setExtraInfluencers(Math.max(0, Number(e.target.value) || 0))} />
+            {extraInfluencers > 0 && (() => {
+              const isBarter = adType === 'BARTER';
+              const oldTotal = form.influencerCount;
+              const newTotal = oldTotal + extraInfluencers;
+              let tokenCost: number;
+              if (isBarter) {
+                tokenCost = Math.ceil(newTotal / 3) - Math.ceil(oldTotal / 3);
+              } else {
+                tokenCost = extraInfluencers;
+              }
+              const notEnough = tokenCost > tokens;
+              return (
+                <div style={{
+                  marginTop: 8, padding: '10px 14px', borderRadius: 12,
+                  background: notEnough ? 'rgba(255,149,0,0.08)' : 'rgba(27,59,81,0.04)',
+                  fontSize: 13, fontWeight: 600, color: notEnough ? '#FF9500' : '#1B3B51',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span>{oldTotal} → {newTotal} influenser</span>
+                  <span style={{ color: notEnough ? '#FF3B30' : '#10B981' }}>-{tokenCost} token</span>
+                </div>
+              );
+            })()}
+          </div>
         </div>
 
         <button style={isDisabled ? ios.btnPrimaryDisabled : ios.btnPrimary} disabled={isDisabled} onClick={handleSave}>

@@ -244,9 +244,40 @@ router.put('/:id', authMiddleware, companyOnly, async (req, res) => {
       return res.status(403).json({ error: "Ruxsat yo'q" });
     }
 
-    const data = { ...req.body };
+    const { extraInfluencers, ...rest } = req.body;
+    const data = { ...rest };
     if (data.images) data.images = JSON.stringify(data.images);
     if (data.platforms) data.platforms = JSON.stringify(data.platforms);
+    // influencerCount ni o'zgartirishga ruxsat bermaslik
+    delete data.influencerCount;
+
+    // Qo'shimcha influencer qo'shish
+    if (extraInfluencers && Number(extraInfluencers) > 0) {
+      const extra = Number(extraInfluencers);
+      const isBarter = ad.adType === 'BARTER';
+      const oldCount = ad.influencerCount;
+      const newCount = oldCount + extra;
+      let tokenCost;
+      if (isBarter) {
+        tokenCost = Math.ceil(newCount / 3) - Math.ceil(oldCount / 3);
+      } else {
+        tokenCost = extra;
+      }
+
+      if (tokenCost > 0) {
+        if (company.tokens < tokenCost) {
+          return res.status(400).json({ error: `Tokenlar yetarli emas. ${tokenCost} ta token kerak.` });
+        }
+        await req.prisma.company.update({
+          where: { id: company.id },
+          data: { tokens: { decrement: tokenCost } },
+        });
+        await req.prisma.tokenHistory.create({
+          data: { companyId: company.id, type: 'AD_CREATE', tokens: -tokenCost, note: `Qo'shimcha: ${ad.title}` },
+        });
+      }
+      data.influencerCount = newCount;
+    }
 
     const updated = await req.prisma.ad.update({
       where: { id: req.params.id },
