@@ -3,7 +3,8 @@ const { Telegraf, Markup } = require('telegraf');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const WEBAPP_URL = process.env.WEBAPP_URL || process.env.FRONTEND_URL || 'http://localhost:5173';
+const BASE_URL = process.env.WEBAPP_URL || process.env.FRONTEND_URL || 'http://localhost:5173';
+const WEBAPP_URL = `${BASE_URL}?v=${Date.now()}`;
 
 // /start komandasi
 bot.start(async (ctx) => {
