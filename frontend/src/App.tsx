@@ -1,3 +1,4 @@
+// v2.0 - tariff system, token economy, levels, earnings
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from './store/auth';
