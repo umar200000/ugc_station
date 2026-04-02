@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Building2, Megaphone, LogOut, Pencil, Star, MapPin, Calendar, Briefcase, ChevronRight, Shield, Globe, X, Save, Camera, Send, Plus, Trash2, Check } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
+import { getSocialUrl } from '../lib/social';
 
 const InstagramIcon = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -426,13 +427,25 @@ export default function Profile() {
             <div>
               <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1B3B51', letterSpacing: -0.3 }}>{profile?.name || user?.firstName}</h2>
               <p style={{ fontSize: 14, color: '#8E8E93', marginTop: 2 }}>@{user?.username || 'user'}</p>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8,
-                background: 'rgba(27,59,81,0.08)', borderRadius: 100,
-                padding: '4px 12px', fontSize: 12, fontWeight: 600, color: '#1B3B51',
-              }}>
-                {isCompany ? <Building2 size={13} /> : <Megaphone size={13} />}
-                {isCompany ? 'Kompaniya' : 'Influenser'}
+              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  background: 'rgba(27,59,81,0.08)', borderRadius: 100,
+                  padding: '4px 12px', fontSize: 12, fontWeight: 600, color: '#1B3B51',
+                }}>
+                  {isCompany ? <Building2 size={13} /> : <Megaphone size={13} />}
+                  {isCompany ? 'Kompaniya' : 'Influenser'}
+                </div>
+                {!isCompany && user?.influencer?.level && (
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    background: 'rgba(27,59,81,0.08)',
+                    borderRadius: 8, padding: '4px 12px', fontSize: 12, fontWeight: 700,
+                    color: '#1B3B51',
+                  }}>
+                    Level {user.influencer.level}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -489,6 +502,109 @@ export default function Profile() {
             </>
           )}
         </div>
+      </div>
+
+      {/* Tokens card (company only) */}
+      {isCompany && (
+        <div className="fade-in" style={{ marginBottom: 16 }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1B3B51, #2A5570)',
+            borderRadius: 16, padding: 20,
+            color: '#fff',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.15)', fontSize: 18,
+                }}>🎯</div>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>Mening tokenlarim</span>
+              </div>
+              <button onClick={() => navigate('/token-history')} style={{
+                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8,
+                padding: '4px 10px', fontSize: 12, fontWeight: 600, color: '#fff',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>Tarix</button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: -1 }}>{user?.company?.tokens ?? 0}</span>
+              <span style={{ fontSize: 14, opacity: 0.7 }}>token</span>
+            </div>
+            {user?.company?.tariff && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 10,
+                background: 'rgba(255,255,255,0.15)', borderRadius: 100,
+                padding: '5px 14px', fontSize: 13, fontWeight: 600,
+              }}>
+                💎 {user.company.tariff.name}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tokens card (influencer) */}
+      {!isCompany && (
+        <div className="fade-in" style={{ marginBottom: 16 }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1B3B51, #2A5570)',
+            borderRadius: 16, padding: 20,
+            color: '#fff',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.15)', fontSize: 18,
+                }}>🎯</div>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>Mening tokenlarim</span>
+              </div>
+              <button onClick={() => navigate('/token-history')} style={{
+                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8,
+                padding: '4px 10px', fontSize: 12, fontWeight: 600, color: '#fff',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>Tarix</button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: -1 }}>{user?.influencer?.tokens ?? 0}</span>
+              <span style={{ fontSize: 14, opacity: 0.7 }}>token</span>
+            </div>
+            {user?.influencer?.influencerTariff && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 10,
+                background: 'rgba(255,255,255,0.15)', borderRadius: 100,
+                padding: '5px 14px', fontSize: 13, fontWeight: 600,
+              }}>
+                💎 {(user.influencer.influencerTariff as any).name} · {(user.influencer.influencerTariff as any).dailyTokens} token/kuniga
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Admin contact */}
+      <div className="fade-in" style={{ marginBottom: 16 }}>
+        <button
+          onClick={() => window.open('https://t.me/umar9334', '_blank')}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+            background: '#fff', borderRadius: 16, padding: '14px 16px',
+            border: '1px solid #E5E5EA', cursor: 'pointer',
+            fontFamily: 'inherit', textAlign: 'left',
+          }}
+        >
+          <div style={{
+            width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+            background: '#2AABEE', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#1B3B51' }}>Admin bilan bog'lanish</div>
+            <div style={{ fontSize: 12, color: '#8E8E93' }}>@umar9334</div>
+          </div>
+          <ChevronRight size={18} style={{ color: '#C7C7CC' }} />
+        </button>
       </div>
 
       {/* About section */}
@@ -592,7 +708,7 @@ export default function Profile() {
               {Object.entries(socialLinks).map(([platform, link]) => (
                 <a
                   key={platform}
-                  href={String(link).startsWith('http') ? link : '#'}
+                  href={getSocialUrl(platform, String(link))}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

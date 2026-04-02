@@ -1,6 +1,6 @@
 const express = require('express');
 const { authMiddleware, companyOnly } = require('../middleware/auth');
-const { broadcastAll } = require('../utils/notify');
+const { broadcastAll, notify } = require('../utils/notify');
 
 const router = express.Router();
 
@@ -162,6 +162,25 @@ router.post('/', authMiddleware, companyOnly, async (req, res) => {
     }
 
     const { title, description, images, videoFormat, faceType, platforms, influencerCount, adType, barterItem, payment } = req.body;
+    const count = Number(influencerCount) || 1;
+    const isBarter = adType === 'BARTER';
+
+    // Token hisoblash: deposit = 1 per influencer, barter = 1-3→1, 4-5→2, 6+→3
+    let tokenCost;
+    if (isBarter) {
+      tokenCost = Math.ceil(count / 3);
+    } else {
+      tokenCost = count;
+    }
+
+    if (company.tokens < tokenCost) {
+      return res.status(400).json({ error: `Tokenlar yetarli emas. ${tokenCost} ta token kerak, sizda ${company.tokens} ta bor.` });
+    }
+
+    await req.prisma.company.update({
+      where: { id: company.id },
+      data: { tokens: { decrement: tokenCost } },
+    });
 
     const ad = await req.prisma.ad.create({
       data: {
@@ -172,10 +191,10 @@ router.post('/', authMiddleware, companyOnly, async (req, res) => {
         videoFormat: videoFormat || 'ANY',
         faceType: faceType || 'ANY',
         platforms: JSON.stringify(platforms || []),
-        influencerCount: Number(influencerCount) || 3,
-        adType: adType || 'BARTER',
-        barterItem: barterItem || '',
-        payment: payment ? Number(payment) : 0,
+        influencerCount: count,
+        adType: isBarter ? 'BARTER' : 'PAID',
+        barterItem: isBarter ? (barterItem || '') : '',
+        payment: isBarter ? (Number(payment) || 0) : 0,
         industry: company.industry,
       },
       include: { company: true },
@@ -183,15 +202,28 @@ router.post('/', authMiddleware, companyOnly, async (req, res) => {
 
     res.status(201).json(formatAd(ad));
 
+    // Token history
+    await req.prisma.tokenHistory.create({
+      data: { companyId: company.id, type: 'AD_CREATE', tokens: -tokenCost, note: `E'lon: ${title}` },
+    });
+
+    // Kompaniyaga Telegram SMS
+    notify(company.userId, {
+      title: 'E\'lon yaratildi',
+      message: `"${title}" e'loni yaratildi. -${tokenCost} token sarflandi`,
+      type: 'info',
+      link: `/ad/${ad.id}`,
+      telegramMsg: `📢 <b>E'lon yaratildi!</b>\n\n📌 <b>${title}</b>\n➖ Sarflangan: <b>${tokenCost} token</b>\n💰 Qolgan: <b>${company.tokens - tokenCost} token</b>`,
+    });
+
     // Barcha userlarga yangi e'lon haqida xabar (Telegram + in-app)
     try {
-      const paymentText = adType === 'PAID' ? `💰 ${Number(payment).toLocaleString()} so'm` : `🔄 Barter: ${barterItem || ''}`;
       await broadcastAll({
         title: 'Yangi e\'lon!',
-        message: `"${title}" — ${company.name}. ${paymentText}`,
+        message: `"${title}" — ${company.name}`,
         type: 'info',
         link: `/ad/${ad.id}`,
-        telegramMsg: `📢 <b>Yangi e'lon!</b>\n\n📌 E'lon nomi: <b>${title}</b>\n🏢 E'lon beruvchi: <b>${company.name}</b>\n${paymentText}\n\nBatafsil ko'rish uchun mini app ni oching!`,
+        telegramMsg: `📢 <b>Yangi e'lon!</b>\n\n📌 E'lon nomi: <b>${title}</b>\n🏢 E'lon beruvchi: <b>${company.name}</b>\n\nBatafsil ko'rish uchun mini app ni oching!`,
       });
     } catch (broadcastErr) {
       console.error('Broadcast error:', broadcastErr);

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { validateInitData, parseInitData } = require('../utils/telegram');
 const { authMiddleware } = require('../middleware/auth');
+const { refreshInfluencerTokens } = require('../utils/tokenRefresh');
 
 const router = express.Router();
 
@@ -258,11 +259,16 @@ router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await req.prisma.user.findUnique({
       where: { id: req.user.userId },
-      include: { company: true, influencer: true },
+      include: { company: { include: { tariff: true } }, influencer: { include: { influencerTariff: true } } },
     });
 
     if (!user) {
       return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+    }
+
+    // Influencer token refresh
+    if (user.influencer?.influencerTariffId) {
+      user.influencer = await refreshInfluencerTokens(req.prisma, user.influencer);
     }
 
     res.json({ user });

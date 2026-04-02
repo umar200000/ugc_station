@@ -134,6 +134,35 @@
     .review-textarea:focus{border-color:var(--p);box-shadow:0 0 0 4px var(--p-bg)}
     .review-actions{display:flex;gap:8px;margin-top:14px}
 
+    /* Tariff panel */
+    .tariff-tab.active{background:var(--p)!important;color:#fff!important;border-color:var(--p)!important}
+    .tariff-card{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;transition:.2s;cursor:pointer}
+    .tariff-card:hover{box-shadow:0 4px 16px rgba(15,23,42,0.06);border-color:var(--p)}
+    .tariff-info h4{font-size:16px;font-weight:700;margin-bottom:4px}
+    .tariff-info .tariff-meta{display:flex;gap:12px;font-size:13px;color:var(--t2)}
+    .tariff-info .tariff-meta b{color:var(--t);font-weight:700}
+    .tariff-actions{display:flex;gap:6px}
+    .tariff-form{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:24px;max-width:460px}
+    .tariff-form label{display:block;font-size:13px;font-weight:700;color:var(--t2);margin-bottom:6px;margin-top:14px}
+    .tariff-form label:first-child{margin-top:0}
+    .calc-wrap{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+    .calc-box{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:20px;flex:1;min-width:320px}
+    .calc-box h4{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .calc-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;margin-bottom:8px;font-size:13px}
+    .calc-row .calc-label{font-weight:600;color:var(--t2)}
+    .calc-row .calc-formula{font-size:12px;color:var(--t3);margin-top:2px}
+    .calc-row .calc-val{font-weight:800;font-size:15px}
+    .calc-profit{color:var(--g)}
+    .calc-expense{color:var(--r)}
+    .calc-detail-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    .calc-detail-header h3{font-size:20px;font-weight:800}
+    .calc-detail-header .back-btn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--bs);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:.2s}
+    .calc-detail-header .back-btn:hover{border-color:var(--p);color:var(--p)}
+    .calc-summary{display:flex;gap:12px;margin-bottom:20px}
+    .calc-summary-item{flex:1;background:var(--bg);border-radius:12px;padding:16px;text-align:center}
+    .calc-summary-item .val{font-size:22px;font-weight:800;color:var(--t)}
+    .calc-summary-item .lbl{font-size:11px;font-weight:600;color:var(--t3);margin-top:4px;text-transform:uppercase}
+
     /* Mobile responsive */
     @media(max-width:900px){
       .sidebar{width:64px}
@@ -200,6 +229,29 @@
       <div class="table-wrap" style="overflow:auto">
         <table class="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
       </div>
+
+      <!-- Darajalar panel -->
+      <div id="levelsPanel" style="display:none">
+        <div id="levelsContent"></div>
+      </div>
+
+      <!-- Influencer tariflar panel -->
+      <div id="infTariffPanel" style="display:none">
+        <div style="display:flex;gap:6px;margin-bottom:20px">
+          <button class="btn btn-s inf-tariff-tab" data-tab="list" onclick="infTariffSubTab='list';renderInfTariffPanel()">Hozirgi tariflar</button>
+          <button class="btn btn-s inf-tariff-tab" data-tab="create" onclick="infTariffSubTab='create';renderInfTariffPanel()">+ Tarif yaratish</button>
+        </div>
+        <div id="infTariffContent"></div>
+      </div>
+
+      <!-- Tariflar panel -->
+      <div id="tariffPanel" style="display:none">
+        <div id="tariffTabs" style="display:flex;gap:6px;margin-bottom:20px">
+          <button class="btn btn-s tariff-tab" data-tab="list" onclick="tariffSubTab='list';viewingTariffId=null;renderTariffPanel()">Hozirgi tariflar</button>
+          <button class="btn btn-s tariff-tab" data-tab="create" onclick="tariffSubTab='create';viewingTariffId=null;renderTariffPanel()">+ Tarif yaratish</button>
+        </div>
+        <div id="tariffContent"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -224,6 +276,68 @@
       <button class="btn btn-s" style="flex:1" onclick="closeReview()">Bekor</button>
       <button class="btn" id="reviewSubmitBtn" style="flex:1" onclick="submitReview()">Tasdiqlash</button>
     </div>
+  </div>
+</div>
+
+<!-- Influencer Detail modal -->
+<div class="modal-bg" id="infDetailModal">
+  <div class="modal" style="max-width:500px;text-align:left;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 id="infDetailTitle" style="margin:0">Influenser</h3>
+      <button class="btn btn-sm btn-s" onclick="closeInfDetail()">&#10005;</button>
+    </div>
+    <div id="infDetailContent"></div>
+  </div>
+</div>
+
+<!-- Token History modal -->
+<div class="modal-bg" id="historyModal">
+  <div class="modal" style="max-width:500px;text-align:left;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 id="historyTitle" style="margin:0">Token tarixi</h3>
+      <button class="btn btn-sm btn-s" onclick="closeHistoryModal()">&#10005;</button>
+    </div>
+    <div id="historyContent"></div>
+  </div>
+</div>
+
+<!-- Revoke tokens modal -->
+<div class="modal-bg" id="revokeModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-icon" style="background:var(--r-bg);color:var(--r)">&#128683;</div>
+    <h3>Token yechib olish</h3>
+    <p id="revokeText" style="font-size:13px;color:var(--t2);margin-bottom:12px"></p>
+    <input class="input" id="revokeTokens" type="number" min="1" placeholder="Nechta token?" style="margin-bottom:14px;text-align:center;font-size:18px;font-weight:700">
+    <div class="modal-acts">
+      <button class="btn btn-s" onclick="closeRevokeModal()">Bekor</button>
+      <button class="btn btn-r" id="revokeBtn" onclick="confirmRevoke()">Yechib olish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Influencer Assign tariff modal -->
+<div class="modal-bg" id="infAssignModal">
+  <div class="modal" style="max-width:460px;text-align:left">
+    <h3 id="infAssignTitle" style="margin-bottom:12px">Tarif</h3>
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button class="btn btn-s inf-assign-tab" data-tab="tariff" onclick="switchInfAssignTab('tariff')" style="flex:1">&#127919; Tarif yoqish</button>
+      <button class="btn btn-s inf-assign-tab" data-tab="bonus" onclick="switchInfAssignTab('bonus')" style="flex:1">&#127873; Bonus token</button>
+    </div>
+    <div id="infAssignContent"></div>
+    <button class="btn btn-s" style="width:100%;margin-top:12px" onclick="closeInfAssignModal()">Yopish</button>
+  </div>
+</div>
+
+<!-- Assign tariff modal -->
+<div class="modal-bg" id="assignModal">
+  <div class="modal" style="max-width:460px;text-align:left">
+    <h3 id="assignTitle" style="margin-bottom:12px">Tarif tanlash</h3>
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button class="btn btn-s assign-tab" data-tab="tariff" onclick="switchAssignTab('tariff')" style="flex:1">&#128176; Tarif tanlash</button>
+      <button class="btn btn-s assign-tab" data-tab="bonus" onclick="switchAssignTab('bonus')" style="flex:1">&#127873; Bonus token</button>
+    </div>
+    <div id="assignContent"></div>
+    <button class="btn btn-s" style="width:100%;margin-top:12px" onclick="closeAssignModal()">Yopish</button>
   </div>
 </div>
 
@@ -268,7 +382,7 @@ async function showDash(){
 
 async function loadAll(){
   try{
-    const[sr,ur,cr,ir,ar,apr,subr]=await Promise.all([api('/stats'),api('/users'),api('/companies'),api('/influencers'),api('/ads'),api('/applications'),api('/submissions')]);
+    const[sr,ur,cr,ir,ar,apr,subr,tr]=await Promise.all([api('/stats'),api('/users'),api('/companies'),api('/influencers'),api('/ads'),api('/applications'),api('/submissions'),api('/tariffs')]);
     if(sr.status===401){doLogout();return}
     const stats=await sr.json();
     allData.users=(await ur.json()).users||[];
@@ -277,6 +391,9 @@ async function loadAll(){
     allData.ads=(await ar.json()).ads||[];
     allData.applications=(await apr.json()).applications||[];
     allData.submissions=(await subr.json()).submissions||[];
+    allData.tariffs=(await tr.json()).tariffs||[];
+    try{const lpr=await api('/level-prices');allData.levelPrices=await lpr.json();}catch{allData.levelPrices={level1:50000,level2:100000,level3:150000}}
+    try{const itr=await api('/influencer-tariffs');allData.inf_tariffs=(await itr.json()).tariffs||[];}catch{allData.inf_tariffs=[]}
     renderStats(stats);switchTab(currentTab);
   }catch(e){console.error(e)}
 }
@@ -303,6 +420,9 @@ const tabConfig=[
   {key:'ads',label:"E'lonlar",ic:'&#128227;'},
   {key:'applications',label:'Arizalar',ic:'&#128203;'},
   {key:'submissions',label:'Videolar',ic:'&#127909;'},
+  {key:'tariffs',label:'Com. Tariflar',ic:'&#128176;'},
+  {key:'levels',label:'Darajalar',ic:'&#11088;'},
+  {key:'inf_tariffs',label:'Inf. Tariflar',ic:'&#127919;'},
 ];
 
 function renderSidebar(){
@@ -312,6 +432,7 @@ function renderSidebar(){
   }).join('');
 }
 
+let tariffSubTab='list';
 function switchTab(t){
   currentTab=t;
   renderSidebar();
@@ -319,10 +440,30 @@ function switchTab(t){
   const cfg=tabConfig.find(x=>x.key===t);
   document.getElementById('pageTitle').innerHTML=cfg?cfg.ic+' '+cfg.label:'Dashboard';
   const isDash=t==='dashboard';
+  const isTariff=t==='tariffs';
   document.getElementById('statsGrid').style.display=isDash?'grid':'none';
-  document.getElementById('searchInput').parentElement.style.display=isDash?'none':'flex';
+  document.getElementById('searchInput').parentElement.style.display=(isDash||isTariff)?'none':'flex';
   document.querySelector('.table-wrap').style.display=isDash?'none':'block';
-  if(isDash){
+  document.getElementById('tariffPanel').style.display=isTariff?'block':'none';
+  const isLevels=t==='levels';
+  const isInfTariffs=t==='inf_tariffs';
+  document.getElementById('levelsPanel').style.display=isLevels?'block':'none';
+  document.getElementById('infTariffPanel').style.display=isInfTariffs?'block':'none';
+  if(isTariff){
+    document.querySelector('.table-wrap').style.display='none';
+    document.getElementById('pageSubtitle').textContent=`${(allData.tariffs||[]).length} ta tarif`;
+    if(tariffSubTab==='detail')tariffSubTab='list';
+    viewingTariffId=null;editingTariffId=null;
+    renderTariffPanel();
+  }else if(isLevels){
+    document.querySelector('.table-wrap').style.display='none';
+    document.getElementById('pageSubtitle').textContent='Influenser darajalari va narxlari';
+    renderLevelsPanel();
+  }else if(isInfTariffs){
+    document.querySelector('.table-wrap').style.display='none';
+    document.getElementById('pageSubtitle').textContent=`${(allData.inf_tariffs||[]).length} ta influenser tarifi`;
+    renderInfTariffPanel();
+  }else if(isDash){
     document.getElementById('pageSubtitle').textContent='Umumiy statistika';
   }else{
     document.getElementById('pageSubtitle').textContent=`${(allData[t]||[]).length} ta yozuv`;
@@ -360,12 +501,22 @@ function renderTable(){
     }).join('');
   }
   else if(currentTab==='companies'){
-    h='<tr><th>Kompaniya</th><th>Soha</th><th>Telefon</th><th>E\'lonlar</th><th>Sana</th><th></th></tr>';
-    rows=data.map(c=>`<tr data-s="${c.name} ${c.industry} ${c.user?.phone||''}"><td><div class="name">${c.name}</div><div class="meta">@${c.user?.username||'—'}</div></td><td>${c.industry}</td><td>${c.user?.phone||'—'}</td><td><span class="badge b-active">${c._count?.ads||0}</span></td><td>${fmtDate(c.user?.createdAt)}</td><td><button class="del" onclick="openModal('company','${c.id}','${c.name.replace(/'/g,'')}')">&#128465;</button></td></tr>`).join('');
+    h='<tr><th>Kompaniya</th><th>Soha</th><th>Telefon</th><th>Tarif</th><th>Tokenlar</th><th>E\'lonlar</th><th></th></tr>';
+    rows=data.map(c=>{
+      const tariffName=c.tariff?c.tariff.name:'—';
+      return`<tr data-s="${c.name} ${c.industry} ${c.user?.phone||''}"><td><div class="name" style="cursor:pointer;color:var(--p)" onclick="openTokenHistory('${c.id}','${c.name.replace(/'/g,'')}')">${c.name}</div><div class="meta">@${c.user?.username||'—'}</div></td><td>${c.industry}</td><td>${c.user?.phone||'—'}</td><td>${c.tariff?`<span class="badge b-active">${tariffName}</span>`:'<span class="badge b-new">Yo\'q</span>'}</td><td><span class="badge b-pending" style="cursor:pointer" onclick="openTokenHistory('${c.id}','${c.name.replace(/'/g,'')}')">&#127919; ${c.tokens||0}</span></td><td><span class="badge b-active">${c._count?.ads||0}</span></td><td><div style="display:flex;gap:6px;align-items:center"><button class="btn btn-sm btn-r" onclick="openRevokeModal('${c.id}','${c.name.replace(/'/g,'')}',${c.tokens||0})">&#128683; Yechish</button><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--p),var(--p-dark));color:#fff;border:none;padding:7px 14px" onclick="openAssignTariff('${c.id}','${c.name.replace(/'/g,'')}')">&#128176; Tarif berish</button><button class="del" onclick="openModal('company','${c.id}','${c.name.replace(/'/g,'')}')">&#128465;</button></div></td></tr>`;
+    }).join('');
   }
   else if(currentTab==='influencers'){
-    h='<tr><th>Influenser</th><th>Yo\'nalish</th><th>Telefon</th><th>Arizalar</th><th>Sana</th><th></th></tr>';
-    rows=data.map(i=>`<tr data-s="${i.name} ${i.category} ${i.user?.phone||''}"><td><div class="row">${avatarHtml(i.user?.photoUrl,i.name)}<div><div class="name">${i.name}</div><div class="meta">@${i.user?.username||'—'}</div></div></div></td><td><div style="max-width:200px">${(i.category||'').split(',').map(c=>`<span class="badge b-influencer" style="margin:2px">${c.trim()}</span>`).join('')}</div></td><td>${i.user?.phone||'—'}</td><td><span class="badge b-pending">${i._count?.applications||0}</span></td><td>${fmtDate(i.user?.createdAt)}</td><td><button class="del" onclick="openModal('influencer','${i.id}','${i.name.replace(/'/g,'')}')">&#128465;</button></td></tr>`).join('');
+    h='<tr><th>Influenser</th><th>Yo\'nalish</th><th>Daraja</th><th>Tokenlar</th><th>Arizalar</th><th></th></tr>';
+    rows=data.map(i=>{
+      const lvl=i.level||1;
+      const lvlColors={1:{bg:'var(--g-bg)',c:'var(--g)'},2:{bg:'var(--p-bg)',c:'var(--p)'},3:{bg:'var(--w-bg)',c:'#92400E'}};
+      const lc=lvlColors[lvl]||lvlColors[1];
+      const catText=(i.category||'').split(',').map(c=>c.trim()).filter(Boolean).join(', ');
+      const hasTariff=!!i.influencerTariffId;
+      return`<tr data-s="${i.name} ${i.category} ${i.user?.phone||''}" style="cursor:pointer" onclick="openInfluencerDetail('${i.id}')"><td><div class="row">${avatarHtml(i.user?.photoUrl,i.name)}<div><div class="name">${i.name}</div><div class="meta">@${i.user?.username||'—'}</div></div></div></td><td><div style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--t2)" title="${catText}">${catText||'—'}</div></td><td><select style="padding:5px 10px;border-radius:8px;border:2px solid ${lc.c};background:${lc.bg};color:${lc.c};font-weight:700;font-size:12px;cursor:pointer;font-family:inherit" onclick="event.stopPropagation()" onchange="event.stopPropagation();changeLevel('${i.id}',Number(this.value))"><option value="1" ${lvl===1?'selected':''}>Level 1</option><option value="2" ${lvl===2?'selected':''}>Level 2</option><option value="3" ${lvl===3?'selected':''}>Level 3</option></select></td><td><span class="badge ${hasTariff?'b-active':'b-new'}">&#127919; ${i.tokens||0}</span></td><td><span class="badge b-pending">${i._count?.applications||0}</span></td><td><div style="display:flex;gap:6px;align-items:center"><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--p),var(--p-dark));color:#fff;border:none;padding:6px 12px;font-size:11px" onclick="event.stopPropagation();openInfAssignTariff('${i.id}','${i.name.replace(/'/g,'')}',${i.tokens||0})">&#127919; Tarif</button><button class="del" onclick="event.stopPropagation();openModal('influencer','${i.id}','${i.name.replace(/'/g,'')}')">&#128465;</button></div></td></tr>`;
+    }).join('');
   }
   else if(currentTab==='ads'){
     h='<tr><th>E\'lon</th><th>Kompaniya</th><th>Turi</th><th>Holati</th><th>Arizalar</th><th></th></tr>';
@@ -474,7 +625,534 @@ function closeVideoPlayer(){
   const v=document.getElementById('videoPlayerSrc');v.pause();v.src='';
   document.getElementById('videoPlayer').classList.remove('open');
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeVideoPlayer();closeReview();closeModal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeVideoPlayer();closeReview();closeModal();closeAssignModal();closeHistoryModal();closeRevokeModal();closeInfDetail();closeInfAssignModal()}});
+
+// ========== TARIFLAR ==========
+let editingTariffId=null;
+let viewingTariffId=null;
+const CALC_CATEGORIES=[
+  {label:'Arzon',perToken:50000,color:'var(--g)',bg:'var(--g-bg)'},
+  {label:'O\'rtacha',perToken:100000,color:'var(--w)',bg:'var(--w-bg)'},
+  {label:'Qimmat',perToken:150000,color:'var(--r)',bg:'var(--r-bg)'},
+];
+
+function fmtPrice(n){return Number(n).toLocaleString('uz-UZ').replace(/,/g,' ')}
+
+function calcHtml(price,tokens){
+  if(!price||!tokens)return'<div style="color:var(--t3);font-size:13px;padding:10px">Narx va token sonini kiriting</div>';
+  return CALC_CATEGORIES.map(cat=>{
+    const expense=cat.perToken*tokens;
+    const profit=price-expense;
+    const isProfit=profit>=0;
+    return`
+      <div class="calc-row" style="background:${cat.bg}">
+        <div>
+          <div class="calc-label" style="color:${cat.color}">${cat.label} — ${fmtPrice(cat.perToken)} so'm/token</div>
+          <div class="calc-formula">${fmtPrice(cat.perToken)} × ${tokens} = ${fmtPrice(expense)} so'm sarflangan</div>
+        </div>
+        <div style="text-align:right">
+          <div class="calc-val ${isProfit?'calc-profit':'calc-expense'}">${isProfit?'+':''}${fmtPrice(profit)} so'm</div>
+          <div style="font-size:11px;color:var(--t3)">${isProfit?'foyda':'zarar'}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderTariffPanel(){
+  const isDetail=tariffSubTab==='detail'&&viewingTariffId;
+  document.getElementById('tariffTabs').style.display=isDetail?'none':'flex';
+  document.querySelectorAll('.tariff-tab').forEach(b=>{
+    b.classList.toggle('active',b.dataset.tab===tariffSubTab);
+  });
+  const el=document.getElementById('tariffContent');
+
+  // Detail view — tarif ichiga kirish
+  if(isDetail){
+    const t=(allData.tariffs||[]).find(x=>x.id===viewingTariffId);
+    if(!t){tariffSubTab='list';renderTariffPanel();return}
+    el.innerHTML=`
+      <div class="calc-detail-header">
+        <button class="back-btn" onclick="viewingTariffId=null;tariffSubTab='list';renderTariffPanel()">&#8592;</button>
+        <div>
+          <h3>${t.name}</h3>
+          <span style="font-size:13px;color:var(--t2)">${t._count?.companies||0} ta kompaniya foydalanmoqda</span>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-sm btn-s" onclick="startEditTariff('${t.id}')">&#9998; Tahrirlash</button>
+          <button class="del" onclick="openModal('tariffs','${t.id}','${t.name.replace(/'/g,'')}')">&#128465;</button>
+        </div>
+      </div>
+      <div class="calc-summary">
+        <div class="calc-summary-item">
+          <div class="val">&#128176; ${fmtPrice(t.price)}</div>
+          <div class="lbl">Narxi (so'm)</div>
+        </div>
+        <div class="calc-summary-item">
+          <div class="val">&#127919; ${t.tokens}</div>
+          <div class="lbl">Token soni</div>
+        </div>
+      </div>
+      <div class="calc-box" style="min-width:auto">
+        <h4>&#128202; Foyda hisoblagich</h4>
+        ${calcHtml(t.price,t.tokens)}
+      </div>`;
+    return;
+  }
+
+  if(tariffSubTab==='create'){
+    el.innerHTML=`
+      <div class="calc-wrap">
+        <div class="tariff-form">
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:4px">${editingTariffId?'Tarifni tahrirlash':'Yangi tarif yaratish'}</h3>
+          <p style="font-size:13px;color:var(--t2);margin-bottom:6px">${editingTariffId?'Ma\'lumotlarni o\'zgartiring':'Tarif nomini, narxini va token sonini kiriting'}</p>
+          <label>Tarif nomi</label>
+          <input class="input" id="tfName" placeholder="Masalan: Boshlang'ich">
+          <label>Narxi (so'm)</label>
+          <input class="input" id="tfPrice" placeholder="100 000" oninput="formatPriceInput(this);updateCreateCalc()">
+          <label>Token soni</label>
+          <input class="input" id="tfTokens" type="number" placeholder="10" min="1" oninput="updateCreateCalc()">
+          <div style="display:flex;gap:8px;margin-top:20px">
+            ${editingTariffId?'<button class="btn btn-s" onclick="editingTariffId=null;renderTariffPanel()">Bekor</button>':''}
+            <button class="btn btn-p" style="flex:1" onclick="saveTariff()">${editingTariffId?'Saqlash':'Yaratish'}</button>
+          </div>
+        </div>
+        <div class="calc-box">
+          <h4>&#128202; Foyda hisoblagich</h4>
+          <div id="createCalc">${calcHtml(0,0)}</div>
+        </div>
+      </div>`;
+    if(editingTariffId){
+      const t=(allData.tariffs||[]).find(x=>x.id===editingTariffId);
+      if(t){
+        document.getElementById('tfName').value=t.name;
+        document.getElementById('tfPrice').value=fmtPrice(t.price);
+        document.getElementById('tfTokens').value=t.tokens;
+        updateCreateCalc();
+      }
+    }
+  }else{
+    const tariffs=allData.tariffs||[];
+    if(tariffs.length===0){
+      el.innerHTML='<div class="empty" style="background:var(--card);border-radius:16px;border:1px solid var(--b);padding:40px">Hali tariflar yo\'q. "Tarif yaratish" tabini bosing.</div>';
+      return;
+    }
+    el.innerHTML=tariffs.map(t=>`
+      <div class="tariff-card" onclick="openTariffDetail('${t.id}')">
+        <div class="tariff-info">
+          <h4>${t.name}</h4>
+          <div class="tariff-meta">
+            <span>&#128176; <b>${fmtPrice(t.price)} so'm</b></span>
+            <span>&#127919; <b>${t.tokens}</b> token</span>
+            <span>&#127970; ${t._count?.companies||0} kompaniya</span>
+          </div>
+        </div>
+        <div class="tariff-actions">
+          <button class="btn btn-sm btn-s" onclick="event.stopPropagation();startEditTariff('${t.id}')">&#9998;</button>
+          <button class="del" onclick="event.stopPropagation();openModal('tariffs','${t.id}','${t.name.replace(/'/g,'')}')">&#128465;</button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateCreateCalc(){
+  const price=Number((document.getElementById('tfPrice')?.value||'').replace(/\s/g,''))||0;
+  const tokens=Number(document.getElementById('tfTokens')?.value)||0;
+  const el=document.getElementById('createCalc');
+  if(el)el.innerHTML=calcHtml(price,tokens);
+}
+
+function formatPriceInput(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v)el.value=Number(v).toLocaleString('uz-UZ').replace(/,/g,' ');
+}
+
+function openTariffDetail(id){
+  viewingTariffId=id;
+  tariffSubTab='detail';
+  renderTariffPanel();
+}
+
+async function saveTariff(){
+  const name=document.getElementById('tfName').value.trim();
+  const price=Number(document.getElementById('tfPrice').value.replace(/\s/g,''));
+  const tokens=Number(document.getElementById('tfTokens').value);
+  if(!name||!price||!tokens){alert('Barcha maydonlarni to\'ldiring');return}
+  try{
+    if(editingTariffId){
+      await api(`/tariffs/${editingTariffId}`,{method:'PUT',body:JSON.stringify({name,price,tokens})});
+      editingTariffId=null;
+    }else{
+      await api('/tariffs',{method:'POST',body:JSON.stringify({name,price,tokens})});
+    }
+    tariffSubTab='list';await loadAll();
+  }catch(e){alert('Xatolik')}
+}
+
+function startEditTariff(id){
+  editingTariffId=id;
+  tariffSubTab='create';
+  renderTariffPanel();
+}
+
+// ========== KOMPANIYAGA TARIF BIRIKTIRISH ==========
+let assignCompanyId=null;
+
+let assignTab='tariff';
+let assignCompanyName='';
+
+function openAssignTariff(companyId,companyName){
+  assignCompanyId=companyId;
+  assignCompanyName=companyName;
+  assignTab='tariff';
+  document.getElementById('assignTitle').textContent=companyName;
+  document.getElementById('assignModal').classList.add('open');
+  renderAssignContent();
+}
+
+function switchAssignTab(tab){
+  assignTab=tab;
+  renderAssignContent();
+}
+
+function renderAssignContent(){
+  document.querySelectorAll('.assign-tab').forEach(b=>{
+    const isOn=b.dataset.tab===assignTab;
+    b.style.background=isOn?'var(--p)':'';
+    b.style.color=isOn?'#fff':'';
+    b.style.borderColor=isOn?'var(--p)':'';
+  });
+  const el=document.getElementById('assignContent');
+  if(assignTab==='tariff'){
+    const tariffs=allData.tariffs||[];
+    if(tariffs.length===0){
+      el.innerHTML='<div class="empty">Hali tariflar yaratilmagan</div>';
+    }else{
+      el.innerHTML=tariffs.map(t=>`
+        <div class="tariff-card" style="cursor:pointer" onclick="assignTariff('${t.id}')">
+          <div class="tariff-info">
+            <h4>${t.name}</h4>
+            <div class="tariff-meta">
+              <span>&#128176; <b>${fmtPrice(t.price)} so'm</b></span>
+              <span>&#127919; <b>+${t.tokens}</b> token</span>
+            </div>
+          </div>
+          <div style="color:var(--p);font-size:20px">&#10145;</div>
+        </div>
+      `).join('');
+    }
+  }else{
+    el.innerHTML=`
+      <div style="background:var(--bg);border-radius:12px;padding:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--t2);display:block;margin-bottom:8px">Token soni</label>
+        <input class="input" id="bonusTokens" type="number" min="1" placeholder="Masalan: 5" style="margin-bottom:12px">
+        <button class="btn btn-p" onclick="sendBonusTokens()">&#127873; Bonus berish</button>
+      </div>`;
+  }
+}
+
+function closeAssignModal(){assignCompanyId=null;document.getElementById('assignModal').classList.remove('open')}
+
+async function assignTariff(tariffId){
+  if(!assignCompanyId)return;
+  try{
+    await api(`/companies/${assignCompanyId}/assign-tariff`,{method:'POST',body:JSON.stringify({tariffId})});
+    closeAssignModal();await loadAll();
+  }catch(e){alert('Xatolik')}
+}
+
+async function sendBonusTokens(){
+  if(!assignCompanyId)return;
+  const tokens=Number(document.getElementById('bonusTokens').value);
+  if(!tokens||tokens<1){alert('Token sonini kiriting');return}
+  try{
+    await api(`/companies/${assignCompanyId}/bonus-tokens`,{method:'POST',body:JSON.stringify({tokens})});
+    closeAssignModal();await loadAll();
+  }catch(e){alert('Xatolik')}
+}
+
+// ========== TOKEN HISTORY ==========
+async function openTokenHistory(companyId,companyName){
+  document.getElementById('historyTitle').textContent=companyName+' — Token tarixi';
+  document.getElementById('historyContent').innerHTML='<div style="text-align:center;padding:20px;color:var(--t3)">Yuklanmoqda...</div>';
+  document.getElementById('historyModal').classList.add('open');
+  try{
+    const r=await api(`/companies/${companyId}/token-history`);
+    const d=await r.json();
+    const history=d.history||[];
+    if(history.length===0){
+      document.getElementById('historyContent').innerHTML='<div class="empty">Hali tarix yo\'q</div>';
+      return;
+    }
+    document.getElementById('historyContent').innerHTML=history.map(h=>{
+      const isPlus=h.tokens>0;
+      const typeLabel={TARIFF:'Tarif',BONUS:'Bonus',REVOKE:'Yechib olindi'}[h.type]||h.type;
+      const typeColor={TARIFF:'var(--p)',BONUS:'var(--g)',REVOKE:'var(--r)'}[h.type]||'var(--t2)';
+      const typeBg={TARIFF:'var(--p-bg)',BONUS:'var(--g-bg)',REVOKE:'var(--r-bg)'}[h.type]||'var(--b)';
+      const typeIcon={TARIFF:'&#128176;',BONUS:'&#127873;',REVOKE:'&#128683;'}[h.type]||'';
+      return`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--b);margin-bottom:8px;background:var(--card)">
+        <div style="width:38px;height:38px;border-radius:10px;background:${typeBg};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${typeIcon}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;color:var(--t)">${typeLabel}</div>
+          <div style="font-size:12px;color:var(--t3)">${h.note||'—'} · ${fmtDate(h.createdAt)}</div>
+        </div>
+        <div style="font-size:16px;font-weight:800;color:${isPlus?'var(--g)':'var(--r)'}">${isPlus?'+':''}${h.tokens}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('historyContent').innerHTML='<div class="empty" style="color:var(--r)">Xatolik</div>';
+  }
+}
+function closeHistoryModal(){document.getElementById('historyModal').classList.remove('open')}
+
+// ========== REVOKE TOKENS ==========
+let revokeCompanyId=null;
+let revokeMaxTokens=0;
+
+function openRevokeModal(companyId,companyName,currentTokens){
+  revokeCompanyId=companyId;
+  revokeMaxTokens=currentTokens;
+  document.getElementById('revokeText').innerHTML=`<strong>${companyName}</strong> dan token yechib olish<br><span style="font-size:12px;color:var(--t3)">Hozirgi balans: <b>${currentTokens}</b> token</span>`;
+  document.getElementById('revokeTokens').value='';
+  document.getElementById('revokeTokens').max=currentTokens;
+  document.getElementById('revokeModal').classList.add('open');
+}
+function closeRevokeModal(){revokeCompanyId=null;document.getElementById('revokeModal').classList.remove('open')}
+
+async function confirmRevoke(){
+  if(!revokeCompanyId)return;
+  const tokens=Number(document.getElementById('revokeTokens').value);
+  if(!tokens||tokens<1){alert('Token sonini kiriting');return}
+  if(tokens>revokeMaxTokens){alert('Kompaniyada faqat '+revokeMaxTokens+' ta token bor');return}
+  const btn=document.getElementById('revokeBtn');
+  btn.disabled=true;btn.textContent='...';
+  try{
+    await api(`/companies/${revokeCompanyId}/revoke-tokens`,{method:'POST',body:JSON.stringify({tokens})});
+    closeRevokeModal();await loadAll();
+  }catch(e){alert('Xatolik')}
+  finally{btn.disabled=false;btn.textContent='Yechib olish'}
+}
+
+// ========== INFLUENCER DETAIL ==========
+function openInfluencerDetail(id){
+  const i=(allData.influencers||[]).find(x=>x.id===id);
+  if(!i)return;
+  document.getElementById('infDetailTitle').textContent=i.name;
+  const lvl=i.level||1;
+  const lvlLabel={1:'Level 1 — Yangi',2:'Level 2 — Tajribali',3:'Level 3 — Professional'}[lvl]||'Level 1';
+  const lvlColor={1:'var(--g)',2:'var(--p)',3:'#92400E'}[lvl]||'var(--g)';
+  const lvlBg={1:'var(--g-bg)',2:'var(--p-bg)',3:'var(--w-bg)'}[lvl]||'var(--g-bg)';
+
+  let socialLinks={};
+  try{socialLinks=typeof i.socialLinks==='string'?JSON.parse(i.socialLinks):i.socialLinks||{}}catch{}
+  const linkEntries=Object.entries(socialLinks).filter(([k,v])=>v&&String(v).trim());
+  const socialIcons={instagram:'📷',telegram:'✈️',youtube:'▶️',tiktok:'🎵',facebook:'📘'};
+
+  const row=(label,value)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b)"><span style="font-size:13px;color:var(--t3)">${label}</span><span style="font-size:13px;font-weight:600;color:var(--t)">${value}</span></div>`;
+
+  document.getElementById('infDetailContent').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      ${avatarHtml(i.user?.photoUrl,i.name).replace('32px','52px').replace('32px','52px').replace('13px','20px').replace('8px','14px')}
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:700;color:var(--t)">${i.name}</div>
+        <div style="font-size:13px;color:var(--t3)">@${i.user?.username||'—'}</div>
+      </div>
+      <span style="padding:5px 12px;border-radius:100px;font-size:12px;font-weight:700;background:${lvlBg};color:${lvlColor}">${lvlLabel}</span>
+    </div>
+
+    <div style="background:var(--bg);border-radius:12px;padding:2px 14px;margin-bottom:14px">
+      ${row('Telefon',i.user?.phone||'—')}
+      ${row('Telegram ID',i.user?.telegramId||'—')}
+      ${row('Arizalar soni',i._count?.applications||0)}
+      ${row('Qabul qilingan',i.acceptedCount||0)}
+      ${row('Yuklangan videolar',i.videoCount||0)}
+      ${row('Ro\'yxatdan o\'tgan',fmtDate(i.user?.createdAt))}
+      ${row('Daraja','Level '+lvl)}
+    </div>
+
+    ${i.bio?`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Bio</div><p style="font-size:13px;color:var(--t2);line-height:1.6;margin:0">${i.bio}</p></div>`:''}
+
+    ${(i.category||'').trim()?`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Yo'nalishlar</div><div style="display:flex;flex-wrap:wrap;gap:4px">${(i.category||'').split(',').map(c=>`<span class="badge b-influencer" style="margin:0">${c.trim()}</span>`).join('')}</div></div>`:''}
+
+    ${linkEntries.length>0?`<div><div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Ijtimoiy tarmoqlar</div><div style="display:flex;flex-direction:column;gap:6px">${linkEntries.map(([k,v])=>{
+      const icon=socialIcons[k.toLowerCase()]||'🔗';
+      return`<a href="${String(v).startsWith('http')?v:'https://'+v}" target="_blank" rel="noreferrer" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:10px;text-decoration:none;font-size:13px;color:var(--t)"><span>${icon}</span><span style="font-weight:600;text-transform:capitalize">${k}</span><span style="color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${v}</span></a>`;
+    }).join('')}</div></div>`:''}
+  `;
+  document.getElementById('infDetailModal').classList.add('open');
+}
+function closeInfDetail(){document.getElementById('infDetailModal').classList.remove('open')}
+
+// ========== INFLUENCER LEVEL ==========
+async function changeLevel(influencerId,level){
+  try{
+    await api(`/influencer/${influencerId}/level`,{method:'PATCH',body:JSON.stringify({level})});
+    await loadAll();
+  }catch(e){alert('Xatolik')}
+}
+
+// ========== DARAJALAR PANEL ==========
+function renderLevelsPanel(){
+  const lp=allData.levelPrices||{level1:50000,level2:100000,level3:150000};
+  const levels=[
+    {key:'level1',label:'Level 1',desc:'Yangi influenserlar',color:'var(--g)',bg:'var(--g-bg)',icon:'&#127793;'},
+    {key:'level2',label:'Level 2',desc:'Tajribali influenserlar',color:'var(--p)',bg:'var(--p-bg)',icon:'&#11088;'},
+    {key:'level3',label:'Level 3',desc:'Professional influenserlar',color:'#92400E',bg:'var(--w-bg)',icon:'&#128081;'},
+  ];
+  document.getElementById('levelsContent').innerHTML=`
+    <p style="font-size:13px;color:var(--t2);margin-bottom:20px">Har bir daraja uchun e'lon narxini belgilang. Influenserlar o'z darajasiga qarab e'lonlar narxini ko'radi.</p>
+    ${levels.map(l=>`
+      <div style="background:var(--card);border:1px solid var(--b);border-radius:16px;padding:20px;margin-bottom:12px;display:flex;align-items:center;gap:16px">
+        <div style="width:48px;height:48px;border-radius:14px;background:${l.bg};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${l.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:700;color:var(--t)">${l.label}</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">${l.desc}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="input" id="lp_${l.key}" style="width:140px;text-align:right;font-weight:700;font-size:14px" value="${fmtPrice(lp[l.key])}" oninput="formatPriceInput(this)">
+          <span style="font-size:13px;color:var(--t3);white-space:nowrap">so'm</span>
+        </div>
+      </div>
+    `).join('')}
+    <button class="btn btn-p" style="margin-top:8px;width:100%;max-width:300px" onclick="saveLevelPrices()">&#10004; Saqlash</button>
+  `;
+}
+
+async function saveLevelPrices(){
+  const level1=Number(document.getElementById('lp_level1').value.replace(/\s/g,''));
+  const level2=Number(document.getElementById('lp_level2').value.replace(/\s/g,''));
+  const level3=Number(document.getElementById('lp_level3').value.replace(/\s/g,''));
+  if(!level1||!level2||!level3){alert('Barcha narxlarni kiriting');return}
+  try{
+    await api('/level-prices',{method:'PUT',body:JSON.stringify({level1,level2,level3})});
+    allData.levelPrices={level1,level2,level3};
+    alert('Saqlandi!');
+  }catch(e){alert('Xatolik')}
+}
+
+// ========== INFLUENCER TARIFLAR ==========
+let infTariffSubTab='list';
+let editingInfTariffId=null;
+
+function renderInfTariffPanel(){
+  document.querySelectorAll('.inf-tariff-tab').forEach(b=>{
+    b.classList.toggle('active',b.dataset.tab===infTariffSubTab);
+  });
+  const el=document.getElementById('infTariffContent');
+  if(infTariffSubTab==='create'){
+    el.innerHTML=`
+      <div class="tariff-form">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:6px">${editingInfTariffId?'Tarifni tahrirlash':'Yangi influenser tarifi'}</h3>
+        <label>Tarif nomi</label>
+        <input class="input" id="itfName" placeholder="Masalan: Kunlik">
+        <label>Narxi (so'm)</label>
+        <input class="input" id="itfPrice" placeholder="100 000" oninput="formatPriceInput(this)">
+        <label>Kunlik token soni</label>
+        <input class="input" id="itfTokens" type="number" placeholder="4" min="1">
+        <label>Davomiyligi (kun)</label>
+        <input class="input" id="itfDays" type="number" placeholder="30" min="1" value="30">
+        <div style="display:flex;gap:8px;margin-top:20px">
+          ${editingInfTariffId?'<button class="btn btn-s" onclick="editingInfTariffId=null;renderInfTariffPanel()">Bekor</button>':''}
+          <button class="btn btn-p" style="flex:1" onclick="saveInfTariff()">${editingInfTariffId?'Saqlash':'Yaratish'}</button>
+        </div>
+      </div>`;
+    if(editingInfTariffId){
+      const t=(allData.inf_tariffs||[]).find(x=>x.id===editingInfTariffId);
+      if(t){document.getElementById('itfName').value=t.name;document.getElementById('itfPrice').value=fmtPrice(t.price);document.getElementById('itfTokens').value=t.dailyTokens;document.getElementById('itfDays').value=t.durationDays;}
+    }
+  }else{
+    const tariffs=allData.inf_tariffs||[];
+    if(!tariffs.length){el.innerHTML='<div class="empty" style="background:var(--card);border-radius:16px;border:1px solid var(--b);padding:40px">Hali tariflar yo\'q</div>';return}
+    el.innerHTML=tariffs.map(t=>`
+      <div class="tariff-card" style="cursor:default">
+        <div class="tariff-info">
+          <h4>${t.name}</h4>
+          <div class="tariff-meta">
+            <span>&#128176; <b>${fmtPrice(t.price)} so'm</b></span>
+            <span>&#127919; <b>${t.dailyTokens}</b> token/kuniga</span>
+            <span>&#128197; <b>${t.durationDays}</b> kun</span>
+            <span>&#128100; ${t._count?.influencers||0}</span>
+          </div>
+        </div>
+        <div class="tariff-actions">
+          <button class="btn btn-sm btn-s" onclick="editingInfTariffId='${t.id}';infTariffSubTab='create';renderInfTariffPanel()">&#9998;</button>
+          <button class="del" onclick="openModal('influencer-tariffs','${t.id}','${t.name.replace(/'/g,'')}')">&#128465;</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+async function saveInfTariff(){
+  const name=document.getElementById('itfName').value.trim();
+  const price=Number(document.getElementById('itfPrice').value.replace(/\s/g,''));
+  const dailyTokens=Number(document.getElementById('itfTokens').value);
+  const durationDays=Number(document.getElementById('itfDays').value)||30;
+  if(!name||!price||!dailyTokens){alert('Barcha maydonlarni to\'ldiring');return}
+  try{
+    if(editingInfTariffId){
+      await api(`/influencer-tariffs/${editingInfTariffId}`,{method:'PUT',body:JSON.stringify({name,price,dailyTokens,durationDays})});
+      editingInfTariffId=null;
+    }else{
+      await api('/influencer-tariffs',{method:'POST',body:JSON.stringify({name,price,dailyTokens,durationDays})});
+    }
+    infTariffSubTab='list';await loadAll();
+  }catch(e){alert('Xatolik')}
+}
+
+// ========== INFLUENCER TARIF ASSIGN ==========
+let infAssignId=null;
+let infAssignTab='tariff';
+
+function openInfAssignTariff(id,name,tokens){
+  infAssignId=id;infAssignTab='tariff';
+  document.getElementById('infAssignTitle').textContent=name;
+  document.getElementById('infAssignModal').classList.add('open');
+  renderInfAssignContent();
+}
+function switchInfAssignTab(tab){infAssignTab=tab;renderInfAssignContent()}
+function closeInfAssignModal(){infAssignId=null;document.getElementById('infAssignModal').classList.remove('open')}
+
+function renderInfAssignContent(){
+  document.querySelectorAll('.inf-assign-tab').forEach(b=>{
+    const on=b.dataset.tab===infAssignTab;
+    b.style.background=on?'var(--p)':'';b.style.color=on?'#fff':'';b.style.borderColor=on?'var(--p)':'';
+  });
+  const el=document.getElementById('infAssignContent');
+  if(infAssignTab==='tariff'){
+    const tariffs=allData.inf_tariffs||[];
+    if(!tariffs.length){el.innerHTML='<div class="empty">Hali tariflar yaratilmagan</div>';return}
+    el.innerHTML=tariffs.map(t=>`
+      <div class="tariff-card" style="cursor:pointer" onclick="assignInfTariff('${t.id}')">
+        <div class="tariff-info">
+          <h4>${t.name}</h4>
+          <div class="tariff-meta">
+            <span>&#128176; <b>${fmtPrice(t.price)} so'm</b></span>
+            <span>&#127919; <b>${t.dailyTokens}</b> token/kuniga</span>
+            <span>&#128197; ${t.durationDays} kun</span>
+          </div>
+        </div>
+        <div style="color:var(--p);font-size:20px">&#10145;</div>
+      </div>`).join('');
+  }else{
+    el.innerHTML=`
+      <div style="background:var(--bg);border-radius:12px;padding:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--t2);display:block;margin-bottom:8px">Token soni</label>
+        <input class="input" id="infBonusTokens" type="number" min="1" placeholder="Masalan: 5" style="margin-bottom:12px">
+        <button class="btn btn-p" onclick="sendInfBonusTokens()">&#127873; Bonus berish</button>
+      </div>`;
+  }
+}
+
+async function assignInfTariff(tariffId){
+  if(!infAssignId)return;
+  try{await api(`/influencer/${infAssignId}/assign-tariff`,{method:'POST',body:JSON.stringify({tariffId})});closeInfAssignModal();await loadAll();}catch(e){alert('Xatolik')}
+}
+async function sendInfBonusTokens(){
+  if(!infAssignId)return;
+  const tokens=Number(document.getElementById('infBonusTokens').value);
+  if(!tokens||tokens<1){alert('Token sonini kiriting');return}
+  try{await api(`/influencer/${infAssignId}/bonus-tokens`,{method:'POST',body:JSON.stringify({tokens})});closeInfAssignModal();await loadAll();}catch(e){alert('Xatolik')}
+}
 
 if(token)showDash();
 </script>

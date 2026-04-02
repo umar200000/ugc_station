@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 import api from '../lib/api';
 import AdCard from '../components/AdCard';
@@ -20,8 +20,15 @@ export default function Feed() {
   const [adType, setAdType] = useState('');
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
-  const [totalUsers, setTotalUsers] = useState(0);
+  const [earnings, setEarnings] = useState<{ total: number; paid: number; barter: number } | null>(null);
+  const isInfluencer = user?.role === 'INFLUENCER';
   const barHeights = useMemo(() => Array.from({ length: 28 }, () => 20 + Math.random() * 80), []);
+
+  useEffect(() => {
+    if (isInfluencer) {
+      api.get('/my-earnings').then(res => setEarnings(res.data)).catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'paid') setAdType('PAID');
@@ -29,9 +36,6 @@ export default function Feed() {
     else setAdType('');
   }, [activeTab]);
 
-  useEffect(() => {
-    api.get('/ads/public-stats').then(res => setTotalUsers(res.data.users)).catch(() => {});
-  }, []);
 
   const fetchAds = async (force = false) => {
     const paramKey = `${adType}|${search}`;
@@ -82,6 +86,9 @@ export default function Feed() {
   const handleRefresh = async () => {
     cache.invalidateFeed();
     await fetchAds(true);
+    if (isInfluencer) {
+      api.get('/my-earnings').then(res => setEarnings(res.data)).catch(() => {});
+    }
   };
 
   return (
@@ -91,59 +98,108 @@ export default function Feed() {
       <div className="ios-feed-header">
         <div className="ios-feed-header-top">
           <div>
-            <p className="ios-feed-greeting">Salom, {user?.firstName}</p>
-            <h1 className="ios-feed-headline">UGC Station</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {user?.role === 'INFLUENCER' && user?.influencer?.level && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  background: 'rgba(27,59,81,0.08)',
+                  borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 700,
+                  color: '#1B3B51',
+                }}>
+                  Lvl {user.influencer.level}
+                </span>
+              )}
+              <p style={{ fontSize: 14, color: '#8E8E93', margin: 0 }}>Salom, {user?.firstName}</p>
+            </div>
+            <h1 className="ios-feed-headline" style={{ margin: 0 }}>UGC Station</h1>
           </div>
-          <NotificationBell />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={async () => {
+                useCacheStore.getState().invalidateAll();
+                await useAuthStore.getState().refreshUser();
+                window.dispatchEvent(new CustomEvent('app-refresh'));
+                fetchAds(true);
+              }}
+              style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: 'rgba(27,59,81,0.08)', border: 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: '#1B3B51',
+              }}
+            >
+              <RefreshCw size={18} strokeWidth={2} />
+            </button>
+            <NotificationBell />
+          </div>
         </div>
 
-        {/* Total users — Methods style */}
-        <div className="ios-feed-total">
-          <span className="ios-feed-total-label">
-            Foydalanuvchilar <ChevronDown size={14} />
-          </span>
-          <span className="ios-feed-total-number">{totalUsers.toLocaleString()}</span>
-          <div className="ios-feed-bar-chart">
-            {barHeights.map((h, i) => (
-              <div
-                key={i}
-                className="ios-feed-bar"
-                style={{ height: `${h}%` }}
-              />
+      </div>
+
+      {/* Earnings — influencer only (inside header area) */}
+      {isInfluencer && earnings && (
+        <>
+          {/* Amount + chart */}
+          <div style={{ textAlign: 'center', marginBottom: 6 }}>
+            <div style={{ fontSize: 36, fontWeight: 800, color: '#1B3B51', letterSpacing: -1 }}>
+              {earnings.total.toLocaleString('uz-UZ').replace(/,/g, ' ')}
+              <span style={{ fontSize: 15, fontWeight: 600, color: '#8E8E93', marginLeft: 4 }}>so'm</span>
+            </div>
+            <div style={{
+              display: 'flex', alignItems: 'flex-end', gap: 2,
+              height: 32, justifyContent: 'center', marginTop: 8, marginBottom: 6,
+            }}>
+              {barHeights.map((h, i) => (
+                <div key={i} style={{
+                  width: 5, borderRadius: 2,
+                  height: `${h}%`, minHeight: 3,
+                  background: '#1B3B51', opacity: 0.12 + (h / 100) * 0.55,
+                }} />
+              ))}
+            </div>
+          </div>
+
+          {/* Segmented tabs */}
+          <div style={{
+            display: 'flex', gap: 0,
+            background: 'rgba(27,59,81,0.06)', borderRadius: 10,
+            padding: 3, marginBottom: 14,
+          }}>
+            {([
+              { key: 'all', label: 'Barchasi' },
+              { key: 'paid', label: 'Pullik' },
+              { key: 'barter', label: 'Barter' },
+            ] as { key: FeedTab; label: string }[]).map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  flex: 1, padding: '7px 0', border: 'none',
+                  background: activeTab === tab.key ? '#fff' : 'transparent',
+                  borderRadius: 8,
+                  fontSize: 13, fontWeight: activeTab === tab.key ? 700 : 500,
+                  color: activeTab === tab.key ? '#1B3B51' : '#8E8E93',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  boxShadow: activeTab === tab.key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                }}
+              >
+                {tab.label}
+              </button>
             ))}
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* iOS Segmented Control / Tabs */}
-      <div className="ios-feed-tabs">
-        <button
-          className={`ios-feed-tab ${activeTab === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveTab('all')}
-        >
-          Barchasi
-        </button>
-        <button
-          className={`ios-feed-tab ${activeTab === 'paid' ? 'active' : ''}`}
-          onClick={() => setActiveTab('paid')}
-        >
-          Pullik
-        </button>
-        <button
-          className={`ios-feed-tab ${activeTab === 'barter' ? 'active' : ''}`}
-          onClick={() => setActiveTab('barter')}
-        >
-          Barter
-        </button>
-      </div>
-
-      {/* Search bar */}
-      <div className="ios-feed-search">
-        <div className="ios-search-wrap">
+      {/* Search + count */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        marginBottom: 14,
+      }}>
+        <div className="ios-search-wrap" style={{ flex: 1 }}>
           <Search size={16} className="ios-search-icon" />
           <input
             className="ios-search-input"
-            placeholder="Qidirish..."
+            placeholder="E'lonlarni qidirish..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, ExternalLink, Award, TrendingUp, MessageCircle, Globe, Hash, Briefcase, Quote, Send } from 'lucide-react';
 import api from '../lib/api';
+import { getSocialUrl } from '../lib/social';
 import { InfluencerProfileShimmer } from '../components/Shimmer';
 
 // SVG iconlar — lucide-react da yo'q
@@ -70,20 +71,6 @@ export default function InfluencerProfile() {
     if (p.includes('telegram')) return 'linear-gradient(135deg, #0088CC, #00AAEE)';
     if (p.includes('tiktok')) return 'linear-gradient(135deg, #000000, #333333)';
     return 'linear-gradient(135deg, #1B3B51, #2A5570)';
-  };
-
-  const getSocialUrl = (platform: string, link: string) => {
-    const val = String(link).trim();
-    if (val.startsWith('http://') || val.startsWith('https://')) return val;
-    const p = platform.toLowerCase();
-    const clean = val.replace(/^@/, '');
-    if (p.includes('instagram')) return `https://instagram.com/${clean}`;
-    if (p.includes('telegram')) return `https://t.me/${clean}`;
-    if (p.includes('tiktok')) return `https://tiktok.com/@${clean}`;
-    if (p.includes('youtube')) return `https://youtube.com/${clean}`;
-    if (p.includes('facebook')) return `https://facebook.com/${clean}`;
-    if (val.includes('.')) return `https://${val}`;
-    return `https://${val}`;
   };
 
   const rating = influencer.avgRating ? Number(influencer.avgRating).toFixed(1) : null;

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from './store/auth';
+import { useCacheStore } from './store/cache';
 
 // Pages
 import SelectRole from './pages/SelectRole';
@@ -21,7 +22,10 @@ import VideoPlayer from './pages/VideoPlayer';
 import NotificationsPage from './pages/Notifications';
 import MyVideos from './pages/MyVideos';
 import ImageViewer from './pages/ImageViewer';
-// Admin panel is now a separate website in /admin folder
+import Tariffs from './pages/Tariffs';
+import TariffDetail from './pages/TariffDetail';
+import SelectAdType from './pages/SelectAdType';
+import TokenHistory from './pages/TokenHistory';
 
 // Tab sahifalarini mount qilib, display bilan boshqarish
 function TabPage({ path, children }: { path: string; children: React.ReactNode }) {
@@ -48,6 +52,7 @@ function App() {
 
   useEffect(() => {
     login();
+    useCacheStore.getState().fetchLevelPrices();
   }, [login]);
 
   if (isLoading) {
@@ -136,7 +141,7 @@ function App() {
 function MainApp() {
   const { user } = useAuthStore();
   const location = useLocation();
-  const TAB_PATHS = ['/', '/videos', '/influencers', '/my-ads', '/my-applications', '/profile'];
+  const TAB_PATHS = ['/', '/videos', '/influencers', '/my-ads', '/my-applications', '/profile', '/tariffs'];
   const isTabPage = TAB_PATHS.includes(location.pathname);
 
   return (
@@ -147,6 +152,8 @@ function MainApp() {
         <TabPage path="/videos"><Videos /></TabPage>
         <TabPage path="/influencers"><Influencers /></TabPage>
         {user?.role === 'COMPANY' && <TabPage path="/my-ads"><MyAds /></TabPage>}
+        {user?.role === 'COMPANY' && <TabPage path="/tariffs"><Tariffs /></TabPage>}
+        {user?.role === 'INFLUENCER' && <TabPage path="/tariffs"><Tariffs /></TabPage>}
         {user?.role === 'INFLUENCER' && <TabPage path="/my-applications"><MyApplications /></TabPage>}
         <TabPage path="/profile"><Profile /></TabPage>
         {/* Admin panel moved to separate /admin folder */}
@@ -157,6 +164,7 @@ function MainApp() {
         <Routes>
           <Route path="/ad/:id" element={<AdDetail />} />
           <Route path="/influencer/:id" element={<InfluencerProfile />} />
+          <Route path="/select-ad-type" element={<SelectAdType />} />
           <Route path="/create-ad" element={<CreateAd />} />
           <Route path="/ad/:id/edit" element={<EditAd />} />
           <Route path="/ad/:id/applications" element={<Applications />} />
@@ -164,6 +172,8 @@ function MainApp() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/my-videos" element={<MyVideos />} />
           <Route path="/image-viewer" element={<ImageViewer />} />
+          <Route path="/tariffs/:id" element={<TariffDetail />} />
+          <Route path="/token-history" element={<TokenHistory />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       )}

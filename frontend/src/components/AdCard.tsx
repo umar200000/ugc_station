@@ -1,16 +1,27 @@
 import { useNavigate } from 'react-router-dom';
 import { Users, Repeat2 } from 'lucide-react';
 import type { Ad } from '../types';
+import { useAuthStore } from '../store/auth';
+import { useCacheStore } from '../store/cache';
 
 interface Props {
   ad: Ad;
   index?: number;
 }
 
+function fmtPrice(n: number) {
+  return n.toLocaleString('uz-UZ').replace(/,/g, ' ');
+}
+
 export default function AdCard({ ad, index = 0 }: Props) {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const getLevelPrice = useCacheStore(s => s.getLevelPrice);
   const isClosed = ad.status === 'CLOSED';
   const hasAvatar = !!ad.company?.user?.photoUrl;
+
+  const level = user?.influencer?.level ?? 1;
+  const price = getLevelPrice(level);
 
   return (
     <div
@@ -20,7 +31,6 @@ export default function AdCard({ ad, index = 0 }: Props) {
     >
       {/* Image area */}
       <div className="ios-card-thumb">
-        {/* Company avatar top-left */}
         <div className="ios-card-avatar">
           {hasAvatar ? (
             <img src={ad.company!.user!.photoUrl} alt="" />
@@ -39,12 +49,22 @@ export default function AdCard({ ad, index = 0 }: Props) {
 
       {/* Content */}
       <div className="ios-card-body">
-        <p className="ios-card-title">{ad.title}</p>
-        <span className={`ios-card-price ${ad.adType === 'PAID' ? 'paid' : 'barter'}`}>
-          {ad.adType === 'PAID'
-            ? `${ad.payment?.toLocaleString()} so'm`
-            : 'Barter'}
-        </span>
+        <p className="ios-card-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ad.title}</p>
+        {user?.role === 'INFLUENCER' && (
+          ad.adType === 'BARTER' ? (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 3,
+              fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+              background: 'rgba(16,185,129,0.1)', color: '#10B981',
+            }}>
+              <Repeat2 size={11} /> Barter
+            </span>
+          ) : (
+            <span className="ios-card-price paid">
+              {fmtPrice(price)} so'm
+            </span>
+          )
+        )}
       </div>
     </div>
   );

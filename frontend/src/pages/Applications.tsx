@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, ChevronRight, ChevronDown, Check, X, Clock, CheckCircle2, XCircle, Send, Phone, Link, User, Video } from 'lucide-react';
 import api from '../lib/api';
+import { getSocialUrl } from '../lib/social';
 import { ApplicationShimmer } from '../components/Shimmer';
 import { hapticFeedback } from '../lib/telegram';
 import type { Application } from '../types';
@@ -66,6 +67,10 @@ export default function Applications() {
     try {
       await api.patch(`/applications/${appId}/status`, { status });
       setApplications((prev) => prev.map((a) => (a.id === appId ? { ...a, status } : a)));
+      // Feed va MyAds cache ni tozalash
+      const { invalidateFeed, invalidateMyAds } = await import('../store/cache').then(m => m.useCacheStore.getState());
+      invalidateFeed();
+      invalidateMyAds();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Xatolik');
     }
@@ -238,7 +243,7 @@ export default function Applications() {
                         if (!url.trim()) return null;
                         const icon = SOCIAL_ICONS[key.toLowerCase()] || '🔗';
                         return (
-                          <a key={key} href={url.startsWith('http') ? url : `https://${url}`} target="_blank" rel="noreferrer"
+                          <a key={key} href={getSocialUrl(key, url)} target="_blank" rel="noreferrer"
                             style={{
                               display: 'flex', alignItems: 'center', gap: 8,
                               fontSize: 13, color: '#1B3B51', textDecoration: 'none',

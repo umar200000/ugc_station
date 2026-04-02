@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ImagePlus, ArrowLeft, ArrowRight, Rocket, Loader2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ImagePlus, ArrowLeft, ArrowRight, Rocket, Loader2, Zap, AlertTriangle } from 'lucide-react';
 
 import api from '../lib/api';
 import { PLATFORMS, INDUSTRIES } from '../types';
 import { hapticFeedback } from '../lib/telegram';
 import { useCacheStore } from '../store/cache';
+import { useAuthStore } from '../store/auth';
+
+function calcBarterTokens(count: number): number {
+  if (count < 1) return 0;
+  return Math.ceil(count / 3);
+}
 
 const ios = {
   page: {
@@ -190,11 +196,17 @@ const ios = {
 
 export default function CreateAd() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuthStore();
+  const tokens = user?.company?.tokens ?? 0;
+  const adType = (location.state as any)?.adType || 'DEPOSIT';
+  const isBarter = adType === 'BARTER';
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     title: '', description: '', industry: '', videoFormat: 'ANY', faceType: 'ANY',
-    platforms: [] as string[], influencerCount: 3, adType: 'BARTER', barterItem: '', payment: 0,
+    platforms: [] as string[], influencerCount: isBarter ? 3 : 1,
+    barterItem: '', barterPrice: '',
   });
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -237,9 +249,16 @@ export default function CreateAd() {
         const uploadRes = await api.post('/upload/images', formData);
         imageUrls = uploadRes.data.urls;
       }
-      await api.post('/ads', { ...form, images: imageUrls });
+      await api.post('/ads', {
+        ...form,
+        images: imageUrls,
+        adType: isBarter ? 'BARTER' : 'DEPOSIT',
+        barterItem: isBarter ? form.barterItem.trim() : '',
+        payment: isBarter ? Number(form.barterPrice) || 0 : 0,
+      });
       useCacheStore.getState().invalidateMyAds();
       useCacheStore.getState().invalidateFeed();
+      useAuthStore.getState().refreshUser();
       navigate('/my-ads');
     } catch (err: any) {
       alert(err.response?.data?.error || 'Xatolik');
@@ -377,51 +396,86 @@ export default function CreateAd() {
             </div>
           </div>
 
+          {/* Barter fields */}
+          {isBarter && (
+            <>
+              <div style={ios.formGroup}>
+                <label style={ios.label}>Barter narsasi *</label>
+                <input style={ios.input} placeholder="Masalan: iPhone 15 Pro" value={form.barterItem}
+                  onChange={(e) => setForm({ ...form, barterItem: e.target.value })}
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
+                <p style={ios.hint}>Barter qilayotgan narsangizni yozing</p>
+              </div>
+              <div style={ios.formGroup}>
+                <label style={ios.label}>Taxminiy narxi (so'm) *</label>
+                <input style={ios.input} type="text" inputMode="numeric" placeholder="500 000"
+                  value={form.barterPrice ? String(form.barterPrice).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''}
+                  onChange={(e) => { const num = e.target.value.replace(/\s/g, ''); if (!isNaN(Number(num))) setForm({ ...form, barterPrice: num }); }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
+                <p style={ios.hint}>Barter narsangizning taxminiy narxini kiriting</p>
+              </div>
+            </>
+          )}
+
           <div style={ios.formGroup}>
             <label style={ios.label}>Influenser soni</label>
-            <input style={{ ...ios.input, borderColor: form.influencerCount > 0 && form.influencerCount < 3 ? '#FF3B30' : '#E5E5EA' }} type="number" min={1} value={form.influencerCount || ''}
+            <input style={{ ...ios.input, borderColor: form.influencerCount < 1 ? '#FF3B30' : '#E5E5EA' }} type="number" min={1} value={form.influencerCount || ''}
               onChange={(e) => setForm({ ...form, influencerCount: Number(e.target.value) || 0 })}
               onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
-              onBlur={(e) => e.currentTarget.style.borderColor = form.influencerCount > 0 && form.influencerCount < 3 ? '#FF3B30' : '#E5E5EA'} />
-            {form.influencerCount > 0 && form.influencerCount < 3 ? (
-              <p style={{ fontSize: 12, color: '#FF3B30', fontWeight: 600, marginTop: 6 }}>Kamida 3 ta influenser bo'lishi kerak</p>
-            ) : (
-              <p style={ios.hint}>Minimum 3 ta influenser</p>
-            )}
+              onBlur={(e) => e.currentTarget.style.borderColor = form.influencerCount < 1 ? '#FF3B30' : '#E5E5EA'} />
+            {/* Token balans */}
+            {(() => {
+              const tokenCost = isBarter ? calcBarterTokens(form.influencerCount) : form.influencerCount;
+              const notEnough = tokenCost > tokens;
+              return (
+                <>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 6, marginTop: 8,
+                    fontSize: 13, fontWeight: 600, color: '#8E8E93',
+                  }}>
+                    <Zap size={14} style={{ color: tokens > 0 ? '#10B981' : '#FF3B30' }} />
+                    <span>Tokenlaringiz: <b style={{ color: '#1B3B51' }}>{tokens}</b></span>
+                    {form.influencerCount > 0 && (
+                      <span style={{ marginLeft: 'auto', color: notEnough ? '#FF3B30' : '#10B981', fontWeight: 700 }}>
+                        -{tokenCost} token
+                      </span>
+                    )}
+                  </div>
+                  {form.influencerCount < 1 ? (
+                    <p style={{ fontSize: 12, color: '#FF3B30', fontWeight: 600, marginTop: 6 }}>Kamida 1 ta influenser</p>
+                  ) : notEnough ? (
+                    <div style={{
+                      marginTop: 8, padding: '10px 14px', borderRadius: 12,
+                      background: 'rgba(255,149,0,0.1)', border: '1px solid rgba(255,149,0,0.2)',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                    }}>
+                      <AlertTriangle size={16} style={{ color: '#FF9500', flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 12, color: '#FF9500', fontWeight: 700, margin: 0 }}>Tokenlar yetarli emas!</p>
+                      </div>
+                      <button onClick={() => navigate('/tariffs')} style={{
+                        background: '#FF9500', color: '#fff', border: 'none', borderRadius: 8,
+                        padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                        fontFamily: 'inherit', whiteSpace: 'nowrap',
+                      }}>Token olish</button>
+                    </div>
+                  ) : isBarter ? (
+                    <p style={ios.hint}>Har 3 ta influenserga 1 ta token</p>
+                  ) : (
+                    <p style={ios.hint}>1 ta influenser = 1 ta token</p>
+                  )}
+                </>
+              );
+            })()}
           </div>
-
-          <div style={ios.formGroup}>
-            <label style={ios.label}>To'lov turi</label>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button style={form.adType === 'BARTER' ? ios.btnSmPrimary : ios.btnSmSecondary}
-                onClick={() => setForm({ ...form, adType: 'BARTER' })}>Barter</button>
-              <button style={form.adType === 'PAID' ? ios.btnSmPrimary : ios.btnSmSecondary}
-                onClick={() => setForm({ ...form, adType: 'PAID' })}>Pullik</button>
-            </div>
-          </div>
-
-          {form.adType === 'BARTER' && (
-            <div style={ios.formGroup}>
-              <label style={ios.label}>Barter narsasi</label>
-              <input style={ios.input} placeholder="Nima berasiz?" value={form.barterItem} onChange={(e) => setForm({ ...form, barterItem: e.target.value })}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
-            </div>
-          )}
-          {form.adType === 'PAID' && (
-            <div style={ios.formGroup}>
-              <label style={ios.label}>To'lov (so'm)</label>
-              <input style={ios.input} type="text" inputMode="numeric" placeholder="100 000" value={form.payment ? String(form.payment).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''} onChange={(e) => { const num = Number(e.target.value.replace(/\s/g, '')); if (!isNaN(num)) setForm({ ...form, payment: num }); }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#1B3B51'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5EA'} />
-            </div>
-          )}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <button style={{ ...ios.btnSecondary, flex: 1 }} onClick={() => setStep(1)}>
               <ArrowLeft size={18} /> Orqaga
             </button>
-            <button style={{ ...ios.btnPrimary, flex: 2, opacity: loading || form.influencerCount < 3 ? 0.5 : 1 }} disabled={loading || form.influencerCount < 3} onClick={handleSubmit}>
+            <button style={{ ...ios.btnPrimary, flex: 2, opacity: loading || form.influencerCount < 1 || (isBarter ? calcBarterTokens(form.influencerCount) : form.influencerCount) > tokens || (isBarter && (!form.barterItem.trim() || !form.barterPrice)) ? 0.5 : 1 }} disabled={loading || form.influencerCount < 1 || (isBarter ? calcBarterTokens(form.influencerCount) : form.influencerCount) > tokens || (isBarter && (!form.barterItem.trim() || !form.barterPrice))} onClick={handleSubmit}>
               {loading ? <><Loader2 size={18} className="spin" /> Yaratilmoqda...</> : <><Rocket size={18} /> E'lon yaratish</>}
             </button>
           </div>

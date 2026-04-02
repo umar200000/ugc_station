@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useCacheStore } from '../store/cache';
-import { Home, Play, ClipboardList, Send, User, RefreshCw } from 'lucide-react';
+import { Home, Play, ClipboardList, Send, User, RefreshCw, Zap } from 'lucide-react';
 
 export default function BottomNav() {
   const { user, refreshUser } = useAuthStore();
@@ -45,22 +45,29 @@ export default function BottomNav() {
           <span>Videolar</span>
         </NavLink>
 
-        {/* Refresh button */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 10px' }}>
-          <button onClick={handleRefresh} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#1B3B51',
-            width: 44, height: 44, borderRadius: '50%', border: 'none',
-            color: '#fff', cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
-            marginTop: -20, transition: 'transform 0.2s',
-          }}>
-            <RefreshCw size={20} strokeWidth={2.2} style={{
-              transition: 'transform 0.6s ease',
-              transform: spinning ? 'rotate(360deg)' : 'rotate(0deg)',
-            }} />
-          </button>
-        </div>
+        {/* Center button: Tariflar for company/influencer, Refresh for others */}
+        {(user?.role === 'COMPANY' || user?.role === 'INFLUENCER') ? (
+          <NavLink to="/tariffs" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <Zap size={22} strokeWidth={1.8} />
+            <span>Tariflar</span>
+          </NavLink>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 10px' }}>
+            <button onClick={handleRefresh} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: '#1B3B51',
+              width: 44, height: 44, borderRadius: '50%', border: 'none',
+              color: '#fff', cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+              marginTop: -20, transition: 'transform 0.2s',
+            }}>
+              <RefreshCw size={20} strokeWidth={2.2} style={{
+                transition: 'transform 0.6s ease',
+                transform: spinning ? 'rotate(360deg)' : 'rotate(0deg)',
+              }} />
+            </button>
+          </div>
+        )}
 
         {user?.role === 'COMPANY' ? (
           <NavLink to="/my-ads" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>

@@ -78,7 +78,7 @@ export default function MyAds() {
           <p style={{ fontSize: 13, color: '#8E8E93', margin: '4px 0 0 0' }}>{ads.length} ta e'lon</p>
         </div>
         <button
-          onClick={() => navigate('/create-ad')}
+          onClick={() => navigate('/select-ad-type')}
           style={{
             background: '#1B3B51', color: '#fff', border: 'none', borderRadius: 12,
             padding: '8px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
@@ -101,7 +101,7 @@ export default function MyAds() {
             <p style={{ color: '#1B3B51', fontWeight: 500 }}>Hali e'lon joylamagansiz</p>
             <p style={{ fontSize: 13, color: '#8E8E93', marginTop: 4 }}>Birinchi e'loningizni yarating va influenserlarni toping</p>
             <button
-              onClick={() => navigate('/create-ad')}
+              onClick={() => navigate('/select-ad-type')}
               style={{
                 marginTop: 20, maxWidth: 220, background: '#1B3B51', color: '#fff',
                 border: 'none', borderRadius: 12, padding: '10px 20px', fontSize: 14,
@@ -224,11 +224,15 @@ export default function MyAds() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <h3 style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.3, color: '#1B3B51', margin: 0 }}>{ad.title}</h3>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#8E8E93' }}>
-                              {ad.adType === 'BARTER' ? <Repeat2 size={13} /> : <Banknote size={13} />}
-                              {ad.adType === 'BARTER' ? 'Barter' : `${ad.payment?.toLocaleString()} so'm`}
-                            </span>
-                            <span style={{ width: 3, height: 3, borderRadius: '50%', background: '#C7C7CC' }} />
+                            {ad.adType === 'BARTER' && (
+                              <span style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 3,
+                                fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                                background: 'rgba(16,185,129,0.1)', color: '#10B981',
+                              }}>
+                                <Repeat2 size={11} /> Barter
+                              </span>
+                            )}
                             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#8E8E93' }}>
                               <Clock size={13} />
                               {new Date(ad.createdAt).toLocaleDateString('uz')}

@@ -8,10 +8,15 @@ import { hapticFeedback } from '../lib/telegram';
 import { useCacheStore } from '../store/cache';
 import type { Ad } from '../types';
 
+function fmtPrice(n: number) {
+  return n.toLocaleString('uz-UZ').replace(/,/g, ' ');
+}
+
 export default function AdDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const getLevelPrice = useCacheStore(s => s.getLevelPrice);
   const [ad, setAd] = useState<Ad | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
@@ -56,6 +61,8 @@ export default function AdDetail() {
       setApplied(true);
       useCacheStore.getState().invalidateFeed();
       useCacheStore.getState().setMyApplications(null as any);
+      // Token yangilash
+      useAuthStore.getState().refreshUser();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Xatolik');
     } finally {
@@ -235,15 +242,17 @@ export default function AdDetail() {
           )}
           {/* Status badge on image */}
           <div style={{ position: 'absolute', top: 64, right: 16, display: 'flex', gap: 6 }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center',
-              fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 100,
-              background: ad.adType === 'BARTER' ? 'rgba(52,199,89,0.9)' : 'rgba(42,111,151,0.9)',
-              color: '#fff',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-            }}>
-              {ad.adType === 'BARTER' ? 'Barter' : `${ad.payment?.toLocaleString()} so'm`}
-            </span>
+            {user?.role === 'INFLUENCER' && ad.adType !== 'BARTER' && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center',
+                fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 100,
+                background: 'rgba(42,111,151,0.9)',
+                color: '#fff',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+              }}>
+                {fmtPrice(getLevelPrice(user?.influencer?.level ?? 1))} so'm
+              </span>
+            )}
             {isClosed && (
               <span style={{
                 display: 'inline-flex', alignItems: 'center',
@@ -295,19 +304,31 @@ export default function AdDetail() {
         {/* Title */}
         <div className="fade-in" style={{ marginBottom: 20, opacity: isClosed ? 0.7 : 1 }}>
           <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: -0.4, lineHeight: 1.3, color: '#1B3B51' }}>{ad.title}</h1>
-          <p style={{ fontSize: 14, color: '#8E8E93', marginTop: 8 }}>
-            {ad.company?.name} · {ad.industry}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+            <p style={{ fontSize: 14, color: '#8E8E93', margin: 0 }}>
+              {ad.company?.name} · {ad.industry}
+            </p>
+            {ad.adType === 'BARTER' && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                background: 'rgba(16,185,129,0.1)', color: '#10B981',
+              }}>
+                Barter
+              </span>
+            )}
+          </div>
           {!hasImages && (
             <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
-                background: ad.adType === 'BARTER' ? 'rgba(52,199,89,0.12)' : 'rgba(42,111,151,0.12)',
-                color: ad.adType === 'BARTER' ? '#34C759' : '#2A6F97',
-              }}>
-                {ad.adType === 'BARTER' ? 'Barter' : `${ad.payment?.toLocaleString()} so'm`}
-              </span>
+              {user?.role === 'INFLUENCER' && ad.adType !== 'BARTER' && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
+                  background: 'rgba(42,111,151,0.12)', color: '#2A6F97',
+                }}>
+                  {fmtPrice(getLevelPrice(user?.influencer?.level ?? 1))} so'm
+                </span>
+              )}
               {isClosed && (
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -332,22 +353,6 @@ export default function AdDetail() {
               onClick={() => navigate(`/ad/${ad.id}/edit`)}
             >
               <Pencil size={15} /> Tahrirlash
-            </button>
-            <button
-              style={{
-                flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                padding: '10px 16px', borderRadius: 14, fontSize: 14, fontWeight: 600,
-                background: isClosed ? '#34C759' : '#FF3B30', border: 'none', color: '#fff',
-                cursor: 'pointer', opacity: toggling ? 0.6 : 1,
-              }}
-              disabled={toggling}
-              onClick={handleToggleStatus}
-            >
-              {toggling ? '...' : isClosed ? (
-                <><Power size={15} /> Qayta ochish</>
-              ) : (
-                <><PowerOff size={15} /> Yopish</>
-              )}
             </button>
           </div>
         )}
@@ -392,17 +397,23 @@ export default function AdDetail() {
           <p style={{ fontSize: 15, lineHeight: 1.7, color: '#8E8E93' }}>{ad.description}</p>
         </div>
 
-        {/* Barter */}
+        {/* Barter info */}
         {ad.adType === 'BARTER' && ad.barterItem && (
           <div className="fade-in" style={{
-            background: 'rgba(52,199,89,0.06)', border: '1px solid rgba(52,199,89,0.15)', borderRadius: 16,
+            background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: 16,
             padding: 16, marginBottom: 12,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <Repeat2 size={16} style={{ color: '#34C759' }} />
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#34C759', textTransform: 'uppercase', letterSpacing: 0.5 }}>Barter narsasi</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#10B981', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Barter</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(16,185,129,0.1)' }}>
+              <span style={{ fontSize: 14, color: '#8E8E93' }}>Nima beriladi</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{ad.barterItem}</span>
             </div>
-            <p style={{ fontSize: 15, fontWeight: 600, color: '#1B3B51' }}>{ad.barterItem}</p>
+            {ad.payment > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+                <span style={{ fontSize: 14, color: '#8E8E93' }}>Taxminiy narxi</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#1B3B51' }}>{fmtPrice(ad.payment)} so'm</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -445,22 +456,35 @@ export default function AdDetail() {
         {/* Bottom actions */}
         <div style={{ display: 'flex', gap: 10, marginTop: 8 }} className="fade-in">
           {user?.role === 'INFLUENCER' && !isClosed && slotsLeft > 0 && (
-            <button
-              style={{
-                flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                padding: '14px 20px', borderRadius: 14, fontSize: 15, fontWeight: 600,
-                background: applied ? '#34C759' : '#1B3B51', border: 'none', color: '#fff',
-                cursor: 'pointer', opacity: (applying || applied) ? 0.7 : 1,
-              }}
-              disabled={applying || applied}
-              onClick={handleApply}
-            >
-              {applied ? (
-                <><Handshake size={18} /> Ariza yuborildi</>
-              ) : applying ? 'Yuborilmoqda...' : (
-                <><Handshake size={18} /> Ariza yuborish</>
-              )}
-            </button>
+            (user?.influencer?.tokens ?? 0) > 0 ? (
+              <button
+                style={{
+                  flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  padding: '14px 20px', borderRadius: 14, fontSize: 15, fontWeight: 600,
+                  background: applied ? '#34C759' : '#1B3B51', border: 'none', color: '#fff',
+                  cursor: 'pointer', opacity: (applying || applied) ? 0.7 : 1,
+                }}
+                disabled={applying || applied}
+                onClick={handleApply}
+              >
+                {applied ? (
+                  <><Handshake size={18} /> Ariza yuborildi</>
+                ) : applying ? 'Yuborilmoqda...' : (
+                  <><Handshake size={18} /> Ariza yuborish <span style={{ opacity: 0.7, fontSize: 12 }}>(-1 token)</span></>
+                )}
+              </button>
+            ) : !applied ? (
+              <button
+                style={{
+                  flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  padding: '14px 20px', borderRadius: 14, fontSize: 15, fontWeight: 600,
+                  background: '#FF9500', border: 'none', color: '#fff', cursor: 'pointer',
+                }}
+                onClick={() => navigate('/tariffs')}
+              >
+                Tokenlar yetarli emas — Tarif olish
+              </button>
+            ) : null
           )}
           {isOwner && (
             <button

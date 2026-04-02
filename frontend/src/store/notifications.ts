@@ -70,6 +70,11 @@ export const useNotifStore = create<NotifState>((set, get) => ({
       const oldCount = get().unreadCount;
       if (newCount > oldCount && oldCount >= 0) {
         playNotificationSound();
+        // Yangi notification keldi — cache tozalash
+        const { useCacheStore } = await import('./cache');
+        useCacheStore.getState().invalidateFeed();
+        useCacheStore.getState().setMyApplications(null as any);
+        useCacheStore.getState().invalidateMyAds();
       }
       set({ unreadCount: newCount });
     } catch {}

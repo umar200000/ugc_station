@@ -222,7 +222,7 @@ export default function EditAd() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: '', description: '', industry: '', videoFormat: 'ANY', faceType: 'ANY',
-    platforms: [] as string[], influencerCount: 3, adType: 'BARTER', barterItem: '', payment: 0,
+    platforms: [] as string[], influencerCount: 3,
   });
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
@@ -241,9 +241,6 @@ export default function EditAd() {
           faceType: ad.faceType || 'ANY',
           platforms: ad.platforms || [],
           influencerCount: ad.influencerCount || 3,
-          adType: ad.adType || 'BARTER',
-          barterItem: ad.barterItem || '',
-          payment: ad.payment || 0,
         });
         setExistingImages(ad.images || []);
         if (ad.industry && !INDUSTRIES.includes(ad.industry)) setCustomIndustry(true);
@@ -419,28 +416,6 @@ export default function EditAd() {
         <p style={ios.sectionTitle}>To'lov</p>
 
         <div style={ios.card}>
-          <div style={ios.formGroup}>
-            <label style={ios.formLabel}>To'lov turi</label>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button style={form.adType === 'BARTER' ? ios.btnToggleActive : ios.btnToggleInactive}
-                onClick={() => setForm({ ...form, adType: 'BARTER' })}>Barter</button>
-              <button style={form.adType === 'PAID' ? ios.btnToggleActive : ios.btnToggleInactive}
-                onClick={() => setForm({ ...form, adType: 'PAID' })}>Pullik</button>
-            </div>
-          </div>
-
-          {form.adType === 'BARTER' && (
-            <div style={{ ...ios.formGroup, marginBottom: 0 }}>
-              <label style={ios.formLabel}>Barter narsasi</label>
-              <input style={ios.formInput} value={form.barterItem} onChange={(e) => setForm({ ...form, barterItem: e.target.value })} />
-            </div>
-          )}
-          {form.adType === 'PAID' && (
-            <div style={{ ...ios.formGroup, marginBottom: 0 }}>
-              <label style={ios.formLabel}>To'lov (so'm)</label>
-              <input style={ios.formInput} type="text" inputMode="numeric" placeholder="100 000" value={form.payment ? String(form.payment).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''} onChange={(e) => { const num = Number(e.target.value.replace(/\s/g, '')); if (!isNaN(num)) setForm({ ...form, payment: num }); }} />
-            </div>
-          )}
         </div>
 
         <button style={isDisabled ? ios.btnPrimaryDisabled : ios.btnPrimary} disabled={isDisabled} onClick={handleSave}>

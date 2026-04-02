@@ -90,6 +90,7 @@ router.get('/companies', async (req, res) => {
     const companies = await req.prisma.company.findMany({
       include: {
         user: { select: { telegramId: true, username: true, phone: true, createdAt: true } },
+        tariff: true,
         _count: { select: { ads: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -106,12 +107,23 @@ router.get('/influencers', async (req, res) => {
   try {
     const influencers = await req.prisma.influencer.findMany({
       include: {
-        user: { select: { telegramId: true, username: true, phone: true, createdAt: true } },
+        user: { select: { telegramId: true, username: true, phone: true, photoUrl: true, createdAt: true } },
         _count: { select: { applications: true } },
+        applications: {
+          where: { status: 'ACCEPTED' },
+          select: { _count: { select: { submissions: true } } },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
-    res.json({ influencers });
+    // Flatten data
+    const result = influencers.map(i => ({
+      ...i,
+      acceptedCount: i.applications.length,
+      videoCount: i.applications.reduce((sum, a) => sum + (a._count?.submissions || 0), 0),
+      applications: undefined,
+    }));
+    res.json({ influencers: result });
   } catch (err) {
     console.error('Admin get influencers error:', err);
     res.status(500).json({ error: 'Xatolik' });
@@ -312,6 +324,322 @@ router.delete('/submission/:id', async (req, res) => {
     console.error('Admin delete submission error:', err);
     res.status(500).json({ error: 'Xatolik' });
   }
+});
+
+// ========== TARIFLAR ==========
+
+// Barcha tariflar
+router.get('/tariffs', async (req, res) => {
+  try {
+    const tariffs = await req.prisma.tariff.findMany({
+      include: { _count: { select: { companies: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ tariffs });
+  } catch (err) {
+    console.error('Admin get tariffs error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Tarif yaratish
+router.post('/tariffs', async (req, res) => {
+  try {
+    const { name, price, tokens } = req.body;
+    if (!name || price == null || tokens == null) return res.status(400).json({ error: 'Barcha maydonlar to\'ldirilishi shart' });
+    const tariff = await req.prisma.tariff.create({ data: { name, price: Number(price), tokens: Number(tokens) } });
+    res.json({ tariff });
+  } catch (err) {
+    console.error('Admin create tariff error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Tarif tahrirlash
+router.put('/tariffs/:id', async (req, res) => {
+  try {
+    const { name, price, tokens } = req.body;
+    const tariff = await req.prisma.tariff.update({
+      where: { id: req.params.id },
+      data: { name, price: Number(price), tokens: Number(tokens) },
+    });
+    res.json({ tariff });
+  } catch (err) {
+    console.error('Admin update tariff error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Tarif o'chirish
+router.delete('/tariffs/:id', async (req, res) => {
+  try {
+    await req.prisma.tariff.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Admin delete tariff error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Kompaniyaga tarif biriktirish va token berish
+router.post('/companies/:id/assign-tariff', async (req, res) => {
+  try {
+    const { tariffId } = req.body;
+    const tariff = await req.prisma.tariff.findUnique({ where: { id: tariffId } });
+    if (!tariff) return res.status(404).json({ error: 'Tarif topilmadi' });
+
+    const company = await req.prisma.company.update({
+      where: { id: req.params.id },
+      data: { tariffId, tokens: { increment: tariff.tokens } },
+      include: { tariff: true, user: true },
+    });
+
+    await req.prisma.tokenHistory.create({
+      data: { companyId: req.params.id, type: 'TARIFF', tokens: tariff.tokens, note: tariff.name },
+    });
+
+    notify(company.userId, {
+      title: 'Token qo\'shildi!',
+      message: `"${tariff.name}" tarifi orqali +${tariff.tokens} token qo'shildi`,
+      type: 'info',
+      link: '/profile',
+      telegramMsg: `🎯 <b>Token qo'shildi!</b>\n\n📦 Tarif: <b>${tariff.name}</b>\n➕ Token: <b>+${tariff.tokens}</b>\n💰 Jami: <b>${company.tokens}</b> token`,
+    });
+
+    res.json({ company });
+  } catch (err) {
+    console.error('Admin assign tariff error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Kompaniyaga bonus token berish
+router.post('/companies/:id/bonus-tokens', async (req, res) => {
+  try {
+    const { tokens } = req.body;
+    if (!tokens || tokens < 1) return res.status(400).json({ error: 'Token soni noto\'g\'ri' });
+    const company = await req.prisma.company.update({
+      where: { id: req.params.id },
+      data: { tokens: { increment: Number(tokens) } },
+      include: { tariff: true, user: true },
+    });
+
+    await req.prisma.tokenHistory.create({
+      data: { companyId: req.params.id, type: 'BONUS', tokens: Number(tokens), note: 'Bonus' },
+    });
+
+    notify(company.userId, {
+      title: 'Bonus token!',
+      message: `Admin tomonidan +${tokens} bonus token berildi`,
+      type: 'info',
+      link: '/profile',
+      telegramMsg: `🎁 <b>Bonus token!</b>\n\n➕ Token: <b>+${tokens}</b>\n💰 Jami: <b>${company.tokens}</b> token`,
+    });
+
+    res.json({ company });
+  } catch (err) {
+    console.error('Admin bonus tokens error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Kompaniyadan token yechib olish
+router.post('/companies/:id/revoke-tokens', async (req, res) => {
+  try {
+    const { tokens } = req.body;
+    if (!tokens || tokens < 1) return res.status(400).json({ error: 'Token soni noto\'g\'ri' });
+
+    const company = await req.prisma.company.findUnique({ where: { id: req.params.id } });
+    if (!company) return res.status(404).json({ error: 'Kompaniya topilmadi' });
+
+    const revokeAmount = Math.min(Number(tokens), company.tokens);
+
+    const updated = await req.prisma.company.update({
+      where: { id: req.params.id },
+      data: { tokens: { decrement: revokeAmount } },
+      include: { tariff: true },
+    });
+
+    await req.prisma.tokenHistory.create({
+      data: { companyId: req.params.id, type: 'REVOKE', tokens: -revokeAmount, note: 'Admin tomonidan yechib olindi' },
+    });
+
+    res.json({ company: updated });
+  } catch (err) {
+    console.error('Admin revoke tokens error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Kompaniya token tarixi
+router.get('/companies/:id/token-history', async (req, res) => {
+  try {
+    const history = await req.prisma.tokenHistory.findMany({
+      where: { companyId: req.params.id },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ history });
+  } catch (err) {
+    console.error('Admin token history error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// ========== INFLUENCER LEVEL ==========
+
+// Influencer levelini o'zgartirish
+router.patch('/influencer/:id/level', async (req, res) => {
+  try {
+    const { level } = req.body;
+    if (![1, 2, 3].includes(level)) return res.status(400).json({ error: 'Level 1, 2 yoki 3 bo\'lishi kerak' });
+    const influencer = await req.prisma.influencer.update({
+      where: { id: req.params.id },
+      data: { level },
+    });
+    res.json({ influencer });
+  } catch (err) {
+    console.error('Admin change level error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// ========== LEVEL NARXLARI ==========
+
+// Level narxlarini olish
+router.get('/level-prices', async (req, res) => {
+  try {
+    const settings = await req.prisma.setting.findMany({
+      where: { key: { in: ['level_1_price', 'level_2_price', 'level_3_price'] } },
+    });
+    const prices = {};
+    settings.forEach(s => { prices[s.key] = Number(s.value); });
+    res.json({
+      level1: prices.level_1_price || 50000,
+      level2: prices.level_2_price || 100000,
+      level3: prices.level_3_price || 150000,
+    });
+  } catch (err) {
+    console.error('Admin get level prices error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// Level narxlarini yangilash
+router.put('/level-prices', async (req, res) => {
+  try {
+    const { level1, level2, level3 } = req.body;
+    if (level1 != null) await req.prisma.setting.upsert({ where: { key: 'level_1_price' }, update: { value: String(level1) }, create: { key: 'level_1_price', value: String(level1) } });
+    if (level2 != null) await req.prisma.setting.upsert({ where: { key: 'level_2_price' }, update: { value: String(level2) }, create: { key: 'level_2_price', value: String(level2) } });
+    if (level3 != null) await req.prisma.setting.upsert({ where: { key: 'level_3_price' }, update: { value: String(level3) }, create: { key: 'level_3_price', value: String(level3) } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Admin update level prices error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
+// ========== INFLUENCER TARIFLAR ==========
+
+router.get('/influencer-tariffs', async (req, res) => {
+  try {
+    const tariffs = await req.prisma.influencerTariff.findMany({
+      include: { _count: { select: { influencers: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ tariffs });
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+});
+
+router.post('/influencer-tariffs', async (req, res) => {
+  try {
+    const { name, price, dailyTokens, durationDays } = req.body;
+    if (!name || !price || !dailyTokens) return res.status(400).json({ error: 'Barcha maydonlarni to\'ldiring' });
+    const tariff = await req.prisma.influencerTariff.create({
+      data: { name, price: Number(price), dailyTokens: Number(dailyTokens), durationDays: Number(durationDays) || 30 },
+    });
+    res.json({ tariff });
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+});
+
+router.put('/influencer-tariffs/:id', async (req, res) => {
+  try {
+    const { name, price, dailyTokens, durationDays } = req.body;
+    const tariff = await req.prisma.influencerTariff.update({
+      where: { id: req.params.id },
+      data: { name, price: Number(price), dailyTokens: Number(dailyTokens), durationDays: Number(durationDays) || 30 },
+    });
+    res.json({ tariff });
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+});
+
+router.delete('/influencer-tariffs/:id', async (req, res) => {
+  try {
+    await req.prisma.influencerTariff.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+});
+
+// Influencerga tarif yoqish
+router.post('/influencer/:id/assign-tariff', async (req, res) => {
+  try {
+    const { tariffId } = req.body;
+    const tariff = await req.prisma.influencerTariff.findUnique({ where: { id: tariffId } });
+    if (!tariff) return res.status(404).json({ error: 'Tarif topilmadi' });
+    const now = new Date();
+    const end = new Date(now.getTime() + tariff.durationDays * 24 * 60 * 60 * 1000);
+    const influencer = await req.prisma.influencer.update({
+      where: { id: req.params.id },
+      data: {
+        influencerTariffId: tariffId,
+        tariffStartDate: now,
+        tariffEndDate: end,
+        tokens: tariff.dailyTokens,
+        lastTokenRefresh: now,
+      },
+      include: { user: true },
+    });
+
+    await req.prisma.tokenHistory.create({
+      data: { influencerId: req.params.id, type: 'TARIFF', tokens: tariff.dailyTokens, note: `${tariff.name} (${tariff.durationDays} kun)` },
+    });
+
+    notify(influencer.userId, {
+      title: 'Tarif yoqildi!',
+      message: `"${tariff.name}" tarifi yoqildi. Kuniga ${tariff.dailyTokens} token, ${tariff.durationDays} kun`,
+      type: 'info',
+      link: '/profile',
+      telegramMsg: `🎯 <b>Tarif yoqildi!</b>\n\n📦 Tarif: <b>${tariff.name}</b>\n➕ Kunlik token: <b>${tariff.dailyTokens}</b>\n📅 Muddat: <b>${tariff.durationDays} kun</b>`,
+    });
+
+    res.json({ influencer });
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
+});
+
+// Influencerga bonus token
+router.post('/influencer/:id/bonus-tokens', async (req, res) => {
+  try {
+    const { tokens } = req.body;
+    if (!tokens || tokens < 1) return res.status(400).json({ error: 'Token soni noto\'g\'ri' });
+    const influencer = await req.prisma.influencer.update({
+      where: { id: req.params.id },
+      data: { tokens: { increment: Number(tokens) } },
+      include: { user: true },
+    });
+
+    await req.prisma.tokenHistory.create({
+      data: { influencerId: req.params.id, type: 'BONUS', tokens: Number(tokens), note: 'Bonus' },
+    });
+
+    notify(influencer.userId, {
+      title: 'Bonus token!',
+      message: `Admin tomonidan +${tokens} bonus token berildi`,
+      type: 'info',
+      link: '/profile',
+      telegramMsg: `🎁 <b>Bonus token!</b>\n\n➕ Token: <b>+${tokens}</b>\n💰 Jami: <b>${influencer.tokens}</b> token`,
+    });
+
+    res.json({ influencer });
+  } catch (err) { res.status(500).json({ error: 'Xatolik' }); }
 });
 
 module.exports = router;

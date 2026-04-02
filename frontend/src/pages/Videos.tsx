@@ -44,7 +44,7 @@ function VideoCard({ video }: { video: VideoItem }) {
     <div style={{
       background: '#FFFFFF', borderRadius: 16, overflow: 'hidden',
       border: '1px solid #E5E5EA',
-      marginBottom: 16,
+      marginBottom: 12,
     }}>
       {/* Influencer info */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px' }}>
@@ -67,7 +67,7 @@ function VideoCard({ video }: { video: VideoItem }) {
       </div>
 
       {/* Video */}
-      <div style={{ position: 'relative', background: '#000', aspectRatio: '9/12', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', background: '#000', aspectRatio: '16/11', overflow: 'hidden' }}>
         {!playing ? (
           <div
             onClick={() => setPlaying(true)}
@@ -102,14 +102,14 @@ function VideoCard({ video }: { video: VideoItem }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <div style={{
-                width: 64, height: 64, borderRadius: '50%',
+                width: 52, height: 52, borderRadius: '50%',
                 background: 'rgba(255,255,255,0.2)',
                 backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
                 border: '2px solid rgba(255,255,255,0.4)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'transform 0.2s',
               }}>
-                <Play size={28} fill="#fff" stroke="#fff" style={{ marginLeft: 3 }} />
+                <Play size={22} fill="#fff" stroke="#fff" style={{ marginLeft: 2 }} />
               </div>
             </div>
             {/* Bottom info overlay */}

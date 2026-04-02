@@ -84,7 +84,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const devAccounts: Record<string, any> = {
         '1': { id: 10001, first_name: 'Kompaniya', username: 'company_user' },
         '2': { id: 10002, first_name: 'Influenser', username: 'influencer_user' },
-        '3': { id: 10003, first_name: 'Kompaniya2', username: 'company2_user' },
+        '3': { id: 10003, first_name: 'User3', username: 'user3', phone: '+998993003030' },
+        '4': { id: 10004, first_name: 'User4', username: 'user4', phone: '+998994004040' },
         '5': { id: 10005, first_name: 'Umar', username: 'umar_user' },
         '6': { id: 10006, first_name: 'Johon', username: 'tester_user' },
         '7': { id: 10007, first_name: 'Aziz', username: 'aziz_user' },

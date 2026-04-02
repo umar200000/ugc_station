@@ -45,6 +45,26 @@ router.post('/', authMiddleware, influencerOnly, async (req, res) => {
       return res.status(400).json({ error: 'Siz allaqachon ariza bergansiz' });
     }
 
+    // Influencer token tekshirish
+    if (influencer.tokens <= 0) {
+      return res.status(400).json({ error: 'Tokenlar yetarli emas. Tarif sotib oling.' });
+    }
+
+    // Token kamaytirish
+    const updatedInf = await req.prisma.influencer.update({
+      where: { id: influencer.id },
+      data: { tokens: { decrement: 1 } },
+    });
+
+    // Token history
+    await req.prisma.tokenHistory.create({
+      data: { influencerId: influencer.id, type: 'APPLICATION', tokens: -1, note: `Ariza: ${ad.title}` },
+    });
+
+    // Telegram SMS
+    const { sendTelegram } = require('../utils/notify');
+    sendTelegram(influencer.user.telegramId, `📩 <b>Ariza yuborildi</b>\n\n📢 E'lon: <b>${ad.title}</b>\n➖ Sarflangan: <b>1 token</b>\n💰 Qolgan: <b>${updatedInf.tokens} token</b>`);
+
     const application = await req.prisma.application.create({
       data: {
         adId,
@@ -130,7 +150,7 @@ router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
       return res.status(403).json({ error: 'Ruxsat yo\'q' });
     }
 
-    // Agar ACCEPTED bo'lsa — slot tekshirish
+    // Agar ACCEPTED bo'lsa — slot tekshirish + token kamaytirish
     if (status === 'ACCEPTED') {
       const acceptedCount = await req.prisma.application.count({
         where: { adId: application.adId, status: 'ACCEPTED' },
@@ -139,6 +159,7 @@ router.patch('/:id/status', authMiddleware, companyOnly, async (req, res) => {
       if (acceptedCount >= application.ad.influencerCount) {
         return res.status(400).json({ error: 'Barcha slotlar to\'lgan' });
       }
+
     }
 
     const updated = await req.prisma.application.update({
