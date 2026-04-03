@@ -201,8 +201,9 @@ export default function Feed() {
             width: 40, height: 40, borderRadius: 12, flexShrink: 0,
             background: 'rgba(255,255,255,0.15)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20,
-          }}>💰</div>
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.5 }}>
               500 000 so'mgacha ishlab toping
