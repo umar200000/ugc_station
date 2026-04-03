@@ -485,6 +485,39 @@ router.get('/companies/:id/token-history', async (req, res) => {
   }
 });
 
+// ========== BROADCAST ==========
+router.post('/broadcast', async (req, res) => {
+  try {
+    const { message, role } = req.body;
+    if (!message || !role) return res.status(400).json({ error: 'Xabar va rol kerak' });
+
+    const where = { onboarded: true };
+    if (role === 'INFLUENCER') where.role = 'INFLUENCER';
+    else if (role === 'COMPANY') where.role = 'COMPANY';
+
+    const users = await req.prisma.user.findMany({ where, select: { id: true, telegramId: true } });
+
+    let sent = 0;
+    for (const user of users) {
+      try {
+        await notify(user.id, {
+          title: 'Admin xabari',
+          message,
+          type: 'info',
+          link: '/',
+          telegramMsg: `📢 <b>Admin xabari</b>\n\n${message}`,
+        });
+        sent++;
+      } catch {}
+    }
+
+    res.json({ sent, total: users.length });
+  } catch (err) {
+    console.error('Broadcast error:', err);
+    res.status(500).json({ error: 'Xatolik' });
+  }
+});
+
 // ========== INFLUENCER LEVEL ==========
 
 // Influencer levelini o'zgartirish

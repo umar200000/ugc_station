@@ -235,6 +235,20 @@
         <div id="levelsContent"></div>
       </div>
 
+      <!-- Broadcast panel -->
+      <div id="broadcastPanel" style="display:none">
+        <div style="background:var(--card);border:1px solid var(--b);border-radius:16px;padding:24px;max-width:520px">
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:6px">Xabar yuborish</h3>
+          <p style="font-size:13px;color:var(--t2);margin-bottom:16px">Telegram va mini app notification orqali xabar yuboriladi</p>
+          <textarea id="broadcastMsg" class="input" style="min-height:120px;resize:vertical;font-size:14px;line-height:1.6" placeholder="Xabar matnini yozing..."></textarea>
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <button class="btn" style="flex:1;background:var(--p-bg);color:var(--p);border:2px solid var(--p);font-size:14px;padding:12px 0" onclick="sendBroadcast('INFLUENCER')" id="bcInfBtn">&#128100; Influenserlarga</button>
+            <button class="btn" style="flex:1;background:var(--g-bg);color:var(--g);border:2px solid var(--g);font-size:14px;padding:12px 0" onclick="sendBroadcast('COMPANY')" id="bcCompBtn">&#127970; Kompaniyalarga</button>
+          </div>
+          <div id="broadcastResult" style="margin-top:14px;display:none"></div>
+        </div>
+      </div>
+
       <!-- Influencer tariflar panel -->
       <div id="infTariffPanel" style="display:none">
         <div style="display:flex;gap:6px;margin-bottom:20px">
@@ -422,6 +436,7 @@ const tabConfig=[
   {key:'submissions',label:'Videolar',ic:'&#127909;'},
   {key:'tariffs',label:'Com. Tariflar',ic:'&#128176;'},
   {key:'levels',label:'Darajalar',ic:'&#11088;'},
+  {key:'broadcast',label:'Xabar yuborish',ic:'&#128232;'},
   {key:'inf_tariffs',label:'Inf. Tariflar',ic:'&#127919;'},
 ];
 
@@ -447,8 +462,10 @@ function switchTab(t){
   document.getElementById('tariffPanel').style.display=isTariff?'block':'none';
   const isLevels=t==='levels';
   const isInfTariffs=t==='inf_tariffs';
+  const isBroadcast=t==='broadcast';
   document.getElementById('levelsPanel').style.display=isLevels?'block':'none';
   document.getElementById('infTariffPanel').style.display=isInfTariffs?'block':'none';
+  document.getElementById('broadcastPanel').style.display=isBroadcast?'block':'none';
   if(isTariff){
     document.querySelector('.table-wrap').style.display='none';
     document.getElementById('pageSubtitle').textContent=`${(allData.tariffs||[]).length} ta tarif`;
@@ -459,6 +476,9 @@ function switchTab(t){
     document.querySelector('.table-wrap').style.display='none';
     document.getElementById('pageSubtitle').textContent='Influenser darajalari va narxlari';
     renderLevelsPanel();
+  }else if(isBroadcast){
+    document.querySelector('.table-wrap').style.display='none';
+    document.getElementById('pageSubtitle').textContent='Barcha foydalanuvchilarga xabar yuborish';
   }else if(isInfTariffs){
     document.querySelector('.table-wrap').style.display='none';
     document.getElementById('pageSubtitle').textContent=`${(allData.inf_tariffs||[]).length} ta influenser tarifi`;
@@ -1152,6 +1172,28 @@ async function sendInfBonusTokens(){
   const tokens=Number(document.getElementById('infBonusTokens').value);
   if(!tokens||tokens<1){alert('Token sonini kiriting');return}
   try{await api(`/influencer/${infAssignId}/bonus-tokens`,{method:'POST',body:JSON.stringify({tokens})});closeInfAssignModal();await loadAll();}catch(e){alert('Xatolik')}
+}
+
+// ========== BROADCAST ==========
+async function sendBroadcast(role){
+  const msg=document.getElementById('broadcastMsg').value.trim();
+  if(!msg){alert('Xabar matnini yozing');return}
+  const btnId=role==='INFLUENCER'?'bcInfBtn':'bcCompBtn';
+  const btn=document.getElementById(btnId);
+  const origText=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='Yuborilmoqda...';
+  const result=document.getElementById('broadcastResult');
+  try{
+    const r=await api('/broadcast',{method:'POST',body:JSON.stringify({message:msg,role})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Xatolik');
+    result.style.display='block';
+    result.innerHTML=`<div style="padding:12px;border-radius:10px;background:var(--g-bg);color:var(--g);font-size:13px;font-weight:600">✅ ${d.sent} ta ${role==='INFLUENCER'?'influenser':'kompaniya'}ga yuborildi</div>`;
+    document.getElementById('broadcastMsg').value='';
+  }catch(e){
+    result.style.display='block';
+    result.innerHTML=`<div style="padding:12px;border-radius:10px;background:var(--r-bg);color:var(--r);font-size:13px;font-weight:600">❌ ${e.message}</div>`;
+  }finally{btn.disabled=false;btn.innerHTML=origText}
 }
 
 if(token)showDash();
