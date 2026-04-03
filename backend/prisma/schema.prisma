@@ -60,6 +60,7 @@ model Influencer {
   socialLinks         String    @default("{}")
   level               Int       @default(1)
   tokens              Int       @default(0)
+  bonusEarnings       Float     @default(100000)
   influencerTariffId  String?
   tariffStartDate     DateTime?
   tariffEndDate       DateTime?

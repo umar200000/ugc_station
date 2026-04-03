@@ -122,7 +122,8 @@ app.get('/api/my-earnings', earningsAuth, async (req, res) => {
       return { id: app.id, title: app.ad.title, amount, type: isBarter ? 'BARTER' : 'PAID', date: app.createdAt };
     });
 
-    res.json({ total, paid, barter, history });
+    const bonus = user.influencer.bonusEarnings || 0;
+    res.json({ total: total + bonus, paid, barter, bonus, history });
   } catch (err) {
     console.error('Earnings error:', err);
     res.status(500).json({ error: 'Xatolik' });

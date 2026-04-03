@@ -190,6 +190,35 @@ export default function Feed() {
         </>
       )}
 
+      {/* Motivatsion banner — influencer only */}
+      {isInfluencer && earnings && earnings.total < 500000 && (
+        <div style={{
+          background: 'linear-gradient(135deg, #1B3B51, #2A5570)',
+          borderRadius: 14, padding: '14px 16px', marginBottom: 14,
+          display: 'flex', alignItems: 'center', gap: 12, color: '#fff',
+        }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+            background: 'rgba(255,255,255,0.15)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 20,
+          }}>💰</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.5 }}>
+              500 000 so'mgacha ishlab toping
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.75, marginTop: 2, lineHeight: 1.4 }}>
+              Balansdagi 100 000 so'm sizga beriladi
+            </div>
+          </div>
+          <div style={{
+            fontSize: 12, fontWeight: 700, opacity: 0.6, whiteSpace: 'nowrap',
+          }}>
+            {Math.round(earnings.total / 500000 * 100)}%
+          </div>
+        </div>
+      )}
+
       {/* Search + count */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 10,
